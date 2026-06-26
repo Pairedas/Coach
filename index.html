@@ -1685,7 +1685,7 @@ async function apiCall(messages,maxTokens=800,system=''){
   if (system) {
     body.systemInstruction = { parts: [{ text: system }] };
   }
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${S.config.apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${S.config.apiKey}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
