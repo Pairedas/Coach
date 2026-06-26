@@ -739,9 +739,9 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
 <section id="sec-config" class="sec">
   <div class="ph"><div><h2>Configuration <span>Pro</span></h2><p>Personnalise ton expérience</p></div></div>
   <div class="card">
-    <div class="card-t cyan">🔑 API Claude</div>
-    <div class="fg"><label>Clé API Anthropic</label><input type="text" id="cfg-api" placeholder="sk-ant-api03-…" autocomplete="off" oninput="saveConfig()"></div>
-    <p style="font-size:11px;color:var(--txt3);margin-top:6px;line-height:1.5">Stockée localement. Obtiens-la sur <strong style="color:var(--blue)">console.anthropic.com</strong></p>
+    <div class="card-t cyan">🔑 API Google Gemini</div>
+    <div class="fg"><label>Clé API Google Gemini</label><input type="text" id="cfg-api" placeholder="AIzaSy..." autocomplete="off" oninput="saveConfig()"></div>
+    <p style="font-size:11px;color:var(--txt3);margin-top:6px;line-height:1.5">Stockée localement. Obtiens-la sur <strong style="color:var(--blue)">aistudio.google.com</strong></p>
   </div>
   <div class="card">
     <div class="card-t lime">🎯 Répartition bénéfices</div>
@@ -942,7 +942,7 @@ function updateScore(){
 // ══════ ALERTES ══════
 function checkAlerts(){
   const al=[];
-  if(!S.config.apiKey)al.push({t:'al-b',i:'🔑',m:'Configure ta clé API Claude dans Config pour discuter avec ton Ami Comptable IA.'});
+  if(!S.config.apiKey)al.push({t:'al-b',i:'🔑',m:'Configure ta clé API Gemini dans Config pour discuter avec ton Ami Comptable IA.'});
   if(S.bilans.length){
     const tx=S.bilans[0].calc.txDepenses;
     if(tx>70)al.push({t:'al-r',i:'🔴',m:`Alerte dépenses : ${tx}% de tes revenus ! Le seuil critique est 60%.`});
@@ -1673,13 +1673,28 @@ STYLE DE RÉPONSE
   }catch(e){removeTyping();addMsg('❌ Erreur API. Vérifie ta clé dans Config.','ai');}
   document.getElementById('send-btn').disabled=false;
 }
-async function apiCall(messages,maxTokens=500,system=''){
-  const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages};
-  if(system)body.system=system;
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':S.config.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});
-  const d=await res.json();
-  if(d.error)throw new Error(d.error.message);
-  return d.content?.map(c=>c.text||'').join('')||'';
+async function apiCall(messages,maxTokens=800,system=''){
+  const geminiMessages = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+  const body = {
+    contents: geminiMessages,
+    generationConfig: { maxOutputTokens: maxTokens }
+  };
+  if (system) {
+    body.systemInstruction = { parts: [{ text: system }] };
+  }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${S.config.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  if (!d.candidates || d.candidates.length === 0) return '';
+  return d.candidates[0].content.parts[0].text || '';
 }
 function addMsg(text,role){
   const c=document.getElementById('chat-msgs');
