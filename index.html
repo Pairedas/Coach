@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FinCoach IA v4 Pro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#05080f">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FinCoach">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -809,6 +817,11 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
     </div>
     <div class="fg" style="margin-bottom:10px"><label>Heure de rappel</label><input type="time" id="notif-time" value="20:00" style="max-width:140px"></div>
     <button class="btn btn-amber btn-sm" onclick="activerNotifs()">🔔 Activer</button>
+  </div>
+  <div class="card">
+    <div class="card-t lime">📲 Application mobile</div>
+    <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:10px">Installe FinCoach sur ton téléphone : icône sur l'écran d'accueil, plein écran, et fonctionne même hors connexion.</p>
+    <button id="install-btn" class="btn btn-lime btn-sm" onclick="installApp()">📲 Installer l'application</button>
   </div>
   <div class="card">
     <div class="card-t">📦 Données</div>
@@ -2271,6 +2284,26 @@ function toast(msg,type='ok'){
   el.style.borderColor=type==='err'?'rgba(255,95,95,.4)':'var(--line2)';
   el.style.color=type==='err'?'var(--red)':'var(--txt)';
   el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
+
+// ══════ PWA — INSTALLATION & HORS-LIGNE ══════
+let _installPrompt=null;
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_installPrompt=e;});
+window.addEventListener('appinstalled',()=>{_installPrompt=null;toast('📲 FinCoach installé sur ton appareil !');});
+async function installApp(){
+  if(_installPrompt){
+    _installPrompt.prompt();
+    const r=await _installPrompt.userChoice;
+    if(r.outcome==='accepted')toast('📲 Installation en cours…');
+    _installPrompt=null;
+    return;
+  }
+  if(window.matchMedia('(display-mode: standalone)').matches){toast('✓ L\'application est déjà installée !');return;}
+  // iOS Safari et navigateurs sans beforeinstallprompt
+  toast('Menu du navigateur → "Ajouter à l\'écran d\'accueil" / "Installer l\'application"');
 }
 
 // ══════ START ══════
