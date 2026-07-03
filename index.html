@@ -373,13 +373,13 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
   <nav class="sb-nav">
     <div class="sb-sec">Principal</div>
     <button class="ni on" onclick="go('dash',this)"><span class="ico">🏠</span>Dashboard<span class="ndot" id="dot-dash"></span></button>
-    <button class="ni" onclick="go('analytics',this)"><span class="ico">📊</span>Analytics<span class="ndot" id="dot-ana"></span></button>
+    <button class="ni" onclick="go('analytics',this)"><span class="ico">📊</span>Rétroviseur<span class="ndot" id="dot-ana"></span></button>
     <button class="ni" onclick="go('journal',this)"><span class="ico">📅</span>Journal</button>
     <div class="sb-sec">Finances</div>
     <button class="ni" onclick="go('bilan',this)"><span class="ico">📋</span>Bilan Mensuel</button>
     <button class="ni" onclick="go('charges',this)"><span class="ico">🔒</span>Charges Fixes</button>
     <button class="ni" onclick="go('patrimoine',this)"><span class="ico">🏦</span>Patrimoine</button>
-    <button class="ni" onclick="go('objectifs',this)"><span class="ico">🎯</span>Objectifs</button>
+    <button class="ni" onclick="go('objectifs',this)"><span class="ico">🎯</span>Réservoir</button>
     <button class="ni" onclick="go('search',this)"><span class="ico">🔍</span>Recherche</button>
     <div class="sb-sec">Intelligence</div>
     <button class="ni" onclick="go('coach',this)"><span class="ico">🤓</span>Ami Comptable</button>
@@ -441,7 +441,7 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
     <div class="prev-bar"><div class="prev-fill" id="prev-fill" style="width:0%"></div></div>
   </div>
   <div class="g4" style="margin-bottom:13px">
-    <div class="mbox ml"><div class="mlbl">Patrimoine Net</div><div class="mval" id="dm-pat">—</div><div class="msub">Actifs − Dettes</div><div class="mtrend" id="dm-pat-trend"></div></div>
+    <div class="mbox ml"><div class="mlbl">Patrimoine Net</div><div class="mval" id="dm-pat">—</div><div class="msub">Actifs + Créances − Dettes</div><div class="mtrend" id="dm-pat-trend"></div></div>
     <div class="mbox mc"><div class="mlbl">Bénéf. ce mois</div><div class="mval" id="dm-ben">—</div><div class="msub">Wave + Crypto</div><div class="mtrend" id="dm-ben-trend"></div></div>
     <div class="mbox ma"><div class="mlbl">Salaire calculé</div><div class="mval" id="dm-sal">—</div><div class="msub">Selon dép. réelles</div></div>
     <div class="mbox mb"><div class="mlbl">Net disponible</div><div class="mval" id="dm-net">—</div><div class="msub">À répartir</div></div>
@@ -458,8 +458,10 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
 </section>
 
 <section id="sec-analytics" class="sec">
-  <div class="ph"><div><h2>Analytics <span>& Graphiques</span></h2><p>Visualisation complète de tes données</p></div></div>
+  <div class="ph"><div><h2>Rétroviseur <span>& Tendances</span></h2><p>Vois tes améliorations, mois après mois</p></div></div>
   <div id="ana-alerts"></div>
+  <div class="card"><div class="card-t cyan">🤓 Diagnostic de l'Ami Comptable</div><div id="retro-diag"></div></div>
+  <div class="card"><div class="card-t amber">↔️ Comparatif inter-mois</div><div id="retro-compare"></div></div>
   <div class="g4" style="margin-bottom:13px">
     <div class="mbox ml"><div class="mlbl">Meilleur mois</div><div class="mval" id="st-best">—</div><div class="msub">Bénéfice max</div></div>
     <div class="mbox mc"><div class="mlbl">Moyenne/mois</div><div class="mval" id="st-moy">—</div><div class="msub">Sur tous les bilans</div></div>
@@ -472,7 +474,7 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
   </div>
   <div class="chart-wrap"><div class="chart-title">📊 Bénéfices vs Dépenses vs Salaire (6 mois)</div><div style="height:220px"><canvas id="ch-cmp"></canvas></div></div>
   <div class="g2">
-    <div class="chart-wrap"><div class="chart-title">💎 Évolution patrimoine</div><div style="height:180px"><canvas id="ch-pat"></canvas></div></div>
+    <div class="chart-wrap"><div class="chart-title">🪄 Croisement magique — Dettes ↓ vs Épargne ↑</div><div style="height:180px"><canvas id="ch-pat"></canvas></div></div>
     <div class="chart-wrap"><div class="chart-title">📅 Journal quotidien (30j)</div><div style="height:180px"><canvas id="ch-jnl"></canvas></div></div>
   </div>
   <div class="chart-wrap"><div class="chart-title">📉 Taux de dépenses mensuel (%)</div><div style="height:160px"><canvas id="ch-txdep"></canvas></div></div>
@@ -487,7 +489,9 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       <div class="fav-btn" onclick="quickEntry('benef_crypto')"><span class="fico">₿</span>Crypto</div>
       <div class="fav-btn" onclick="quickEntry('depense_var')"><span class="fico">🛒</span>Dépense</div>
       <div class="fav-btn" onclick="quickEntry('depense_fixe')"><span class="fico">🏠</span>Fixe</div>
+      <div class="fav-btn" onclick="quickEntry('side_hustle')"><span class="fico">💼</span>Side-hustle</div>
       <div class="fav-btn" onclick="quickEntry('remb_dette')"><span class="fico">💳</span>Remb. dette</div>
+      <div class="fav-btn" onclick="quickEntry('remb_recu')"><span class="fico">🤝</span>Remb. reçu</div>
       <div class="fav-btn" onclick="quickEntry('epargne')"><span class="fico">⭐</span>Épargne</div>
     </div>
   </div>
@@ -500,14 +504,25 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
         <select id="j-type">
           <option value="benef_wave">💸 Bénéfice Wave</option>
           <option value="benef_crypto">₿ Bénéfice Crypto</option>
+          <option value="side_hustle">💼 Side-hustle</option>
           <option value="depense_fixe">🏠 Dépense fixe</option>
           <option value="depense_var">🛒 Dépense variable</option>
           <option value="revenu_autre">💰 Autre revenu</option>
-          <option value="remb_dette">💳 Remboursement dette</option>
+          <option value="remb_dette">💳 Remboursement dette (je paie)</option>
+          <option value="remb_recu">🤝 Remboursement reçu (on me paie)</option>
           <option value="epargne">⭐ Épargne versée</option>
         </select>
       </div>
       <div class="fg"><label>Montant (FCFA)</label><input type="number" id="j-montant" placeholder="ex: 15000" inputmode="numeric"></div>
+      <div class="fg">
+        <label>Poche</label>
+        <select id="j-poche">
+          <option value="wave">🌊 Wave</option>
+          <option value="om">🟠 Orange Money</option>
+          <option value="mtn">🟡 MTN MoMo</option>
+          <option value="cash">💵 Cash</option>
+        </select>
+      </div>
       <div class="fg"><label>Description</label><input type="text" id="j-desc" placeholder="ex: Dépôts client matin"></div>
     </div>
     <div class="btn-row">
@@ -538,6 +553,7 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       <div class="tag" onclick="filterJournal('benef_crypto',this)">₿ Crypto</div>
       <div class="tag" onclick="filterJournal('depense_fixe',this)">🏠 Fixes</div>
       <div class="tag" onclick="filterJournal('depense_var',this)">🛒 Variables</div>
+      <div class="tag" onclick="filterJournal('side_hustle',this)">💼 Side-hustle</div>
     </div>
     <div id="j-hist-list"><div class="empty"><div class="ei">📅</div><p>Aucune entrée.</p></div></div>
   </div>
@@ -551,8 +567,8 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       <div class="fg">
         <label>Mois</label>
         <select id="b-mois">
-          <option>Janvier</option><option>Février</option><option selected>Avril</option>
-          <option>Mai</option><option>Juin</option><option>Juillet</option>
+          <option>Janvier</option><option>Février</option><option>Mars</option>
+          <option>Avril</option><option>Mai</option><option>Juin</option><option>Juillet</option>
           <option>Août</option><option>Septembre</option><option>Octobre</option>
           <option>Novembre</option><option>Décembre</option>
         </select>
@@ -586,25 +602,39 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
 </section>
 
 <section id="sec-patrimoine" class="sec">
-  <div class="ph"><div><h2>Patrimoine <span>Net</span></h2><p>Actifs − Dettes = Valeur réelle</p></div></div>
+  <div class="ph"><div><h2>Patrimoine <span>& Zone de Crise</span></h2><p>Actifs + Créances − Dettes = Valeur réelle</p></div></div>
   <div class="pat-hero">
     <div>
       <div style="font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);text-transform:uppercase;margin-bottom:4px">Patrimoine net total</div>
       <div class="pat-net-val" id="pat-net">0 F</div>
-      <div style="font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-top:3px">Actifs totaux − Dettes</div>
+      <div style="font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-top:3px">Actifs + Créances − Dettes</div>
     </div>
     <div style="display:flex;gap:20px;flex-wrap:wrap;margin-left:auto">
       <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--lime)" id="pat-actifs">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Actifs</div></div>
+      <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--cyan)" id="pat-creances">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">On te doit</div></div>
       <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--red)" id="pat-dettes">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Dettes</div></div>
     </div>
   </div>
   <div class="card"><div class="card-t cyan">🔵 Wallets & Comptes</div><div class="wgrid" id="wallets-grid"><div class="empty full"><div class="ei">💳</div><p>Aucun compte</p></div></div><div class="btn-row"><button class="btn btn-lime btn-sm" onclick="openModal('wallet')">➕ Ajouter compte</button></div></div>
   <div class="card"><div class="card-t violet">💜 Investissements & Épargnes</div><div id="invest-list"><div class="empty"><div class="ei">📈</div><p>Aucun investissement</p></div></div><div class="btn-row"><button class="btn btn-lime btn-sm" onclick="openModal('invest')">➕ Ajouter</button></div></div>
-  <div class="card"><div class="card-t red">🔴 Dettes & Emprunts</div><div id="dettes-list"><div class="empty"><div class="ei">✅</div><p>Aucune dette</p></div></div><div class="btn-row"><button class="btn btn-red btn-sm" onclick="openModal('dette')">➕ Ajouter dette</button></div></div>
+  <div class="card"><div class="card-t red">🔴 Zone de crise — Ce que tu dois</div><div id="dettes-list"><div class="empty"><div class="ei">✅</div><p>Aucune dette</p></div></div><div class="btn-row"><button class="btn btn-red btn-sm" onclick="openModal('dette')">➕ Ajouter dette</button></div></div>
+  <div class="card"><div class="card-t lime">🟢 Zone de crise — On te doit</div><div id="creances-list"><div class="empty"><div class="ei">🤝</div><p>Personne ne te doit d'argent</p></div></div><div class="btn-row"><button class="btn btn-lime btn-sm" onclick="openModal('creance')">➕ Ajouter créance</button></div></div>
 </section>
 
 <section id="sec-objectifs" class="sec">
-  <div class="ph"><div><h2>Objectifs <span>Multi-projets</span></h2><p>Jusqu'à 5 objectifs simultanés</p></div></div>
+  <div class="ph"><div><h2>Le Réservoir <span>Épargne & Objectifs</span></h2><p>Fonds de sécurité • Sous-comptes • Défis d'épargne</p></div></div>
+  <div class="card">
+    <div class="card-t cyan">🛡️ Fonds de sécurité — intouchable</div>
+    <div id="fs-display"></div>
+    <div class="g2">
+      <div class="fg"><label>Cible du fonds (FCFA)</label><input type="number" id="fs-cible" placeholder="ex: 300000" inputmode="numeric" onchange="setFsCible()"></div>
+      <div class="fg"><label>Montant du mouvement (FCFA)</label><input type="number" id="fs-verse" placeholder="ex: 10000" inputmode="numeric"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-lime btn-sm" onclick="verserFS()">➕ Verser au fonds</button>
+      <button class="btn btn-red btn-sm" onclick="retirerFS()">🚨 Retrait d'urgence</button>
+    </div>
+  </div>
   <div id="objectifs-list"></div>
   <div class="card">
     <div class="card-t lime">➕ Nouvel objectif</div>
@@ -619,6 +649,16 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       <button class="btn btn-blue" onclick="iaObj()">🤖 IA suggère</button>
     </div>
   </div>
+  <div class="card">
+    <div class="card-t violet">🔥 Défis d'épargne — Tiens ton rythme</div>
+    <div id="defis-list"><div class="empty"><div class="ei">🔥</div><p>Aucun défi en cours.<br>Lance un défi hebdo pour suivre ton rythme de croisière !</p></div></div>
+    <div class="g2" style="margin-top:12px">
+      <div class="fg"><label>Nom du défi</label><input type="text" id="defi-nom" placeholder="ex: 10 000 F / semaine"></div>
+      <div class="fg"><label>Montant / semaine (FCFA)</label><input type="number" id="defi-montant" placeholder="ex: 10000" inputmode="numeric"></div>
+      <div class="fg"><label>Nombre de semaines</label><input type="number" id="defi-sem" value="12" min="1" max="52" inputmode="numeric"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-lime" onclick="addDefi()">🔥 Lancer le défi</button></div>
+  </div>
 </section>
 
 <section id="sec-search" class="sec">
@@ -630,7 +670,9 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
     <div class="tag" onclick="srchFilter('benef_crypto',this)">₿ Crypto</div>
     <div class="tag" onclick="srchFilter('depense_fixe',this)">🏠 Fixes</div>
     <div class="tag" onclick="srchFilter('depense_var',this)">🛒 Variables</div>
+    <div class="tag" onclick="srchFilter('side_hustle',this)">💼 Side-hustle</div>
     <div class="tag" onclick="srchFilter('remb_dette',this)">💳 Dettes</div>
+    <div class="tag" onclick="srchFilter('remb_recu',this)">🤝 Remb. reçus</div>
     <div class="tag" onclick="srchFilter('epargne',this)">⭐ Épargne</div>
   </div>
   <div id="srch-stats" style="margin-bottom:12px"></div>
@@ -667,6 +709,7 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
       <div class="chip" onclick="chip(this)">Plan agressif pour solder mes dettes</div>
       <div class="chip" onclick="chip(this)">Suis-je en danger avec mes dépenses actuelles ?</div>
       <div class="chip" onclick="chip(this)">Comment sécuriser mon fonds Wave ce mois ?</div>
+      <div class="chip" onclick="chip(this)">Quel est mon niveau d'oxygène financier ?</div>
       <div class="chip" onclick="chip(this)">J'ai beaucoup de stress avec mes factures, aide-moi</div>
       <div class="chip" onclick="chip(this)">Analyse complète de ma situation</div>
     </div>
@@ -800,6 +843,15 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
     <div class="modal-drag"></div>
     <div class="modal-t" id="quick-t">Saisie rapide</div>
     <div class="fg"><label>Montant (FCFA)</label><input type="number" id="q-montant" placeholder="ex: 15000" inputmode="numeric"></div>
+    <div class="fg">
+      <label>Poche</label>
+      <select id="q-poche">
+        <option value="wave">🌊 Wave</option>
+        <option value="om">🟠 Orange Money</option>
+        <option value="mtn">🟡 MTN MoMo</option>
+        <option value="cash">💵 Cash</option>
+      </select>
+    </div>
     <div class="fg"><label>Description (optionnel)</label><input type="text" id="q-desc" placeholder="ex: Dépôts client matin"></div>
     <div class="fg"><label>Date</label><input type="date" id="q-date"></div>
     <div class="modal-footer">
@@ -812,8 +864,8 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
 <script>
 // ══════ STATE ══════
 let S={
-  journal:[],bilans:[],wallets:[],investissements:[],dettes:[],objectifs:[],
-  chargesFixes:[],
+  journal:[],bilans:[],wallets:[],investissements:[],dettes:[],creances:[],objectifs:[],
+  chargesFixes:[],defis:[],fondsSecurite:{cible:0,actuel:0},
   config:{apiKey:'',pct:{sal:35,epa:20,wav:25,urg:10,inv:10}},
   chatHist:[]
 };
@@ -840,6 +892,14 @@ const CF_FREQ={
 function getMontantMensuel(cf){return Math.round(cf.montant/(CF_FREQ[cf.freq]?.div||1));}
 function getTotalChargesFixes(){return S.chargesFixes.filter(c=>c.actif).reduce((s,cf)=>s+getMontantMensuel(cf),0);}
 
+// ══════ POCHES (CASH / MOBILE MONEY) ══════
+const POCHES={
+  cash:{icon:'💵',label:'Cash'},
+  wave:{icon:'🌊',label:'Wave'},
+  om:{icon:'🟠',label:'Orange Money'},
+  mtn:{icon:'🟡',label:'MTN MoMo'},
+};
+
 // ══════ INIT ══════
 function init(){
   try{const d=localStorage.getItem('fcv4');if(d)S={...S,...JSON.parse(d)};}catch(e){}
@@ -860,6 +920,8 @@ function setTodayInputs(){
   const t=new Date(),iso=t.toISOString().split('T')[0];
   document.getElementById('j-date').value=iso;
   document.getElementById('q-date').value=iso;
+  document.getElementById('b-mois').selectedIndex=t.getMonth();
+  document.getElementById('b-annee').value=t.getFullYear();
   const lbl=t.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('dash-date').textContent=lbl;
   document.getElementById('j-date-lbl').textContent=lbl;
@@ -873,12 +935,12 @@ function go(id,btn){
   document.querySelectorAll('.ni').forEach(b=>b.classList.remove('on'));
   document.getElementById('sec-'+id).classList.add('on');
   if(btn&&btn.classList)btn.classList.add('on');
-  if(id==='analytics')setTimeout(buildCharts,100);
+  if(id==='analytics'){setTimeout(buildCharts,100);renderRetro();}
   if(id==='patrimoine')refreshPatrimoine();
   if(id==='journal')refreshJournal();
   if(id==='bilan'){prefillBilan();showBilanCFDetail();}
   if(id==='charges')refreshChargesFixes();
-  if(id==='objectifs')refreshObjectifs();
+  if(id==='objectifs'){refreshObjectifs();refreshReservoir();}
   if(id==='dash')refreshDash();
   if(id==='search')doSearch();
   closeSB();window.scrollTo(0,0);
@@ -890,7 +952,7 @@ function closeSB(){document.getElementById('sidebar').classList.remove('open');d
 function refreshAll(){
   refreshDash();refreshJournal();refreshPatrimoine();
   refreshObjectifs();refreshBilansHist();updateScore();updatePrev();checkAlerts();
-  refreshChargesFixes();
+  refreshChargesFixes();refreshReservoir();renderRetro();
 }
 
 // ══════ SCORE ══════
@@ -956,11 +1018,14 @@ function checkAlerts(){
   }
   if(totalCF===0)al.push({t:'al-b',i:'🔒',m:'Configure tes charges fixes dans "Charges Fixes" — elles seront auto-injectées.'});
   if(calcDettes()>0)al.push({t:'al-a',i:'💳',m:`${fmt(calcDettes())} de dettes actives. Pense à intégrer un remboursement ce mois.`});
+  const oxy=calcOxygene();
+  if(oxy!==null&&oxy>35)al.push({t:'al-r',i:'🫁',m:`Oxygène : ${oxy}% de tes revenus du mois partent dans les dettes — zone rouge !`});
+  if(calcCreances()>0)al.push({t:'al-b',i:'🤝',m:`${fmt(calcCreances())} à récupérer chez tes débiteurs. Pense à relancer !`});
   const ts=new Date().toISOString().split('T')[0];
   if(!S.journal.some(e=>e.date===ts))al.push({t:'al-l',i:'📅',m:'Rappel : saisis tes revenus et dépenses du jour !'});
   const html=al.slice(0,3).map(a=>`<div class="alert ${a.t}"><div class="al-ico">${a.i}</div><div>${a.m}</div></div>`).join('');
   ['dash-alerts','ana-alerts'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=html;});
-  document.getElementById('dot-dash').className='ndot'+(al.some(a=>a.t==='al-r')?'on':'');
+  document.getElementById('dot-dash').className='ndot'+(al.some(a=>a.t==='al-r')?' on':'');
 }
 
 // ══════ PRÉVISION ══════
@@ -969,7 +1034,7 @@ function updatePrev(){
   const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const ents=S.journal.filter(e=>e.date.startsWith(prefix));
   const jours=[...new Set(ents.map(e=>e.date))].length;
-  const ben=ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
+  const ben=ents.filter(e=>isBen(e.type)).reduce((s,e)=>s+e.montant,0);
   const joursT=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   const jourA=now.getDate();
   const pct=Math.round(jourA/joursT*100);
@@ -982,13 +1047,26 @@ function updatePrev(){
     document.getElementById('prev-lbl').textContent=`Basé sur ${jours}j saisi(s) · ${fmt(Math.round(ben/jours))}/j`;
   }else{document.getElementById('prev-val').textContent='—';document.getElementById('prev-lbl').textContent='Saisis des données dans le Journal';}
 }
-function isInc(t){return t==='benef_wave'||t==='benef_crypto'||t==='revenu_autre';}
+function isInc(t){return t==='benef_wave'||t==='benef_crypto'||t==='revenu_autre'||t==='side_hustle'||t==='remb_recu';}
+// Bénéfice réel : entrées d'argent hors remboursements de prêts reçus (ce n'est pas un revenu)
+function isBen(t){return isInc(t)&&t!=='remb_recu';}
+// Indicateur d'Oxygène : part des revenus du mois qui part dans le remboursement de dettes
+function calcOxygene(){
+  const now=new Date();
+  const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const ents=S.journal.filter(e=>e.date.startsWith(prefix));
+  const rev=ents.filter(e=>isBen(e.type)).reduce((s,e)=>s+e.montant,0);
+  const remb=ents.filter(e=>e.type==='remb_dette').reduce((s,e)=>s+e.montant,0);
+  if(remb<=0)return rev>0?0:null;
+  if(rev<=0)return 100;
+  return Math.min(999,Math.round(remb/rev*100));
+}
 
 // ══════ DASHBOARD ══════
 function refreshDash(){
   updateScore();updatePrev();checkAlerts();
   const mois=getMoisActuel();
-  const patNet=calcActifs()-calcDettes();
+  const patNet=calcPatrimoine();
   document.getElementById('dm-pat').textContent=fmt(patNet);
   document.getElementById('dm-pat').style.color=patNet>=0?'var(--lime)':'var(--red)';
   document.getElementById('dm-ben').textContent=fmt(mois.ben);
@@ -1014,7 +1092,7 @@ function refreshDash(){
   }else dt.innerHTML='<div class="empty"><div class="ei">📝</div><p>Aucune saisie aujourd\'hui</p></div>';
   const da=S.dettes.filter(d=>d.soldeRestant>0);
   const dd=document.getElementById('dash-dettes');
-  if(da.length){dd.innerHTML=da.slice(0,3).map(d=>{const p=Math.round(d.soldeRestant/d.montantInitial*100);return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${d.nom}</span><span style="color:var(--red);font-family:'Fira Code',monospace">${fmt(d.soldeRestant)}</span></div><div class="db-trk"><div class="db-fill" style="width:${p}%;background:var(--red)"></div></div></div>`;}).join('');}
+  if(da.length){dd.innerHTML=oxygeneHTML()+da.slice(0,3).map(d=>{const p=Math.round(d.soldeRestant/d.montantInitial*100);return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${d.nom}</span><span style="color:var(--red);font-family:'Fira Code',monospace">${fmt(d.soldeRestant)}</span></div><div class="db-trk"><div class="db-fill" style="width:${p}%;background:var(--red)"></div></div></div>`;}).join('');}
   else dd.innerHTML='<div class="empty"><div class="ei">✅</div><p>Aucune dette active</p></div>';
   const dw=document.getElementById('dash-wallets');
   if(S.wallets.length){dw.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">${S.wallets.map(w=>`<div style="background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:10px 13px;min-width:120px"><div style="font-size:18px">${w.icon}</div><div style="font-size:12px;font-weight:700;margin-top:3px">${w.nom}</div><div style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--lime);margin-top:4px">${fmt(w.solde)}</div></div>`).join('')}</div>`;}
@@ -1023,7 +1101,7 @@ function refreshDash(){
     document.getElementById('dash-chart-wrap').style.display='block';
     const bils=S.bilans.slice(0,6).reverse();
     mkChart('chart-mini','line',bils.map(b=>b.moisKey.substring(0,3)),[
-      {label:'Bénéfices',data:bils.map(b=>b.calc.totalBen),borderColor:'var(--lime)',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'var(--lime)'},
+      {label:'Bénéfices',data:bils.map(b=>b.calc.totalBen),borderColor:'#b8ff57',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#b8ff57'},
     ],false,true);
   }
 }
@@ -1035,9 +1113,20 @@ function getMoisActuel(){
   if(b)return{ben:b.calc.totalBen,dep:b.calc.totalDep,net:b.calc.netDispo};
   const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const ents=S.journal.filter(e=>e.date.startsWith(prefix));
-  const ben=ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
+  const ben=ents.filter(e=>isBen(e.type)).reduce((s,e)=>s+e.montant,0);
   const dep=ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
   return{ben,dep,net:ben-dep};
+}
+function oxygeneHTML(){
+  const oxy=calcOxygene();
+  if(oxy===null)return'';
+  const col=oxy>35?'var(--red)':oxy>20?'var(--amber)':'var(--lime)';
+  const border=oxy>35?'rgba(255,95,95,.3)':oxy>20?'rgba(255,184,48,.3)':'rgba(184,255,87,.2)';
+  const lbl=oxy>35?'zone rouge':oxy>20?'à surveiller':'tu respires bien';
+  return`<div style="background:var(--ink);border:1px solid ${border};border-radius:9px;padding:10px 13px;margin-bottom:10px;font-size:12px">
+    🫁 <strong>Oxygène :</strong> <span style="color:${col};font-family:'Fira Code',monospace;font-weight:700">${oxy}%</span> des revenus du mois → dettes <span style="color:var(--txt3)">(${lbl})</span>
+    <div class="db-trk" style="margin-top:6px"><div class="db-fill" style="width:${Math.min(100,oxy)}%;background:${col}"></div></div>
+  </div>`;
 }
 
 // ══════ JOURNAL ══════
@@ -1054,15 +1143,26 @@ function closeQuick(){document.getElementById('quick-overlay').style.display='no
 function confirmQuick(){
   const montant=Math.abs(parseFloat(document.getElementById('q-montant').value));
   const desc=document.getElementById('q-desc').value.trim();
+  const poche=document.getElementById('q-poche').value;
   const date=document.getElementById('q-date').value||new Date().toISOString().split('T')[0];
   if(!montant||montant<=0||isNaN(montant)){toast('⚠️ Montant invalide','err');return;}
-  S.journal.push({id:uid(),date,type:_quickType,montant,desc,ts:Date.now()});
+  const type=_quickType;
+  S.journal.push({id:uid(),date,type,montant,desc,poche,ts:Date.now()});
   save();closeQuick();refreshJournal();refreshDash();updatePrev();
-  toast('✓ '+typeCfg(_quickType).label+' ajouté : '+fmt(montant));
-  if(_quickType==='remb_dette'){
+  toast('✓ '+typeCfg(type).label+' ajouté : '+fmt(montant));
+  linkEntryToComptes(type,montant,date);
+}
+// Relie une entrée remb_dette / remb_recu à la dette ou créance correspondante
+// (skipJournal=true car l'entrée journal vient d'être créée — évite le double comptage)
+function linkEntryToComptes(type,montant,date){
+  if(type==='remb_dette'){
     const da=S.dettes.filter(x=>x.soldeRestant>0);
-    if(da.length===1)enregistrerPaiementDette(da[0].id,montant,date);
+    if(da.length===1)enregistrerPaiementDette(da[0].id,montant,date,'',true);
     else if(da.length>1)ouvrirSelectionDette(montant,date);
+  }else if(type==='remb_recu'){
+    const ca=S.creances.filter(x=>x.soldeRestant>0);
+    if(ca.length===1)enregistrerEncaissementCreance(ca[0].id,montant,date,'',true);
+    else if(ca.length>1)ouvrirSelectionCreance(montant,date);
   }
 }
 function addEntry(){
@@ -1070,19 +1170,16 @@ function addEntry(){
   const type=document.getElementById('j-type').value;
   const montant=Math.abs(parseFloat(document.getElementById('j-montant').value));
   const desc=document.getElementById('j-desc').value.trim();
+  const poche=document.getElementById('j-poche').value;
   if(!date){toast('⚠️ Sélectionne une date','err');return;}
   if(!montant||montant<=0||isNaN(montant)){toast('⚠️ Saisis un montant valide','err');return;}
-  S.journal.push({id:uid(),date,type,montant,desc,ts:Date.now()});
+  S.journal.push({id:uid(),date,type,montant,desc,poche,ts:Date.now()});
   save();
   document.getElementById('j-montant').value='';
   document.getElementById('j-desc').value='';
   refreshJournal();refreshDash();updatePrev();
   toast('✓ Entrée ajoutée !');
-  if(type==='remb_dette'){
-    const da=S.dettes.filter(x=>x.soldeRestant>0);
-    if(da.length===1)enregistrerPaiementDette(da[0].id,montant,date);
-    else if(da.length>1)ouvrirSelectionDette(montant,date);
-  }
+  linkEntryToComptes(type,montant,date);
 }
 function filterJournal(type,el){
   _jFilter=type;
@@ -1130,9 +1227,10 @@ function entryHTML(e,compact=false){
   const col=inc?'var(--lime)':'var(--red)';
   const sign=inc?'+':'-';
   const t=new Date(e.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const po=POCHES[e.poche];
   return`<div class="je">
     <div class="je-ico" style="background:${cfg.bg}">${cfg.icon}</div>
-    <div style="flex:1;min-width:0"><div class="je-cat">${cfg.label}</div><div class="je-desc">${e.desc||cfg.label}</div></div>
+    <div style="flex:1;min-width:0"><div class="je-cat">${cfg.label}${po?' · '+po.icon+' '+po.label:''}</div><div class="je-desc">${e.desc||cfg.label}</div></div>
     ${!compact?`<div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace;flex-shrink:0">${t}</div>`:''}
     <div class="je-val" style="color:${col}">${sign}${fmt(e.montant)}</div>
     <button class="je-del" onclick="delEntry('${e.id}')">🗑</button>
@@ -1145,7 +1243,9 @@ function typeCfg(type){
     depense_fixe:{icon:'🏠',label:'Dépense fixe',bg:'rgba(255,95,95,.1)'},
     depense_var:{icon:'🛒',label:'Dépense variable',bg:'rgba(255,95,95,.07)'},
     revenu_autre:{icon:'💰',label:'Autre revenu',bg:'rgba(77,158,255,.1)'},
+    side_hustle:{icon:'💼',label:'Side-hustle',bg:'rgba(56,240,208,.12)'},
     remb_dette:{icon:'💳',label:'Remb. dette',bg:'rgba(192,132,252,.12)'},
+    remb_recu:{icon:'🤝',label:'Remb. reçu',bg:'rgba(184,255,87,.1)'},
     epargne:{icon:'⭐',label:'Épargne versée',bg:'rgba(255,184,48,.1)'},
   };
   return m[type]||{icon:'💵',label:type,bg:'rgba(255,255,255,.05)'};
@@ -1213,7 +1313,7 @@ function prefillBilan(){
   document.getElementById('b-crypto').value=ents.filter(e=>e.type==='benef_crypto').reduce((s,e)=>s+e.montant,0)||0;
   document.getElementById('b-fixes').value=fixesTotal||0;
   document.getElementById('b-vars').value=ents.filter(e=>e.type==='depense_var').reduce((s,e)=>s+e.montant,0)||0;
-  document.getElementById('b-autres').value=ents.filter(e=>e.type==='revenu_autre').reduce((s,e)=>s+e.montant,0)||0;
+  document.getElementById('b-autres').value=ents.filter(e=>e.type==='revenu_autre'||e.type==='side_hustle').reduce((s,e)=>s+e.montant,0)||0;
   calcBilan();
   if(totalCF>0&&ents.length>0)toast(`✓ Auto-rempli — Charges fixes : ${fmt(totalCF)} intégrées`);
   else if(totalCF>0)toast(`✓ Charges fixes : ${fmt(totalCF)} injectées automatiquement`);
@@ -1273,9 +1373,10 @@ function saveBilan(){
   const calc={totalBen:tBen,totalDep:tDep,netDispo:net,salaire:Math.max(0,Math.round(net*p.sal/100)),epargne:Math.round(net*p.epa/100),wave:Math.round(net*p.wav/100),urgence:Math.round(net*p.urg/100),invest:Math.round(net*p.inv/100),txDepenses:tBen>0?Math.round(tDep/tBen*100):0};
   const mk=`${mois} ${annee}`;
   const idx=S.bilans.findIndex(b=>b.moisKey===mk);
-  const entry={moisKey:mk,wave,crypto,fixes,vars,autres,capital,calc,date:new Date().toLocaleDateString('fr-FR')};
+  const entry={moisKey:mk,wave,crypto,fixes,vars,autres,capital,calc,detteSnapshot:calcDettes(),date:new Date().toLocaleDateString('fr-FR')};
   if(idx>=0)S.bilans[idx]=entry;else S.bilans.unshift(entry);
-  save();refreshBilansHist();refreshDash();updateScore();refreshObjectifs();
+  entry.scoreSnapshot=calcScore()?.total??null;
+  save();refreshBilansHist();refreshDash();updateScore();refreshObjectifs();renderRetro();
   toast(`✓ Bilan ${mk} enregistré !`);
 }
 function refreshBilansHist(){
@@ -1298,18 +1399,21 @@ async function bilanIA(){
   const net=wave+crypto-(parseFloat(document.getElementById('b-fixes').value)||0)-(parseFloat(document.getElementById('b-vars').value)||0);
   const mk=`${document.getElementById('b-mois').value} ${document.getElementById('b-annee').value}`;
   const sc=calcScore();
-  const prompt=`Analyse mon bilan ${mk}: Wave ${fmt(wave)}, Crypto ${fmt(crypto)}, Net ${fmt(net)}. Score ${sc?.total||'—'}/100. Patrimoine ${fmt(calcActifs()-calcDettes())}. Donne-moi 3 conseils pratiques et bienveillants (max 150 mots).`;
+  const prompt=`Analyse mon bilan ${mk}: Wave ${fmt(wave)}, Crypto ${fmt(crypto)}, Net ${fmt(net)}. Score ${sc?.total||'—'}/100. Patrimoine ${fmt(calcPatrimoine())}. Donne-moi 3 conseils pratiques et bienveillants (max 150 mots).`;
   go('coach',null);await chatWith(prompt,`Analyse mon bilan ${mk}`);
 }
 
 // ══════ PATRIMOINE ══════
 function calcActifs(){return S.wallets.reduce((s,w)=>s+w.solde,0)+S.investissements.reduce((s,i)=>s+i.montant,0);}
 function calcDettes(){return S.dettes.reduce((s,d)=>s+d.soldeRestant,0);}
+function calcCreances(){return (S.creances||[]).reduce((s,c)=>s+c.soldeRestant,0);}
+function calcPatrimoine(){return calcActifs()+calcCreances()-calcDettes();}
 function refreshPatrimoine(){
-  const a=calcActifs(),d=calcDettes(),net=a-d;
+  const a=calcActifs(),d=calcDettes(),cr=calcCreances(),net=calcPatrimoine();
   document.getElementById('pat-net').textContent=fmt(net);
   document.getElementById('pat-net').style.color=net>=0?'var(--lime)':'var(--red)';
   document.getElementById('pat-actifs').textContent=fmt(a);
+  document.getElementById('pat-creances').textContent=fmt(cr);
   document.getElementById('pat-dettes').textContent=fmt(d);
   const wg=document.getElementById('wallets-grid');
   if(!S.wallets.length)wg.innerHTML='<div class="empty full"><div class="ei">💳</div><p>Aucun compte.</p></div>';
@@ -1318,8 +1422,8 @@ function refreshPatrimoine(){
   if(!S.investissements.length)il.innerHTML='<div class="empty"><div class="ei">📈</div><p>Aucun investissement.</p></div>';
   else il.innerHTML=S.investissements.map(i=>`<div class="je"><div class="je-ico" style="background:rgba(192,132,252,.12)">📈</div><div style="flex:1"><div class="je-cat">${i.type} • ${i.date}</div><div class="je-desc">${i.nom}</div></div><div class="je-val" style="color:var(--violet)">${fmt(i.montant)}</div><button class="je-del" onclick="delInv('${i.id}')">🗑</button></div>`).join('');
   const dl=document.getElementById('dettes-list');
-  if(!S.dettes.length){dl.innerHTML='<div class="empty"><div class="ei">✅</div><p>Aucune dette.</p></div>';return;}
-  dl.innerHTML=S.dettes.map(d=>{
+  if(!S.dettes.length){dl.innerHTML='<div class="empty"><div class="ei">✅</div><p>Aucune dette.</p></div>';renderCreances();return;}
+  dl.innerHTML=oxygeneHTML()+S.dettes.map(d=>{
     const pct=Math.round((1-d.soldeRestant/d.montantInitial)*100);
     const totalPayé=d.montantInitial-d.soldeRestant;
     const hp=(d.paiements||[]).slice(-3).reverse();
@@ -1354,7 +1458,84 @@ function refreshPatrimoine(){
       </div>`:''}
     </div>`;
   }).join('');
+  renderCreances();
 }
+function renderCreances(){
+  const cl=document.getElementById('creances-list');if(!cl)return;
+  if(!(S.creances||[]).length){cl.innerHTML='<div class="empty"><div class="ei">🤝</div><p>Personne ne te doit d\'argent.</p></div>';return;}
+  cl.innerHTML=S.creances.map(c=>{
+    const pct=c.montantInitial>0?Math.round((1-c.soldeRestant/c.montantInitial)*100):0;
+    const soldé=c.soldeRestant<=0;
+    const hp=(c.paiements||[]).slice(-3).reverse();
+    return`<div class="dette-item" style="opacity:${soldé?.6:1}">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="je-ico" style="background:${soldé?'rgba(184,255,87,.1)':'rgba(56,240,208,.1)'}">${soldé?'✅':'🤝'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace">Prêté le ${c.dateDebut||'—'} • ${c.paiements?.length||0} encaissement(s)</div>
+          <div style="font-size:14px;font-weight:700">${c.nom}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:${soldé?'var(--lime)':'var(--cyan)'}">${soldé?'RÉCUPÉRÉ':fmt(c.soldeRestant)}</div>
+          <div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">${soldé?'✓ Tout est rentré':'reste à récupérer'}</div>
+        </div>
+        <button class="je-del" onclick="delCreance('${c.id}')">🗑</button>
+      </div>
+      <div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-bottom:4px">
+          <span style="color:var(--lime)">${pct}% récupéré (${fmt(c.montantInitial-c.soldeRestant)})</span><span>Prêté : ${fmt(c.montantInitial)}</span>
+        </div>
+        <div class="db-trk"><div class="db-fill" style="width:${pct}%;background:${pct>=100?'var(--lime)':'var(--cyan)'}"></div></div>
+      </div>
+      ${hp.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)">
+        ${hp.map(p=>`<div style="display:flex;justify-content:space-between;font-size:11px;font-family:'Fira Code',monospace;color:var(--txt2);margin-bottom:3px"><span>📅 ${p.date}</span><span style="color:var(--lime)">+${fmt(p.montant)}</span></div>`).join('')}
+      </div>`:''}
+      ${!soldé?`<div style="margin-top:10px"><button class="btn btn-lime btn-sm" onclick="encaisserCreance('${c.id}')" style="width:100%">💰 Encaisser un remboursement</button></div>`:''}
+    </div>`;
+  }).join('');
+}
+function delCreance(id){if(!confirm('Supprimer cette créance ?'))return;S.creances=S.creances.filter(c=>c.id!==id);save();refreshPatrimoine();refreshDash();toast('✓ Créance supprimée');}
+function encaisserCreance(id){
+  const c=S.creances.find(x=>x.id===id);if(!c)return;
+  _mt='encaisser_creance';_eid=id;
+  document.getElementById('modal-t').textContent=`💰 Encaisser — ${c.nom}`;
+  document.getElementById('modal-body').innerHTML=`
+    <div style="background:rgba(56,240,208,.07);border:1px solid rgba(56,240,208,.2);border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);text-transform:uppercase;margin-bottom:4px">Reste à récupérer</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:24px;font-weight:800;color:var(--cyan)">${fmt(c.soldeRestant)}</div>
+    </div>
+    <div class="fg"><label>Montant encaissé (FCFA)</label><input type="number" id="m-encaisse" placeholder="ex: 25000" inputmode="numeric"></div>
+    <div class="fg"><label>Date</label><input type="date" id="m-encaisse-date" value="${new Date().toISOString().split('T')[0]}"></div>
+    <div class="fg"><label>Note (optionnel)</label><input type="text" id="m-encaisse-note" placeholder="ex: Wave, espèces…"></div>`;
+  document.getElementById('modal-overlay').style.display='flex';
+  setTimeout(()=>document.getElementById('m-encaisse').focus(),300);
+}
+function enregistrerEncaissementCreance(id,montant,date,note='',skipJournal=false){
+  const c=S.creances.find(x=>x.id===id);if(!c)return;
+  const avant=c.soldeRestant;
+  c.soldeRestant=Math.max(0,c.soldeRestant-montant);
+  if(!c.paiements)c.paiements=[];
+  c.paiements.push({date:new Date(date+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}),montant,note,soldeAvant:avant,soldeApres:c.soldeRestant});
+  if(!skipJournal)S.journal.push({id:uid(),date,type:'remb_recu',montant,desc:`Encaissement ${c.nom}${note?' ('+note+')':''}`,ts:Date.now()});
+  save();refreshPatrimoine();refreshDash();refreshJournal();updatePrev();
+  if(c.soldeRestant<=0)toast(`🎉 "${c.nom}" t'a tout remboursé !`);
+  else toast(`✓ ${fmt(montant)} encaissé — Reste : ${fmt(c.soldeRestant)}`);
+}
+function ouvrirSelectionCreance(montant,date){
+  const ca=S.creances.filter(x=>x.soldeRestant>0);
+  _mt='select_creance';_eid=JSON.stringify({montant,date});
+  document.getElementById('modal-t').textContent='🤝 Qui t\'a remboursé ?';
+  document.getElementById('modal-body').innerHTML=`
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:12px">Montant : <strong style="color:var(--lime)">${fmt(montant)}</strong> — Sélectionne la créance :</div>
+    ${ca.map(c=>`<div onclick="selectCreanceModal('${c.id}')"
+      style="background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer"
+      onmouseover="this.style.borderColor='var(--lime)'" onmouseout="this.style.borderColor='var(--line)'">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:700">${c.nom}</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--cyan)">${fmt(c.soldeRestant)}</div>
+      </div></div>`).join('')}`;
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function selectCreanceModal(creanceId){const data=JSON.parse(_eid);closeModal();enregistrerEncaissementCreance(creanceId,data.montant,data.date,'',true);}
 function editW(id){openModal('wallet',id);}
 function delW(id){S.wallets=S.wallets.filter(w=>w.id!==id);save();refreshPatrimoine();refreshDash();toast('✓ Supprimé');}
 function delInv(id){S.investissements=S.investissements.filter(i=>i.id!==id);save();refreshPatrimoine();refreshDash();toast('✓ Supprimé');}
@@ -1384,13 +1565,13 @@ function payerMensualite(id){
   const d=S.dettes.find(x=>x.id===id);if(!d||!d.mensualite)return;
   enregistrerPaiementDette(id,d.mensualite,new Date().toISOString().split('T')[0],'Mensualité');
 }
-function enregistrerPaiementDette(id,montant,date,note=''){
+function enregistrerPaiementDette(id,montant,date,note='',skipJournal=false){
   const d=S.dettes.find(x=>x.id===id);if(!d)return;
   const avant=d.soldeRestant;
   d.soldeRestant=Math.max(0,d.soldeRestant-montant);
   if(!d.paiements)d.paiements=[];
   d.paiements.push({date:new Date(date+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}),montant,note,soldeAvant:avant,soldeApres:d.soldeRestant});
-  S.journal.push({id:uid(),date,type:'remb_dette',montant,desc:`Remb. ${d.nom}${note?' ('+note+')':''}`,ts:Date.now()});
+  if(!skipJournal)S.journal.push({id:uid(),date,type:'remb_dette',montant,desc:`Remb. ${d.nom}${note?' ('+note+')':''}`,ts:Date.now()});
   save();refreshPatrimoine();refreshDash();refreshJournal();updateScore();updatePrev();
   if(d.soldeRestant<=0)toast(`🎉 Dette "${d.nom}" entièrement remboursée !`);
   else toast(`✓ Paiement de ${fmt(montant)} enregistré — Reste : ${fmt(d.soldeRestant)}`);
@@ -1410,7 +1591,7 @@ function ouvrirSelectionDette(montant,date){
       </div></div>`;}).join('')}`;
   document.getElementById('modal-overlay').style.display='flex';
 }
-function selectDetteModal(detteId){const data=JSON.parse(_eid);closeModal();enregistrerPaiementDette(detteId,data.montant,data.date);}
+function selectDetteModal(detteId){const data=JSON.parse(_eid);closeModal();enregistrerPaiementDette(detteId,data.montant,data.date,'',true);}
 
 // ══════ ANALYTICS ══════
 function buildCharts(){
@@ -1432,7 +1613,14 @@ function buildCharts(){
     {label:'Salaire',data:sals,backgroundColor:'rgba(255,184,48,.4)',borderRadius:5},
   ]);
   mkChart('ch-dep','doughnut',['Fixes','Variables'],[{data:[S.bilans[0].fixes||0,S.bilans[0].vars||0],backgroundColor:['rgba(255,95,95,.65)','rgba(255,184,48,.65)'],borderColor:['#ff5f5f','#ffb830'],borderWidth:2,hoverOffset:6}],true);
-  mkChart('ch-pat','line',lbls,[{label:'Patrimoine net',data:bils.map(()=>calcActifs()-calcDettes()),borderColor:'#b8ff57',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.3,pointBackgroundColor:'#b8ff57',pointRadius:3}]);
+  // Croisement magique : la courbe des dettes doit descendre, celle de l'épargne cumulée monter
+  let cumE=0;const epaCum=bils.map(b=>{cumE+=Math.max(0,b.calc.epargne);return cumE;});
+  const detteSeries=bils.map(b=>typeof b.detteSnapshot==='number'?b.detteSnapshot:null);
+  if(detteSeries.length&&detteSeries[detteSeries.length-1]===null)detteSeries[detteSeries.length-1]=calcDettes();
+  mkChart('ch-pat','line',lbls,[
+    {label:'Dettes',data:detteSeries,borderColor:'#ff5f5f',backgroundColor:'rgba(255,95,95,.06)',fill:true,tension:.3,pointBackgroundColor:'#ff5f5f',pointRadius:3,spanGaps:true},
+    {label:'Épargne cumulée',data:epaCum,borderColor:'#b8ff57',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.3,pointBackgroundColor:'#b8ff57',pointRadius:3},
+  ]);
   const now=new Date();const jl=[],jb=[],jd=[];
   for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const str=d.toISOString().split('T')[0];jl.push(d.getDate());const ents=S.journal.filter(e=>e.date===str);jb.push(ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0));jd.push(ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0));}
   mkChart('ch-jnl','bar',jl,[{label:'Bénéfices',data:jb,backgroundColor:'rgba(56,240,208,.4)',borderRadius:3},{label:'Dépenses',data:jd,backgroundColor:'rgba(255,95,95,.35)',borderRadius:3}]);
@@ -1447,9 +1635,10 @@ function buildCharts(){
   document.getElementById('st-moy').textContent=fmt(moy);
   document.getElementById('st-ep').textContent=txE+'%';
   const ge=document.getElementById('st-grow');ge.textContent=grow;ge.style.color=grow.startsWith('+')?'var(--lime)':'var(--red)';
-  checkAlerts();
+  checkAlerts();renderRetro();
 }
 function mkChart(id,type,labels,datasets,pie=false,mini=false,maxY=null){
+  if(typeof Chart==='undefined')return;
   if(CH[id])CH[id].destroy();
   const ctx=document.getElementById(id);if(!ctx)return;
   const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a93ae',font:{size:10,family:'Fira Code'}}}}};
@@ -1506,15 +1695,158 @@ async function iaObj(){
   if(!S.config.apiKey){toast('⚠️ Configure ta clé API','err');return;}
   if(!S.bilans.length){toast('⚠️ Enregistre d\'abord un bilan','err');return;}
   const moy=S.bilans.reduce((s,b)=>s+b.calc.epargne,0)/S.bilans.length;
-  const prompt=`Épargne moy ${fmt(Math.round(moy))}/mois. Patrimoine net ${fmt(calcActifs()-calcDettes())}. Propose un objectif réaliste. JSON uniquement: {"nom":"string","cible":number,"date":"YYYY-MM-DD"}`;
+  const prompt=`Épargne moy ${fmt(Math.round(moy))}/mois. Patrimoine net ${fmt(calcPatrimoine())}. Propose un objectif réaliste. JSON uniquement: {"nom":"string","cible":number,"date":"YYYY-MM-DD"}`;
   try{const r=await apiCall([{role:'user',content:prompt}],150);const p=JSON.parse(r.replace(/```json|```/g,'').trim());document.getElementById('obj-nom').value=p.nom;document.getElementById('obj-cible').value=p.cible;document.getElementById('obj-date').value=p.date;toast('✓ Suggestion IA : '+p.nom+' → '+fmt(p.cible));}
   catch(e){toast('❌ Erreur IA','err');}
+}
+
+// ══════ RÉSERVOIR — FONDS DE SÉCURITÉ & DÉFIS ══════
+function refreshReservoir(){
+  const el=document.getElementById('fs-display');if(!el)return;
+  if(!S.fondsSecurite)S.fondsSecurite={cible:0,actuel:0};
+  const fs=S.fondsSecurite;
+  const pct=fs.cible>0?Math.min(100,Math.round(fs.actuel/fs.cible*100)):0;
+  el.innerHTML=`<div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px">
+    <div>
+      <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:800;color:var(--cyan)">${fmt(fs.actuel)}</div>
+      <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace">🔒 Réserve d'urgence — on n'y touche pas</div>
+    </div>
+    <div style="font-family:'Fira Code',monospace;font-size:12px;color:var(--txt2)">${fs.cible>0?pct+'% de '+fmt(fs.cible):'Définis une cible ↓'}</div>
+  </div>
+  <div style="height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:12px"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--cyan),var(--lime));border-radius:4px;transition:width .8s ease"></div></div>`;
+  const ci=document.getElementById('fs-cible');
+  if(ci&&document.activeElement!==ci)ci.value=fs.cible||'';
+  const dl=document.getElementById('defis-list');if(!dl)return;
+  if(!(S.defis||[]).length){dl.innerHTML='<div class="empty"><div class="ei">🔥</div><p>Aucun défi en cours.<br>Lance un défi hebdo pour suivre ton rythme de croisière !</p></div>';return;}
+  dl.innerHTML=S.defis.map(d=>{
+    const done=d.done.filter(Boolean).length;
+    const pctD=Math.round(done/d.done.length*100);
+    return`<div style="background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:13px;font-weight:700">🔥 ${d.nom}</div>
+          <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px">${fmt(d.montant)}/sem • ${done}/${d.done.length} semaines • <span style="color:var(--lime)">${fmt(done*d.montant)} épargnés</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:${pctD>=100?'var(--lime)':pctD>=50?'var(--cyan)':'var(--amber)'}">${pctD}%</span>
+          <button class="je-del" onclick="delDefi('${d.id}')">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${d.done.map((v,i)=>`<div onclick="toggleDefiSemaine('${d.id}',${i})" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'Fira Code',monospace;cursor:pointer;touch-action:manipulation;border:1px solid ${v?'var(--lime)':'var(--line)'};background:${v?'rgba(184,255,87,.12)':'var(--ink)'};color:${v?'var(--lime)':'var(--txt3)'}">S${i+1}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+function setFsCible(){
+  if(!S.fondsSecurite)S.fondsSecurite={cible:0,actuel:0};
+  S.fondsSecurite.cible=Math.abs(parseFloat(document.getElementById('fs-cible').value)||0);
+  save();refreshReservoir();
+}
+function verserFS(){
+  const m=Math.abs(parseFloat(document.getElementById('fs-verse').value)||0);
+  if(!m){toast('⚠️ Saisis un montant','err');return;}
+  if(!S.fondsSecurite)S.fondsSecurite={cible:0,actuel:0};
+  S.fondsSecurite.actuel+=m;
+  S.journal.push({id:uid(),date:new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:'Fonds de sécurité',ts:Date.now()});
+  document.getElementById('fs-verse').value='';
+  save();refreshReservoir();refreshJournal();
+  toast(`🛡️ ${fmt(m)} versés au fonds de sécurité !`);
+}
+function retirerFS(){
+  const m=Math.abs(parseFloat(document.getElementById('fs-verse').value)||0);
+  if(!m){toast('⚠️ Saisis le montant à retirer','err');return;}
+  if(!S.fondsSecurite||S.fondsSecurite.actuel<=0){toast('⚠️ Le fonds est vide','err');return;}
+  if(!confirm('🚨 Ce fonds est ta bouée de sauvetage.\nC\'est une VRAIE urgence ?'))return;
+  S.fondsSecurite.actuel=Math.max(0,S.fondsSecurite.actuel-m);
+  document.getElementById('fs-verse').value='';
+  save();refreshReservoir();
+  toast(`🚨 ${fmt(m)} retirés du fonds — pense à le reconstituer vite`);
+}
+function addDefi(){
+  const nom=document.getElementById('defi-nom').value.trim();
+  const montant=Math.abs(parseFloat(document.getElementById('defi-montant').value)||0);
+  const sem=Math.min(52,Math.max(1,parseInt(document.getElementById('defi-sem').value)||12));
+  if(!nom){toast('⚠️ Nom du défi requis','err');return;}
+  if(!montant){toast('⚠️ Montant hebdo requis','err');return;}
+  if(!S.defis)S.defis=[];
+  S.defis.push({id:uid(),nom,montant,done:Array(sem).fill(false)});
+  document.getElementById('defi-nom').value='';
+  document.getElementById('defi-montant').value='';
+  save();refreshReservoir();
+  toast(`🔥 Défi lancé : ${fmt(montant)}/semaine sur ${sem} semaines !`);
+}
+function toggleDefiSemaine(id,i){
+  const d=S.defis.find(x=>x.id===id);if(!d)return;
+  d.done[i]=!d.done[i];
+  save();refreshReservoir();
+  if(d.done[i]){
+    const done=d.done.filter(Boolean).length;
+    if(done===d.done.length)toast(`🏆 Défi "${d.nom}" TERMINÉ ! ${fmt(done*d.montant)} épargnés !`);
+    else toast(`✓ Semaine ${i+1} validée — ${fmt(d.montant)} de plus !`);
+  }
+}
+function delDefi(id){if(!confirm('Abandonner ce défi ?'))return;S.defis=S.defis.filter(d=>d.id!==id);save();refreshReservoir();toast('✓ Défi supprimé');}
+
+// ══════ RÉTROVISEUR ══════
+function renderRetro(){
+  const cmp=document.getElementById('retro-compare'),dg=document.getElementById('retro-diag');
+  if(!cmp||!dg)return;
+  dg.innerHTML=diagnosticAmi();
+  if(S.bilans.length<2){cmp.innerHTML='<div class="empty"><div class="ei">↔️</div><p>Enregistre au moins 2 bilans mensuels pour comparer les mois.</p></div>';return;}
+  const b0=S.bilans[0],b1=S.bilans[1];
+  const rows=[
+    {l:'💰 Bénéfices',a:b0.calc.totalBen,b:b1.calc.totalBen,goodUp:true},
+    {l:'🛒 Dép. variables',a:b0.vars||0,b:b1.vars||0,goodUp:false},
+    {l:'🏠 Dép. fixes',a:b0.fixes||0,b:b1.fixes||0,goodUp:false},
+    {l:'⭐ Épargne',a:b0.calc.epargne,b:b1.calc.epargne,goodUp:true},
+    {l:'💵 Net dispo',a:b0.calc.netDispo,b:b1.calc.netDispo,goodUp:true},
+  ];
+  cmp.innerHTML=`<div style="font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-bottom:10px">${b1.moisKey} → ${b0.moisKey}</div>`+rows.map(r=>{
+    const diff=r.a-r.b;
+    const pd=r.b!==0?Math.round(diff/Math.abs(r.b)*100):(r.a?100:0);
+    const good=diff===0||((diff>0)===r.goodUp);
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(29,47,69,.5);font-size:13px;gap:8px;flex-wrap:wrap">
+      <span>${r.l}</span>
+      <div style="display:flex;gap:12px;align-items:center;font-family:'Fira Code',monospace;font-size:12px">
+        <span style="color:var(--txt3)">${fmt(r.b)} →</span>
+        <span style="font-weight:700">${fmt(r.a)}</span>
+        <span style="color:${good?'var(--lime)':'var(--red)'};min-width:60px;text-align:right">${diff>=0?'▲':'▼'} ${Math.abs(pd)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function diagnosticAmi(){
+  const sc=calcScore();
+  if(!sc)return'<div class="empty"><div class="ei">🤓</div><p>Enregistre un premier bilan et je te fais ton diagnostic, direct et sans détour.</p></div>';
+  const b0=S.bilans[0],b1=S.bilans[1];
+  const parts=[];
+  let scoreLine=`<strong>Score : ${sc.total}/100 — ${scoreLabel(sc.total)}</strong>`;
+  if(b1&&typeof b1.scoreSnapshot==='number'){
+    const d=sc.total-b1.scoreSnapshot;
+    if(d>0)scoreLine+=` · Tu passes de <strong>${scoreLabel(b1.scoreSnapshot)}</strong> à <strong>${scoreLabel(sc.total)}</strong> (+${d} pts). Continue comme ça. 💪`;
+    else if(d<0)scoreLine+=` · −${Math.abs(d)} pts vs le mois dernier. On ne panique pas, on corrige.`;
+    else scoreLine+=` · Stable vs le mois dernier.`;
+  }
+  parts.push(scoreLine);
+  if(b1){
+    const dv=(b0.vars||0)-(b1.vars||0);
+    if(dv<0)parts.push(`✅ <strong>Dépenses variables</strong> : −${fmt(Math.abs(dv))} vs ${b1.moisKey}. C'est exactement ce qu'on veut voir.`);
+    else if(dv>0)parts.push(`⚠️ <strong>Dépenses variables</strong> : +${fmt(dv)} vs ${b1.moisKey}. Aïe — c'est là qu'on serre la vis en premier.`);
+    else parts.push(`👌 <strong>Dépenses variables</strong> : stables. Tu as stabilisé tes sorties.`);
+  }
+  const oxy=calcOxygene();
+  if(oxy!==null)parts.push(`🫁 <strong>Oxygène</strong> : ${oxy}% de tes revenus du mois partent dans les dettes${oxy>35?' — zone rouge, priorité n°1.':oxy>20?' — ça se surveille de près.':' — tu respires bien.'}`);
+  const fs=S.fondsSecurite;
+  if(fs&&fs.cible>0)parts.push(`🛡️ <strong>Fonds de sécurité</strong> : ${Math.min(100,Math.round(fs.actuel/fs.cible*100))}% de la cible (${fmt(fs.actuel)} / ${fmt(fs.cible)}).`);
+  if(calcCreances()>0)parts.push(`🤝 <strong>On te doit ${fmt(calcCreances())}</strong>. Cet argent doit revenir dans ta poche — relance.`);
+  return parts.map(p=>`<div style="font-size:13px;line-height:1.6;padding:7px 0;border-bottom:1px solid rgba(29,47,69,.5)">${p}</div>`).join('');
 }
 
 // ══════ MODAL ══════
 function openModal(type,id=null){
   _mt=type;_eid=id;
-  const titles={wallet:'💳 Compte / Wallet',invest:'📈 Investissement / Épargne',dette:'💳 Dette / Emprunt'};
+  const titles={wallet:'💳 Compte / Wallet',invest:'📈 Investissement / Épargne',dette:'💳 Dette / Emprunt',creance:'🤝 Créance — On te doit'};
   document.getElementById('modal-t').textContent=titles[type];
   if(type==='wallet'){
     const w=id?S.wallets.find(x=>x.id===id):null;
@@ -1538,6 +1870,12 @@ function openModal(type,id=null){
       <div class="fg"><label>Solde restant (FCFA)</label><input type="number" id="m-restant" placeholder="ex: 150000" inputmode="numeric"></div>
       <div class="fg"><label>Mensualité (FCFA)</label><input type="number" id="m-mens" placeholder="ex: 25000" inputmode="numeric"></div>
       <div class="fg"><label>Date de début</label><input type="date" id="m-date" value="${new Date().toISOString().split('T')[0]}"></div>`;
+  }else if(type==='creance'){
+    document.getElementById('modal-body').innerHTML=`
+      <div class="fg"><label>Nom / Débiteur</label><input type="text" id="m-nom" placeholder="ex: Cousin Ibrahim, Client Awa…"></div>
+      <div class="fg"><label>Montant prêté (FCFA)</label><input type="number" id="m-initial" placeholder="ex: 100000" inputmode="numeric"></div>
+      <div class="fg"><label>Reste à récupérer (FCFA)</label><input type="number" id="m-restant" placeholder="laisse vide si tout est dû" inputmode="numeric"></div>
+      <div class="fg"><label>Date du prêt</label><input type="date" id="m-date" value="${new Date().toISOString().split('T')[0]}"></div>`;
   }
   document.getElementById('modal-overlay').style.display='flex';
   setTimeout(()=>{const inp=document.querySelector('#modal-body input[type=text],#modal-body input[type=number]');if(inp)inp.focus();},300);
@@ -1571,13 +1909,28 @@ function modalOK(){
     if(!nom||!montantInitial){toast('⚠️ Nom et montant initial requis','err');return;}
     S.dettes.push({id:uid(),nom,type,montantInitial,soldeRestant,mensualite,dateDebut,paiements:[]});
     toast('✓ Dette ajoutée');
+  }else if(_mt==='creance'){
+    const nom=document.getElementById('m-nom').value.trim();
+    const montantInitial=parseFloat(document.getElementById('m-initial').value)||0;
+    const restantSaisi=parseFloat(document.getElementById('m-restant').value);
+    const soldeRestant=isNaN(restantSaisi)?montantInitial:restantSaisi;
+    const dateDebut=document.getElementById('m-date').value;
+    if(!nom||!montantInitial){toast('⚠️ Nom et montant requis','err');return;}
+    S.creances.push({id:uid(),nom,montantInitial,soldeRestant,dateDebut,paiements:[]});
+    toast('✓ Créance ajoutée — on n\'oublie pas qui te doit !');
   }else if(_mt==='payer_dette'){
     const montant=parseFloat(document.getElementById('m-paiement').value)||0;
     const date=document.getElementById('m-paiement-date').value;
     const note=document.getElementById('m-paiement-note').value.trim();
     if(!montant||montant<=0){toast('⚠️ Montant invalide','err');return;}
     const detteId=_eid;closeModal();enregistrerPaiementDette(detteId,montant,date,note);return;
-  }else if(_mt==='select_dette'){return;}
+  }else if(_mt==='encaisser_creance'){
+    const montant=parseFloat(document.getElementById('m-encaisse').value)||0;
+    const date=document.getElementById('m-encaisse-date').value;
+    const note=document.getElementById('m-encaisse-note').value.trim();
+    if(!montant||montant<=0){toast('⚠️ Montant invalide','err');return;}
+    const creanceId=_eid;closeModal();enregistrerEncaissementCreance(creanceId,montant,date,note);return;
+  }else if(_mt==='select_dette'||_mt==='select_creance'){return;}
   save();closeModal();refreshPatrimoine();refreshDash();updateScore();
 }
 
@@ -1599,7 +1952,7 @@ async function chatWith(autoP,dispMsg){
   const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const moisEnts=S.journal.filter(e=>e.date.startsWith(prefix));
   const jSaisis=[...new Set(moisEnts.map(e=>e.date))].length;
-  const benMois=moisEnts.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
+  const benMois=moisEnts.filter(e=>isBen(e.type)).reduce((s,e)=>s+e.montant,0);
   const joursTotal=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   const prevision=jSaisis>0?Math.round(benMois/jSaisis*joursTotal):0;
   const hist6=S.bilans.slice(0,6);
@@ -1611,7 +1964,9 @@ async function chatWith(autoP,dispMsg){
   const txDepenses=lb?lb.calc.txDepenses:0;
   const salaireReco=lb?lb.calc.salaire:0;
 
-  const sys=`Tu es un CONSEILLER FINANCIER EXPERT et ami de confiance. Tu combines la rigueur d'un professionnel de la finance avec la bienveillance d'un ami qui connaît ta situation personnelle. Tu es direct, honnête, mais toujours encourageant.
+  const oxyIA=calcOxygene();
+  const fsIA=S.fondsSecurite||{cible:0,actuel:0};
+  const sys=`Tu es l'AMI COMPTABLE : un pote tech & business qui maîtrise la finance. Tu connais le dossier de ton ami par cœur (ci-dessous) et tu lui parles d'égal à égal.
 
 ═══════════════════════════════════
 DOSSIER CLIENT COMPLET
@@ -1619,20 +1974,28 @@ DOSSIER CLIENT COMPLET
 
 ▌ SANTÉ FINANCIÈRE
 • Score : ${sc?sc.total:'Non évalué'}/100 ${sc?'→ '+scoreLabel(sc.total):''}
-• Patrimoine net : ${fmt(calcActifs()-calcDettes())} FCFA
-• Actifs : ${fmt(calcActifs())} FCFA | Dettes : ${fmt(calcDettes())} FCFA
+• Patrimoine net : ${fmt(calcPatrimoine())} FCFA (actifs + créances − dettes)
+• Actifs : ${fmt(calcActifs())} FCFA | Créances (on lui doit) : ${fmt(calcCreances())} FCFA | Dettes : ${fmt(calcDettes())} FCFA
 • Ratio endettement : ${calcActifs()>0?Math.round(calcDettes()/calcActifs()*100):0}% des actifs
+• Oxygène (part des revenus du mois absorbée par les dettes) : ${oxyIA!==null?oxyIA+'%':'N/A'}
 
 ▌ COMPTES & ACTIFS
 ${S.wallets.length>0?S.wallets.map(w=>`  • ${w.icon} ${w.nom} (${w.type}) : ${fmt(w.solde)}`).join('\n'):'  • Aucun compte enregistré'}
 ${S.investissements.length>0?S.investissements.map(i=>`  • 📈 ${i.nom} (${i.type}) : ${fmt(i.montant)}`).join('\n'):''}
 
+▌ RÉSERVOIR (ÉPARGNE)
+• Fonds de sécurité (intouchable) : ${fmt(fsIA.actuel)}${fsIA.cible>0?' / cible '+fmt(fsIA.cible)+' ('+Math.min(100,Math.round(fsIA.actuel/Math.max(1,fsIA.cible)*100))+'%)':' (pas de cible définie)'}
+${(S.defis||[]).length>0?S.defis.map(d=>{const done=d.done.filter(Boolean).length;return`  • Défi "${d.nom}" : ${done}/${d.done.length} semaines validées (${fmt(done*d.montant)} épargnés)`;}).join('\n'):'  • Aucun défi d\'épargne en cours'}
+
 ▌ CHARGES FIXES (${fmt(getTotalChargesFixes())}/mois)
 ${S.chargesFixes.filter(c=>c.actif).length>0?S.chargesFixes.filter(c=>c.actif).map(cf=>`  • ${CF_CATS[cf.cat]?.icon||'📦'} ${cf.nom} : −${fmt(getMontantMensuel(cf))}/mois`).join('\n'):'  • Aucune charge fixe configurée'}
 
-▌ DETTES ACTIVES
+▌ ZONE DE CRISE — DETTES (CE QU'IL DOIT)
 ${S.dettes.filter(d=>d.soldeRestant>0).length>0?S.dettes.filter(d=>d.soldeRestant>0).map(d=>{const pct=Math.round((1-d.soldeRestant/d.montantInitial)*100);const dp=d.paiements&&d.paiements.length>0?d.paiements[d.paiements.length-1]:null;return`  • ${d.nom} : ${fmt(d.soldeRestant)} restant | ${pct}% remboursé | Mensualité : ${fmt(d.mensualite)}${dp?' | Dernier paiement : '+fmt(dp.montant)+' le '+dp.date:''}`;}).join('\n'):'  • Aucune dette — situation saine ✅'}
 ${S.dettes.filter(d=>d.soldeRestant<=0&&d.montantInitial>0).length>0?'\nDettes soldées : '+S.dettes.filter(d=>d.soldeRestant<=0&&d.montantInitial>0).map(d=>d.nom).join(', '):''}
+
+▌ ZONE DE CRISE — CRÉANCES (CE QU'ON LUI DOIT)
+${(S.creances||[]).filter(c=>c.soldeRestant>0).length>0?S.creances.filter(c=>c.soldeRestant>0).map(c=>`  • ${c.nom} : ${fmt(c.soldeRestant)} à récupérer (prêté ${fmt(c.montantInitial)})`).join('\n'):'  • Personne ne lui doit d\'argent'}
 
 ▌ DERNIER MOIS ${lb?'('+lb.moisKey+')':''}
 ${lb?`• Revenus : ${fmt(lb.calc.totalBen)} | Charges : ${fmt(lb.calc.totalDep)} (${txDepenses}%)
@@ -1655,14 +2018,27 @@ ${S.objectifs.length>0?S.objectifs.map(o=>{const pct=o.cible>0?Math.round(o.actu
 Salaire ${S.config.pct.sal}% → ${fmt(salaireReco)} | Épargne ${S.config.pct.epa}% | Capital Wave ${S.config.pct.wav}% | Urgence ${S.config.pct.urg}% | Invest ${S.config.pct.inv}%
 
 ═══════════════════════════════════
-STYLE DE RÉPONSE
+TON STYLE — 3 RÈGLES NON NÉGOCIABLES
 ═══════════════════════════════════
-• Tu es direct et pratique — tu donnes des montants précis en FCFA
-• Tu es bienveillant — tu encourages les bonnes actions, tu ne juges pas
-• Tu prescris des actions concrètes avec des étapes numérotées quand c'est utile
-• Si les dépenses dépassent 60% ou l'épargne est sous 15%, tu le signales clairement
-• Tu fixes le salaire que le client peut se verser ce mois si on te le demande
-• Max 300 mots. Français professionnel mais accessible.`;
+
+1. ÉQUILIBRE EMPATHIE / FRANCHISE (CANDOR)
+• Si ça va mal : tu valides le stress en UNE phrase, puis tu mets les chiffres sur la table sans tourner autour du pot. Ex : "Aïe, le budget a pris un coup cette semaine. On ne va pas paniquer, mais il faut couper les dépenses variables dès aujourd'hui."
+• Si ça va bien : tu célèbres la victoire comme un bon partenaire de business. Pas de tiédeur.
+• INTERDIT : la fausse politesse robotique corporate ("Je comprends tout à fait votre situation financière difficile...").
+
+2. CLARTÉ SCANNABLE — l'info doit se capter en 2 secondes
+• **Gras** sur les chiffres clés et les mots importants (format **texte**).
+• Listes à puces courtes plutôt que des paragraphes.
+• Une ligne "---" seule pour séparer les grandes idées.
+• JAMAIS de gros blocs de texte indigestes.
+
+3. PAIR À PAIR — le pote tech & business
+• Tutoiement obligatoire. Zéro jargon inutile.
+• Tu entres DIRECT dans le vif du sujet : aucune phrase d'intro type "En tant qu'IA..." ou "Excellente question !".
+• Montants précis en FCFA, actions concrètes, étapes numérotées quand utile.
+• Si les dépenses dépassent 60% ou l'épargne est sous 15%, tu le dis cash.
+• Si l'oxygène dépasse 35%, le désendettement devient la priorité n°1 de ta réponse.
+• Max 250 mots.`;
 
   S.chatHist.push({role:'user',content:autoP||dispMsg});
   addTyping();document.getElementById('send-btn').disabled=true;
@@ -1696,11 +2072,19 @@ async function apiCall(messages,maxTokens=800,system=''){
   if (!d.candidates || d.candidates.length === 0) return '';
   return d.candidates[0].content.parts[0].text || '';
 }
+// Mise en forme "scannable" des réponses IA : gras, séparateurs, sauts de ligne
+function mdLite(text){
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^\s*-{3,}\s*$/gm,'<hr style="border:none;border-top:1px solid var(--line);margin:8px 0">')
+    .replace(/\n/g,'<br>');
+}
 function addMsg(text,role){
   const c=document.getElementById('chat-msgs');
   const t=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   const d=document.createElement('div');d.className='msg '+role;
-  d.innerHTML=`<div class="msg-av ${role}" style="${role==='ai'?'background:linear-gradient(135deg,#1a3a5c,#0d2137);font-size:14px':''}">${role==='ai'?'🤓':'👤'}</div><div><div class="msg-bbl">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${t}</div></div>`;
+  d.innerHTML=`<div class="msg-av ${role}" style="${role==='ai'?'background:linear-gradient(135deg,#1a3a5c,#0d2137);font-size:14px':''}">${role==='ai'?'🤓':'👤'}</div><div><div class="msg-bbl">${mdLite(text)}</div><div class="msg-time">${t}</div></div>`;
   c.appendChild(d);c.scrollTop=c.scrollHeight;
 }
 function addTyping(){const c=document.getElementById('chat-msgs');const d=document.createElement('div');d.className='msg ai';d.id='typing';d.innerHTML=`<div class="msg-av ai" style="background:linear-gradient(135deg,#1a3a5c,#0d2137);font-size:14px">🤓</div><div class="msg-bbl"><div class="typing"><span></span><span></span><span></span></div></div>`;c.appendChild(d);c.scrollTop=c.scrollHeight;}
@@ -1744,7 +2128,7 @@ function exportPDF(){
   const vars=parseFloat(document.getElementById('b-vars').value)||0;
   const autres=parseFloat(document.getElementById('b-autres').value)||0;
   const tBen=wave+crypto+autres,tDep=fixes+vars,net=tBen-tDep;
-  const p=S.config.pct;const sc=calcScore();const pat=calcActifs()-calcDettes();
+  const p=S.config.pct;const sc=calcScore();const pat=calcPatrimoine();
   const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
     body{font-family:Arial,sans-serif;color:#1a1a2e;padding:32px;max-width:720px;margin:0 auto}
