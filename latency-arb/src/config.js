@@ -28,6 +28,10 @@ export const config = {
     weights: { binance: num('WEIGHT_BINANCE', 0.65), coinbase: num('WEIGHT_COINBASE', 0.35) },
     // Au-dela, une venue est jugee morte et sort du prix consolide.
     stalenessMs: num('SPOT_STALENESS_MS', 3_000),
+    // Place de reference libellee en vrais dollars : les autres places y sont
+    // ramenees avant consolidation (correction de la base USDT/USD).
+    referenceVenue: str('SPOT_REFERENCE_VENUE', 'coinbase'),
+    basisHalfLifeSec: num('BASIS_HALFLIFE_SEC', 300),
     historyMs: num('SPOT_HISTORY_MS', 120_000),
   },
 

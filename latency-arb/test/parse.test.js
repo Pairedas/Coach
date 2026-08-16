@@ -67,3 +67,39 @@ test('l\'ordre des resultats est respecte quand « Yes » n\'est pas en premier'
   assert.equal(r.market.tokenYes, '222');
   assert.equal(r.market.tokenNo, '111');
 });
+
+test('une plage horaire explicite donne la duree reelle de la periode', () => {
+  // Cas observe le 16 aout 2026 : des marches de cinq minutes existent, et les
+  // traiter comme horaires ferait reconstruire le seuil sur la mauvaise bougie.
+  const r = parseMarket({ ...baseRaw, question: 'Bitcoin Up or Down - December 19, 11:35AM-11:40AM ET' });
+  assert.ok(r.ok);
+  assert.equal(r.market.kind, 'updown');
+  assert.equal(r.market.periodMs, 5 * 60_000);
+});
+
+test('les plages horaires de differentes durees sont lues correctement', () => {
+  const periode = (q) => parseMarket({ ...baseRaw, question: q }).market.periodMs;
+  assert.equal(periode('Bitcoin Up or Down - 3:00PM-3:15PM ET'), 15 * 60_000);
+  assert.equal(periode('Bitcoin Up or Down - 11:55PM-12:05AM ET'), 10 * 60_000, 'plage franchissant minuit');
+  assert.equal(periode('Bitcoin Up or Down - 9:00AM-10:00AM ET'), 3_600_000);
+});
+
+test('sans plage explicite, un marche horaire reste horaire', () => {
+  const r = parseMarket({ ...baseRaw, question: 'Bitcoin Up or Down - August 16, 9AM ET' });
+  assert.equal(r.market.periodMs, 3_600_000);
+});
+
+test('un marche a fourchette est accepte avec ses deux bornes', () => {
+  const r = parseMarket({ ...baseRaw, question: 'Will the price of Bitcoin be between $62,000 and $64,000 on August 16?' });
+  assert.ok(r.ok, `rejete : ${r.reason}`);
+  assert.equal(r.market.kind, 'range');
+  assert.equal(r.market.side, 'inside');
+  assert.equal(r.market.strike, 62_000);
+  assert.equal(r.market.strikeHigh, 64_000);
+});
+
+test('une fourchette inversee ou incomplete est rejetee', () => {
+  const r = parseMarket({ ...baseRaw, question: 'Will Bitcoin be between $64,000 and $62,000 today?' });
+  assert.equal(r.ok, false);
+  assert.match(r.reason, /fourchette/);
+});

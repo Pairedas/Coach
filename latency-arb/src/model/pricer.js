@@ -56,6 +56,20 @@ export function probDelta({ spot, strike, timeToExpiryMs, volAnnual }) {
 export function fairProbability(market, { spot, volAnnual, now }) {
   const timeToExpiryMs = market.expiryTs - now;
   const args = { spot, strike: market.strike, timeToExpiryMs, volAnnual };
+
+  // Fourchette : P(K1 < S < K2) = N(d2(K1)) - N(d2(K2)). Exact sous le meme
+  // modele, aucune approximation supplementaire.
+  if (market.side === 'inside') {
+    if (!(market.strikeHigh > market.strike)) return { prob: NaN, timeToExpiryMs, delta: 0 };
+    const haut = { ...args, strike: market.strikeHigh };
+    const prob = probAbove(args) - probAbove(haut);
+    return {
+      prob: Number.isFinite(prob) ? clamp(prob, 0, 1) : NaN,
+      timeToExpiryMs,
+      delta: probDelta(args) - probDelta(haut),
+    };
+  }
+
   const p = market.side === 'below' ? probBelow(args) : probAbove(args);
   return { prob: p, timeToExpiryMs, delta: probDelta(args) * (market.side === 'below' ? -1 : 1) };
 }

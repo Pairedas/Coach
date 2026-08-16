@@ -30,6 +30,8 @@ export class Engine extends EventEmitter {
       volHalfLifeSec: cfg.model.volHalfLifeSec,
       seedVolAnnual: cfg.model.seedVolAnnual,
       volSampleMs: cfg.model.volSampleMs,
+      referenceVenue: cfg.spot.referenceVenue,
+      basisHalfLifeSec: cfg.spot.basisHalfLifeSec,
     });
     this.strategy = new LatencyArbStrategy(cfg);
     this.risk = new RiskManager(cfg);

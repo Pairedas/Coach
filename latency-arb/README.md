@@ -69,8 +69,19 @@ log-rendements), **echantillonnee sur une grille d'une seconde** — echantillon
 a chaque tick mesure le bruit de microstructure et surestime σ d'un facteur deux
 ou plus, ce qui ecrase tous les justes prix vers 0,5.
 
-Les marches a barriere (« Bitcoin atteindra-t-il X ? ») sont **rejetes** : leur
-payoff depend du chemin, `N(d2)` y est faux.
+Les marches a **fourchette** (« entre 62 000 et 64 000 ») sont valorises
+exactement, comme une difference de deux digitaux :
+`P = N(d2(K1)) − N(d2(K2))`. Ils sont naturellement proches de 50/50, donc bien
+plus interessants pour cette strategie que des seuils profondement dans ou hors
+la monnaie.
+
+Les marches a **barriere** (« Bitcoin atteindra-t-il X ? ») sont **rejetes** :
+leur payoff depend du chemin, `N(d2)` y est faux.
+
+Pour les marches « Up or Down », la duree de la periode est lue dans le libelle
+quand il porte une plage explicite (`11:35AM-11:40AM ET` vaut cinq minutes, pas
+une heure). Se tromper de periode ferait reconstruire le seuil sur la mauvaise
+bougie, et inverserait le signe de la marge.
 
 ---
 
@@ -129,6 +140,23 @@ npm run paper                                   # temps reel, execution simulee
 npm run record                                  # idem, en journalisant les flux
 npm run replay -- ./data/session.ndjson         # rejoue la seance enregistree
 ```
+
+### La base USDT/USD
+
+Binance cote **BTCUSDT**, Coinbase **BTCUSD**. L'ecart entre les deux vaut
+couramment une dizaine de points de base — une soixantaine de dollars sur un BTC
+a 63 000. Les seuils Polymarket etant libelles en dollars, melanger les deux sans
+correction injecte cette erreur directement dans le juste prix.
+
+Sur un marche de cinq minutes, ce n'est pas un detail : avec 60 % de volatilite
+et 90 secondes restantes, l'ecart-type du prix a l'echeance est du meme ordre de
+grandeur que la base. L'erreur ne serait alors plus une nuance, elle dominerait
+le calcul.
+
+Le moteur ramene donc chaque place a la place de reference
+(`SPOT_REFERENCE_VENUE`, Coinbase par defaut) en estimant l'ecart moyen par
+lissage lent. Un mouvement commun aux deux places passe intact ; seul le
+decalage structurel est retire. `probe` affiche la base estimee.
 
 ### Deux balayages a la decouverte
 
@@ -215,7 +243,7 @@ src/
     sim.js / replay.js   Simulation hors ligne et rejeu de seances
 ```
 
-83 tests couvrent la valorisation, le carnet, la detection de retard, les
+97 tests couvrent la valorisation, le carnet, la detection de retard, les
 plafonds de risque, la pagination de la decouverte et la comparaison
 retard / sans retard : `npm test`.
 
@@ -244,14 +272,6 @@ Le bac a sable de developpement bloque `api.binance.com`,
 - **Reste a valider par la mesure** : la rentabilite. Lance `npm run probe` — si
   le rapport n'affiche aucun tick spot ou aucune re-cotation, c'est un flux qui
   ne remonte plus, pas un marche calme.
-
-Autre point de vigilance : le prix consolide melange **BTCUSDT** (Binance) et
-**BTCUSD** (Coinbase). L'ecart entre les deux — la base USDT/USD — vaut
-couramment une dizaine de points de base, soit une soixantaine de dollars sur un
-BTC a 63 000. Les seuils Polymarket sont libelles en dollars : sur un marche
-proche de la monnaie, ce decalage se transforme directement en erreur de juste
-prix. Le rapport de `probe` affiche cet ecart entre places ; s'il est important,
-mets `WEIGHT_BINANCE=0` pour ne garder qu'une reference en vrais dollars.
 
 Un point merite une verification manuelle systematique : pour les marches
 « Up or Down », le seuil est reconstruit depuis l'ouverture de la bougie horaire

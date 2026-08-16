@@ -92,7 +92,11 @@ export function buildReport({ cfg, engine, books, markets, intervals }) {
       && mid <= cfg.strategy.maxPrice;
 
     // Volatilite que le marche implique, a comparer a celle que l'on mesure.
-    const probAboveMarche = mid === null ? null : (m.side === 'below' ? 1 - mid : mid);
+    // L'inversion ne vaut que pour un seuil unique : une fourchette depend de
+    // deux seuils, sa volatilite implicite n'est pas identifiable ainsi.
+    const probAboveMarche = mid === null || m.side === 'inside'
+      ? null
+      : (m.side === 'below' ? 1 - mid : mid);
     const volImplicite = probAboveMarche === null ? null : impliedVolAbove({
       spot,
       strike: m.strike,
@@ -127,6 +131,7 @@ export function buildReport({ cfg, engine, books, markets, intervals }) {
     spot,
     volAnnual: engine.spot.volAnnual,
     venueSpreadBps: engine.spot.venueSpreadBps(),
+    basis: Object.fromEntries(engine.spot.basis),
     spotUpdates: engine.spot.updates,
     lignes,
     nbVivants: vivants.length,
@@ -149,6 +154,9 @@ function printReport(r, cfg) {
   console.log(`Spot consolide      : ${r.spot ? r.spot.toFixed(1) : 'indisponible'} USD`);
   console.log(`Volatilite estimee  : ${(r.volAnnual * 100).toFixed(0) } %`);
   console.log(`Ecart entre places  : ${r.venueSpreadBps.toFixed(2)} points de base`);
+  for (const [venue, ecart] of Object.entries(r.basis ?? {})) {
+    console.log(`Base ${venue.padEnd(14)} : ${ecart >= 0 ? '+' : ''}${ecart.toFixed(1)} USD, corrigee avant consolidation`);
+  }
   console.log(`Ticks spot recus    : ${r.spotUpdates}`);
 
   console.log('\n── Marches observes ──\n');

@@ -106,9 +106,9 @@ test('le seuil d\'un marche up/down est reconstruit depuis l\'ouverture horaire'
     return [marche(1, { question: 'Bitcoin Up or Down - August 16, 1PM ET' })];
   };
   let demande = null;
-  const fetchHourOpen = async (ts) => { demande = ts; return 118_400; };
+  const fetchPeriodOpen = async (ts) => { demande = ts; return 118_400; };
 
-  const markets = await discoverMarkets(cfg(), { getJson, fetchHourOpen, now: NOW });
+  const markets = await discoverMarkets(cfg(), { getJson, fetchPeriodOpen, now: NOW });
   assert.equal(markets.length, 1);
   assert.equal(markets[0].strike, 118_400);
   assert.equal(markets[0].strikeSource, 'binance-kline-open');
@@ -121,8 +121,8 @@ test('un seuil introuvable ecarte le marche au lieu d\'inventer un prix', async 
     if (params.get('order') !== 'volume24hr' || Number(params.get('offset')) !== 0) return [];
     return [marche(1, { question: 'Bitcoin Up or Down - August 16, 1PM ET' })];
   };
-  const fetchHourOpen = async () => { throw new Error('bougie indisponible'); };
-  const markets = await discoverMarkets(cfg(), { getJson, fetchHourOpen, now: NOW });
+  const fetchPeriodOpen = async () => { throw new Error('bougie indisponible'); };
+  const markets = await discoverMarkets(cfg(), { getJson, fetchPeriodOpen, now: NOW });
   assert.equal(markets.length, 0);
 });
 

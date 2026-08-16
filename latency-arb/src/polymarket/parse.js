@@ -11,6 +11,11 @@ const BARRIER_PATTERNS = [/\bdip to\b/i, /\breach\b/i, /\bhit\b/i, /\btouch\b/i,
 const ABOVE_PATTERNS = [/\babove\b/i, /\bgreater than\b/i, /\bmore than\b/i, /\bexceed/i, /\bau[- ]dessus\b/i, /\b>=?\s*\$/];
 const BELOW_PATTERNS = [/\bbelow\b/i, /\bless than\b/i, /\bunder\b/i, /\ben[- ]dessous\b/i, /\b<=?\s*\$/];
 const UPDOWN_PATTERNS = [/\bup or down\b/i, /\bup\b.*\bdown\b/i, /\bhigher\b.*\blower\b/i];
+// « between $62,000 and $64,000 » : payoff a fourchette, valorisable exactement
+// comme une difference de deux digitaux.
+const RANGE_PATTERN = /\bbetween\b\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*[kKmM]?)\s*\band\b\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*[kKmM]?)/i;
+// « 11:35AM-11:40AM ET » : plage horaire explicite, donc duree explicite.
+const TIME_RANGE_PATTERN = /(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[-–]\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i;
 
 /** Convertit « $118,500 », « 118.5k », « 120K » en nombre. */
 export function parseMoney(raw) {
@@ -71,10 +76,20 @@ export function parseMarket(raw) {
 
   const isUpDown = UPDOWN_PATTERNS.some((re) => re.test(question));
   const strike = parseStrike(question);
+  const plage = question.match(RANGE_PATTERN);
 
   let kind;
   let side;
-  if (Number.isFinite(strike)) {
+  let strikeHigh = null;
+  if (plage) {
+    // P(K1 < S < K2) = N(d2(K1)) - N(d2(K2)) : exact sous le meme modele.
+    const bas = parseMoney(plage[1]);
+    const haut = parseMoney(plage[2]);
+    if (!(bas > 0) || !(haut > bas)) return { ok: false, reason: 'fourchette illisible' };
+    kind = 'range';
+    side = 'inside';
+    strikeHigh = haut;
+  } else if (Number.isFinite(strike)) {
     kind = 'threshold';
     const below = BELOW_PATTERNS.some((re) => re.test(question));
     const above = ABOVE_PATTERNS.some((re) => re.test(question));
@@ -102,7 +117,9 @@ export function parseMarket(raw) {
       question,
       kind,
       side,
-      strike: Number.isFinite(strike) ? strike : null,
+      strike: kind === 'range' ? parseMoney(plage[1]) : (Number.isFinite(strike) ? strike : null),
+      // Borne haute, renseignee uniquement pour les marches a fourchette.
+      strikeHigh,
       // Duree de la periode pour un marche up/down horaire, utilisee pour
       // retrouver le prix d'ouverture de reference.
       periodMs: kind === 'updown' ? inferPeriodMs(question) : null,
@@ -120,8 +137,27 @@ export function parseMarket(raw) {
 
 /** Duree de la periode d'un marche up/down, deduite du libelle. */
 function inferPeriodMs(question) {
+  // Une plage horaire explicite prime sur toute heuristique : « 11:35AM-11:40AM »
+  // dure cinq minutes, pas une heure. Se tromper de periode, c'est reconstruire
+  // le seuil sur la mauvaise bougie — et donc inverser le signe de la marge.
+  const plage = question.match(TIME_RANGE_PATTERN);
+  if (plage) {
+    const [, h1, m1, ap1, h2, m2, ap2] = plage;
+    const debut = toMinutes(h1, m1, ap1 ?? ap2);
+    const fin = toMinutes(h2, m2, ap2);
+    let duree = fin - debut;
+    if (duree < 0) duree += 24 * 60; // la plage franchit minuit
+    if (duree > 0) return duree * 60_000;
+  }
   if (/\bhourly\b|\bhour\b|\b\d{1,2}\s?(am|pm)\b/i.test(question)) return 3600_000;
   if (/\bdaily\b|\btoday\b|\bday\b/i.test(question)) return 24 * 3600_000;
   if (/\bweek/i.test(question)) return 7 * 24 * 3600_000;
   return 3600_000;
+}
+
+/** Convertit « 11:35 PM » en minutes depuis minuit. */
+function toMinutes(heure, minute, meridien) {
+  let h = Number(heure) % 12;
+  if (meridien && /pm/i.test(meridien)) h += 12;
+  return h * 60 + Number(minute);
 }

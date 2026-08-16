@@ -10,18 +10,24 @@ async function getJson(url, { timeoutMs = 8_000 } = {}) {
 }
 
 /**
- * Prix d'ouverture d'une bougie horaire Binance, servant de seuil aux marches
- * « up or down ».
+ * Prix d'ouverture de la periode d'un marche « up or down », qui en constitue
+ * le seuil.
+ *
+ * On lit toujours une bougie d'une minute : l'ouverture de la premiere minute
+ * d'une periode est, par construction, l'ouverture de la periode — que celle-ci
+ * dure cinq minutes ou une heure. Une seule requete couvre donc tous les
+ * formats, sans table de correspondance a maintenir.
  *
  * Attention : Polymarket peut resoudre ces marches sur une autre source de prix.
  * Verifie la regle de resolution du marche avant de traiter en reel — une
  * reference decalee de quelques dollars suffit a inverser le signe de la marge.
  */
-export async function fetchHourOpen(periodStartTs, { symbol = 'BTCUSDT' } = {}) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&startTime=${periodStartTs}&limit=1`;
+export async function fetchPeriodOpen(periodStartTs, { symbol = 'BTCUSDT' } = {}) {
+  const aligne = Math.floor(periodStartTs / 60_000) * 60_000;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&startTime=${aligne}&limit=1`;
   const rows = await getJson(url);
   const open = Number(rows?.[0]?.[1]);
-  if (!(open > 0)) throw new Error('bougie horaire indisponible');
+  if (!(open > 0)) throw new Error('bougie d\'ouverture indisponible');
   return open;
 }
 
@@ -33,7 +39,7 @@ export async function fetchHourOpen(periodStartTs, { symbol = 'BTCUSDT' } = {}) 
  */
 export async function discoverMarkets(cfg, deps = {}) {
   const fetchJson = deps.getJson ?? getJson;
-  const getHourOpen = deps.fetchHourOpen ?? fetchHourOpen;
+  const getPeriodOpen = deps.fetchPeriodOpen ?? fetchPeriodOpen;
   const now = deps.now ?? Date.now();
 
   // Deux balayages complementaires, dedupliques.
@@ -110,7 +116,7 @@ export async function discoverMarkets(cfg, deps = {}) {
   // depuis le prix d'ouverture de la periode.
   for (const m of kept.filter((x) => x.kind === 'updown' && x.strike === null)) {
     try {
-      m.strike = await getHourOpen(m.expiryTs - m.periodMs);
+      m.strike = await getPeriodOpen(m.expiryTs - m.periodMs);
       m.strikeSource = 'binance-kline-open';
     } catch (err) {
       log.warn(`seuil introuvable pour "${m.question}" : ${err.message}`);

@@ -78,3 +78,34 @@ test('un marche plus confiant que le modele implique une volatilite plus faible'
   assert.ok(volMarche < volModele, 'le marche implique moins de volatilite');
   assert.ok(volMarche > 0.1 && volMarche < 0.5, `volatilite implicite inattendue : ${volMarche}`);
 });
+
+test('une fourchette vaut la difference de deux digitaux', () => {
+  const market = { strike: 62_000, strikeHigh: 64_000, side: 'inside', expiryTs: 3_600_000 };
+  const ctx = { spot: 63_000, volAnnual: 0.6, now: 0 };
+  const r = fairProbability(market, ctx);
+
+  const attendu = probAbove({ spot: 63_000, strike: 62_000, timeToExpiryMs: 3_600_000, volAnnual: 0.6 })
+    - probAbove({ spot: 63_000, strike: 64_000, timeToExpiryMs: 3_600_000, volAnnual: 0.6 });
+  assert.ok(Math.abs(r.prob - attendu) < 1e-12);
+  assert.ok(r.prob > 0 && r.prob < 1);
+});
+
+test('une fourchette est plus probable au centre qu\'aux bords', () => {
+  const market = { strike: 62_000, strikeHigh: 64_000, side: 'inside', expiryTs: 3_600_000 };
+  const centre = fairProbability(market, { spot: 63_000, volAnnual: 0.6, now: 0 }).prob;
+  const bord = fairProbability(market, { spot: 61_000, volAnnual: 0.6, now: 0 }).prob;
+  assert.ok(centre > bord, `${centre} devrait depasser ${bord}`);
+});
+
+test('la sensibilite d\'une fourchette change de signe de part et d\'autre', () => {
+  const market = { strike: 62_000, strikeHigh: 64_000, side: 'inside', expiryTs: 3_600_000 };
+  const sousLaBorneBasse = fairProbability(market, { spot: 61_500, volAnnual: 0.6, now: 0 }).delta;
+  const auDessusDeLaHaute = fairProbability(market, { spot: 64_500, volAnnual: 0.6, now: 0 }).delta;
+  assert.ok(sousLaBorneBasse > 0, 'sous la fourchette, monter rapproche du gain');
+  assert.ok(auDessusDeLaHaute < 0, 'au-dessus, monter eloigne du gain');
+});
+
+test('une fourchette mal formee ne produit pas de prix', () => {
+  const market = { strike: 64_000, strikeHigh: 62_000, side: 'inside', expiryTs: 3_600_000 };
+  assert.ok(Number.isNaN(fairProbability(market, { spot: 63_000, volAnnual: 0.6, now: 0 }).prob));
+});
