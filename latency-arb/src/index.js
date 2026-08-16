@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runLive, runScan } from './runners/live.js';
 import { runReplay } from './runners/replay.js';
+import { runProbe } from './runners/probe.js';
 import { runOneSim, runSimBatch } from './runners/sim.js';
 
 const USAGE = `
@@ -10,6 +11,8 @@ Arbitrage de latence BTC — Binance/Coinbase vs Polymarket
 
 Commandes
   scan                  Liste les marches Polymarket exploitables, sans rien engager
+  probe [--seconds=n]   Observe les carnets sans engager d'ordre et mesure le
+                        temps pendant lequel ils restent figes (defaut 120 s)
   paper                 Session temps reel en execution simulee (par defaut)
   record                Comme paper, en journalisant les flux pour rejeu
   replay <fichier>      Rejoue une seance enregistree avec la configuration courante
@@ -54,6 +57,10 @@ try {
   switch (command) {
     case 'scan':
       await runScan();
+      break;
+    case 'probe':
+      await runProbe({ seconds: flag('seconds', 120) });
+      process.exit(0);
       break;
     case 'paper':
       await runLive({ record: false });

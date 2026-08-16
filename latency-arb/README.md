@@ -124,17 +124,34 @@ Aucune dependance npm en mode papier. Le mode reel en ajoute deux (voir plus bas
 ```bash
 npm run sim -- --lag=1500 --runs=12 --compare   # hors ligne, aucun reseau
 npm run scan                                    # liste les marches exploitables
+npm run probe -- --seconds=300                  # mesure le retard reel, sans ordre
 npm run paper                                   # temps reel, execution simulee
 npm run record                                  # idem, en journalisant les flux
 npm run replay -- ./data/session.ndjson         # rejoue la seance enregistree
 ```
 
+### La commande qui decide de tout : `probe`
+
+Elle observe les carnets sans jamais engager d'ordre et mesure **combien de temps
+le carnet Polymarket reste fige entre deux re-cotations**. Compare cette duree a
+ta propre latence :
+
+| Mediane observee | Ce que ca veut dire |
+|---|---|
+| > 3x ta latence | Une fenetre existe. Passe a `record`. |
+| entre 1x et 3x | Fenetre etroite, marge fragile. Mesure avant d'engager. |
+| < ta latence | Le carnet se re-cote plus vite que tu n'agis. Rien a prendre ici. |
+
+Le rapport affiche aussi, marche par marche, le juste prix implique par le spot
+face a la cote affichee, et le motif exact pour lequel chaque signal a ete
+ecarte. C'est le diagnostic a lancer avant toute autre chose.
+
 Le tableau de bord est sur <http://127.0.0.1:8787> (positions, marges, motifs de
 rejet). Il n'ecoute que sur la boucle locale.
 
-**La sequence recommandee** : `sim` pour comprendre le comportement, puis
-`record` pendant plusieurs jours, puis `replay` pour regler les seuils sur des
-donnees vraies. Regler les seuils sur le simulateur revient a s'entrainer contre
+**La sequence recommandee** : `sim` pour comprendre le comportement, `scan` puis
+`probe` pour verifier qu'il y a quelque chose a prendre, `record` pendant
+plusieurs jours, puis `replay` pour regler les seuils sur des donnees vraies. Regler les seuils sur le simulateur revient a s'entrainer contre
 sa propre imagination.
 
 ---
@@ -166,11 +183,18 @@ src/
   exec/
     paper.js             Execution simulee avec latence et perte de file
     live.js              Execution reelle, verrouillee par defaut
+    null.js              Courtier inerte, utilise par le mode diagnostic
   replay/                Simulateur, enregistreur, rejeu
+  runners/
+    session.js           Cablage commun aux sessions temps reel
+    probe.js             Diagnostic : mesure du retard reel, sans aucun ordre
+    live.js              Session d'exploitation (papier ou reel)
+    sim.js / replay.js   Simulation hors ligne et rejeu de seances
 ```
 
-66 tests couvrent la valorisation, le carnet, la detection de retard, les
-plafonds de risque et la comparaison retard / sans retard : `npm test`.
+74 tests couvrent la valorisation, le carnet, la detection de retard, les
+plafonds de risque, la pagination de la decouverte et la comparaison
+retard / sans retard : `npm test`.
 
 ---
 
@@ -183,12 +207,13 @@ Le bac a sable de developpement bloque `api.binance.com`,
 - **Verifie et teste** : valorisation, detection de retard, dimensionnement,
   plafonds de risque, execution simulee, rejeu, boucle complete sur marche
   synthetique.
-- **Ecrit d'apres la documentation, jamais execute contre les serveurs reels** :
-  les quatre connecteurs (flux Binance, flux Coinbase, decouverte Gamma, carnets
-  CLOB). Le format des messages suit la documentation publique, mais lance
-  `npm run scan` puis `npm run paper` **avant** toute autre chose, et verifie que
-  les seuils, echeances et carnets affiches correspondent bien a ce que montre
-  le site de Polymarket.
+- **Confirme en execution reelle le 16 aout 2026** : la decouverte Gamma repond,
+  le parsing des marches fonctionne, les marches a barriere sont bien ecartes
+  (`npm run scan`).
+- **Toujours non verifie contre les serveurs reels** : les flux WebSocket
+  Binance et Coinbase, et les carnets CLOB. Lance `npm run probe` avant toute
+  autre chose : si le rapport n'affiche aucun tick spot ou aucune re-cotation,
+  c'est un flux qui ne remonte pas, pas un marche calme.
 
 Un point merite une verification manuelle systematique : pour les marches
 « Up or Down », le seuil est reconstruit depuis l'ouverture de la bougie horaire

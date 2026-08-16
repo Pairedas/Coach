@@ -12,6 +12,7 @@
     "record": "node src/index.js record",
     "replay": "node src/index.js replay",
     "scan": "node src/index.js scan",
+    "probe": "node src/index.js probe",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {}

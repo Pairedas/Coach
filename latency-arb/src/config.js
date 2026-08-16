@@ -39,6 +39,10 @@ export const config = {
     // Filtre de decouverte des marches.
     keywords: str('MARKET_KEYWORDS', 'bitcoin,btc').split(',').map((s) => s.trim()).filter(Boolean),
     maxMarkets: num('MAX_MARKETS', 12),
+    // Pagination de la decouverte : Gamma plafonne chaque reponse, il faut
+    // balayer plusieurs pages pour atteindre les marches horaires.
+    pageSize: num('GAMMA_PAGE_SIZE', 100),
+    maxPages: num('GAMMA_MAX_PAGES', 10),
     rediscoverMs: num('REDISCOVER_MS', 60_000),
     // Frais preneur de liquidite, en points de base, appliques sur min(p, 1-p).
     takerFeeBps: num('TAKER_FEE_BPS', 0),
