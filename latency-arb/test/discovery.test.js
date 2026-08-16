@@ -132,3 +132,18 @@ test('une reponse Gamma inattendue leve une erreur explicite', async () => {
     /Gamma inattendue/,
   );
 });
+
+test('un marche deja echu est distingue d\'une echeance simplement proche', async () => {
+  const getJson = async (url) => {
+    const params = new URL(url).searchParams;
+    if (params.get('order') !== 'volume24hr' || Number(params.get('offset')) !== 0) return [];
+    return [
+      marche(1, { endDate: new Date(NOW - 3_600_000).toISOString() }), // deja echu
+      marche(2, { endDate: new Date(NOW + 30_000).toISOString() }),    // proche mais a venir
+      marche(3),
+    ];
+  };
+  const markets = await discoverMarkets(cfg(), { getJson, now: NOW });
+  assert.equal(markets.length, 1);
+  assert.equal(markets[0].id, '0x3');
+});

@@ -243,7 +243,7 @@ src/
     sim.js / replay.js   Simulation hors ligne et rejeu de seances
 ```
 
-97 tests couvrent la valorisation, le carnet, la detection de retard, les
+99 tests couvrent la valorisation, le carnet, la detection de retard, les
 plafonds de risque, la pagination de la decouverte et la comparaison
 retard / sans retard : `npm test`.
 

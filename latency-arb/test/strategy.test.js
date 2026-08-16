@@ -244,3 +244,42 @@ test('une position dont la marge reste entiere n\'est pas fermee', () => {
   });
   assert.equal(decision.exit, false);
 });
+
+test('sur une fourchette, le signal suit la probabilite et non la direction du BTC', () => {
+  const fourchette = {
+    ...market,
+    id: 'range',
+    kind: 'range',
+    side: 'inside',
+    strike: 62_000,
+    strikeHigh: 64_000,
+    question: 'Will Bitcoin be between $62,000 and $64,000?',
+  };
+  const strat = new LatencyArbStrategy(cfg());
+  strat.state(fourchette.id).midHistory.push(NOW - 4_000, 0.5);
+
+  // Le BTC monte de 61 000 vers 62 900 : il ENTRE dans la fourchette, donc la
+  // probabilite grimpe. Une hausse du BTC ne signifie pas mecaniquement YES —
+  // c'est le sens de la probabilite qui decide.
+  const entrant = strat.evaluateEntry({
+    market: fourchette,
+    yesBook: bookAt(0.5),
+    spot: fakeSpot({ price: 62_900, before: 61_000 }),
+    now: NOW,
+  });
+  assert.ok(entrant.signal, `signal attendu (motif : ${entrant.reason})`);
+  assert.equal(entrant.signal.outcome, 'YES');
+
+  // Le BTC monte de 63 500 vers 65 500 : il SORT par le haut, la probabilite
+  // s'effondre. Meme direction du BTC, decision inverse.
+  const strat2 = new LatencyArbStrategy(cfg());
+  strat2.state(fourchette.id).midHistory.push(NOW - 4_000, 0.5);
+  const sortant = strat2.evaluateEntry({
+    market: fourchette,
+    yesBook: bookAt(0.5),
+    spot: fakeSpot({ price: 65_500, before: 63_500 }),
+    now: NOW,
+  });
+  assert.ok(sortant.signal, `signal attendu (motif : ${sortant.reason})`);
+  assert.equal(sortant.signal.outcome, 'NO');
+});

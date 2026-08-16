@@ -101,6 +101,13 @@ export async function discoverMarkets(cfg, deps = {}) {
     }
     const m = parsed.market;
     const tte = m.expiryTs - now;
+    if (tte <= 0) {
+      // L'API renvoie parfois des marches deja echus comme encore actifs. Les
+      // distinguer d'une simple echeance proche evite de croire a un reglage
+      // trop strict la ou il s'agit d'une donnee obsolete.
+      rejeter('echeance deja passee (donnee obsolete)', m.question);
+      continue;
+    }
     if (tte < cfg.strategy.minTimeToExpiryMs) {
       rejeter('echeance trop proche', m.question);
       continue;
