@@ -1,0 +1,19 @@
+{
+  "name": "latency-arb",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Moteur d'arbitrage de latence : spot BTC (Binance/Coinbase) vs marches de prediction Polymarket",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js paper",
+    "paper": "node src/index.js paper",
+    "sim": "node src/index.js sim",
+    "record": "node src/index.js record",
+    "replay": "node src/index.js replay",
+    "scan": "node src/index.js scan",
+    "probe": "node src/index.js probe",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {}
+}
