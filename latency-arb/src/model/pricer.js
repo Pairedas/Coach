@@ -59,3 +59,43 @@ export function fairProbability(market, { spot, volAnnual, now }) {
   const p = market.side === 'below' ? probBelow(args) : probAbove(args);
   return { prob: p, timeToExpiryMs, delta: probDelta(args) * (market.side === 'below' ? -1 : 1) };
 }
+
+/**
+ * Volatilite implicite : quelle volatilite annualisee rend la cote du marche
+ * juste ? Obtenue par dichotomie, N(d2) etant monotone en sigma de chaque cote
+ * de la monnaie.
+ *
+ * C'est l'outil de calibration le plus direct : si la volatilite implicite du
+ * marche s'ecarte franchement de la volatilite realisee que l'on mesure, ce
+ * n'est pas une opportunite, c'est un desaccord de modele. Et sur un marche
+ * liquide, celui qui se trompe est rarement le marche.
+ *
+ * @returns {number|null} null si la volatilite n'est pas identifiable
+ */
+export function impliedVolAbove({ spot, strike, timeToExpiryMs, prob }) {
+  if (!(spot > 0) || !(strike > 0) || !(timeToExpiryMs > 0)) return null;
+  // Une cote posee exactement sur le plancher ou le plafond du pas de cotation
+  // (0,001 sur Polymarket) n'apprend rien : toute volatilite faible l'explique.
+  // Au-dessus, l'inversion est possible — bruitee, mais informative.
+  if (!(prob > 0.001) || !(prob < 0.999)) return null;
+  // A la monnaie, N(d2) vaut ~0,5 quelle que soit la volatilite : rien a inverser.
+  if (Math.abs(Math.log(spot / strike)) < 1e-6) return null;
+
+  const f = (v) => probAbove({ spot, strike, timeToExpiryMs, volAnnual: v }) - prob;
+  let lo = 0.01;
+  let hi = 5;
+  let flo = f(lo);
+  if (flo * f(hi) > 0) return null; // la cote est hors de portee du modele
+
+  for (let i = 0; i < 80; i += 1) {
+    const mid = (lo + hi) / 2;
+    const fm = f(mid);
+    if (flo * fm <= 0) {
+      hi = mid;
+    } else {
+      lo = mid;
+      flo = fm;
+    }
+  }
+  return (lo + hi) / 2;
+}

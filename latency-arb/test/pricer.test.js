@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { probAbove, probBelow, probDelta, fairProbability } from '../src/model/pricer.js';
+import { probAbove, probBelow, probDelta, fairProbability, impliedVolAbove } from '../src/model/pricer.js';
 
 const base = { spot: 100_000, strike: 100_000, timeToExpiryMs: 1_800_000, volAnnual: 0.6 };
 
@@ -48,4 +48,33 @@ test('un marche « below » inverse le sens', () => {
 test('entrees invalides renvoient NaN plutot qu\'un prix invente', () => {
   assert.ok(Number.isNaN(probAbove({ ...base, spot: 0 })));
   assert.ok(Number.isNaN(probAbove({ ...base, volAnnual: 0 })));
+});
+
+test('la volatilite implicite retrouve la volatilite qui a produit le prix', () => {
+  // Echeance a 28 h : assez lointaine pour que meme 25 % de volatilite donne un
+  // prix loin du pas de cotation, donc reellement inversible.
+  const args = { spot: 63_000, strike: 64_000, timeToExpiryMs: 100_000_000 };
+  for (const vol of [0.25, 0.6, 1.2]) {
+    const prix = probAbove({ ...args, volAnnual: vol });
+    const implicite = impliedVolAbove({ ...args, prob: prix });
+    assert.ok(Math.abs(implicite - vol) < 1e-3, `${implicite} devrait valoir ${vol}`);
+  }
+});
+
+test('la volatilite implicite n\'est pas identifiable dans les cas degeneres', () => {
+  const args = { spot: 63_000, strike: 64_000, timeToExpiryMs: 10_000_000 };
+  assert.equal(impliedVolAbove({ ...args, prob: 0.001 }), null, 'cote posee sur le plancher du pas');
+  assert.equal(impliedVolAbove({ ...args, prob: 0.9999 }), null);
+  assert.equal(impliedVolAbove({ spot: 63_000, strike: 63_000, timeToExpiryMs: 10_000_000, prob: 0.5 }), null, 'a la monnaie');
+  assert.equal(impliedVolAbove({ ...args, timeToExpiryMs: 0, prob: 0.3 }), null);
+});
+
+test('un marche plus confiant que le modele implique une volatilite plus faible', () => {
+  // Cas reel observe le 16 aout 2026 : spot 63 040, seuil 64 000, ~2 h avant
+  // echeance. Le carnet cotait 0,002 la ou le modele calculait 0,094.
+  const args = { spot: 63_040, strike: 64_000, timeToExpiryMs: 2.4 * 3600_000 };
+  const volMarche = impliedVolAbove({ ...args, prob: 0.002 });
+  const volModele = impliedVolAbove({ ...args, prob: 0.094 });
+  assert.ok(volMarche < volModele, 'le marche implique moins de volatilite');
+  assert.ok(volMarche > 0.1 && volMarche < 0.5, `volatilite implicite inattendue : ${volMarche}`);
 });

@@ -2,7 +2,7 @@ import { config, validateConfig } from '../config.js';
 import { NullBroker } from '../exec/null.js';
 import { buildSession } from './session.js';
 import { quantile } from '../util/stats.js';
-import { fairProbability } from '../model/pricer.js';
+import { fairProbability, impliedVolAbove } from '../model/pricer.js';
 import { logger } from '../util/log.js';
 
 const log = logger('diagnostic');
@@ -61,7 +61,7 @@ export async function runProbe({ seconds = 120 } = {}) {
   return rapport;
 }
 
-function buildReport({ cfg, engine, books, markets, intervals }) {
+export function buildReport({ cfg, engine, books, markets, intervals }) {
   const now = Date.now();
   const spot = engine.spot.price;
 
@@ -82,6 +82,24 @@ function buildReport({ cfg, engine, books, markets, intervals }) {
       ? fairProbability(m, { spot, volAnnual: engine.spot.volAnnual * cfg.model.volMultiplier, now }).prob
       : null;
 
+    // Un marche est « vivant » s'il a deux cotes et si son prix laisse de la
+    // place au mouvement. Un carnet a 0,999 n'est pas lent, il est joue : sa
+    // duree de figement ne dit rien d'un quelconque retard exploitable.
+    const mid = book.mid;
+    const vivant = book.hasTop
+      && mid !== null
+      && mid >= cfg.strategy.minPrice
+      && mid <= cfg.strategy.maxPrice;
+
+    // Volatilite que le marche implique, a comparer a celle que l'on mesure.
+    const probAboveMarche = mid === null ? null : (m.side === 'below' ? 1 - mid : mid);
+    const volImplicite = probAboveMarche === null ? null : impliedVolAbove({
+      spot,
+      strike: m.strike,
+      timeToExpiryMs: m.expiryTs - now,
+      prob: probAboveMarche,
+    });
+
     return {
       question: m.question,
       strike: m.strike,
@@ -94,16 +112,25 @@ function buildReport({ cfg, engine, books, markets, intervals }) {
       verdict: signal ? 'signal' : reason,
       juste: Number.isFinite(fair) ? fair : null,
       ecart: Number.isFinite(fair) && book.bestAsk !== null ? fair - book.bestAsk : null,
+      vivant,
+      volImplicite,
+      intervalles: ech,
     };
   });
 
-  const toutes = [...intervals.values()].flat();
+  // Seuls les marches vivants alimentent la statistique de figement.
+  const vivants = lignes.filter((l) => l.vivant);
+  const toutes = vivants.flatMap((l) => l.intervalles);
+  const volsImplicites = vivants.map((l) => l.volImplicite).filter((v) => v !== null);
+
   return {
     spot,
     volAnnual: engine.spot.volAnnual,
     venueSpreadBps: engine.spot.venueSpreadBps(),
     spotUpdates: engine.spot.updates,
     lignes,
+    nbVivants: vivants.length,
+    volImpliciteMediane: volsImplicites.length ? quantile(volsImplicites, 0.5) : null,
     figeGlobal: toutes.length
       ? { echantillons: toutes.length, p25: quantile(toutes, 0.25), median: quantile(toutes, 0.5), p75: quantile(toutes, 0.75), p90: quantile(toutes, 0.9) }
       : null,
@@ -130,16 +157,47 @@ function printReport(r, cfg) {
     console.log(`    seuil ${l.strike?.toFixed(0) ?? '—'} · achat ${px(l.bestBid)} · vente ${px(l.bestAsk)} · spread ${px(l.spread)}`);
     console.log(`    juste prix ${px(l.juste)} · ecart brut ${l.ecart === null ? '—' : (l.ecart * 100).toFixed(1) + ' pts'}`);
     console.log(`    re-cotations ${l.recotations} · fige median ${ms(l.figeMedianMs)} · p90 ${ms(l.figeP90Ms)}`);
+    console.log(`    ${l.vivant ? 'VIVANT' : 'JOUE (prix colle a 0 ou 1, hors jeu)'}`
+      + (l.volImplicite === null ? '' : ` · volatilite implicite ${(l.volImplicite * 100).toFixed(0)} %`));
     console.log(`    verdict : ${l.verdict}`);
   }
 
-  console.log('\n── Duree pendant laquelle le carnet reste fige (tous marches) ──\n');
-  if (!r.figeGlobal) {
-    console.log('  Aucune re-cotation observee. Soit les carnets sont morts, soit le flux');
-    console.log('  WebSocket ne remonte pas — verifie que des messages arrivent.');
+  // Calibration du modele : si le marche et nous ne sommes pas d'accord sur la
+  // volatilite, tout ecart de prix est du desaccord, pas du retard.
+  if (r.volImpliciteMediane !== null) {
+    const ecart = r.volAnnual / r.volImpliciteMediane;
+    console.log('\n── Calibration du modele ──\n');
+    console.log(`  Volatilite mesuree sur le spot   : ${(r.volAnnual * 100).toFixed(0)} %`);
+    console.log(`  Volatilite implicite du marche   : ${(r.volImpliciteMediane * 100).toFixed(0)} %`);
+    if (ecart > 1.3 || ecart < 0.77) {
+      console.log(`  => DESACCORD (facteur ${ecart.toFixed(2)}). Tant qu'il dure, les ecarts de prix`);
+      console.log('     que tu vois sont du desaccord de modele, pas du retard. Ne trade pas :');
+      console.log('     ajuste VOL_MULTIPLIER, ou verifie l\'heure et la source de resolution');
+      console.log('     du marche avant toute chose.');
+    } else {
+      console.log('  => Modele et marche sont d\'accord sur la volatilite. La calibration tient.');
+    }
+  }
+
+  console.log('\n── Duree pendant laquelle le carnet reste fige ──\n');
+  if (r.nbVivants === 0) {
+    console.log(`  Aucun marche vivant sur les ${r.lignes.length} observes : tous ont un prix colle`);
+    console.log('  a 0 ou a 1, ou un carnet a sens unique. Ils sont deja joues.');
+    console.log('');
+    console.log('  Il n\'y a rien a arbitrer ici, et ce n\'est pas une question de reglage :');
+    console.log('  cette strategie a besoin de marches proches de 50/50, donc d\'echeances');
+    console.log('  courtes (horaires) ou de seuils proches du prix courant.');
+    console.log('  Relance `npm run scan` a un moment ou de tels marches existent.');
+  } else if (!r.figeGlobal) {
+    console.log(`  ${r.nbVivants} marche(s) vivant(s), mais aucune re-cotation observee.`);
+    console.log('  Sonde plus longtemps, ou verifie que le WebSocket CLOB remonte bien.');
   } else {
     const g = r.figeGlobal;
-    console.log(`  echantillons ${g.echantillons} · p25 ${ms(g.p25)} · median ${ms(g.median)} · p75 ${ms(g.p75)} · p90 ${ms(g.p90)}`);
+    console.log(`  sur ${r.nbVivants} marche(s) vivant(s) — echantillons ${g.echantillons}`);
+    console.log(`  p25 ${ms(g.p25)} · median ${ms(g.median)} · p75 ${ms(g.p75)} · p90 ${ms(g.p90)}`);
+    if (g.echantillons < 20) {
+      console.log('\n  ATTENTION : trop peu d\'echantillons pour conclure. Sonde plus longtemps.');
+    }
     console.log(`\n  Ta latence d'execution supposee : ${r.latenceExecMs} ms`);
     if (g.median > r.latenceExecMs * 3) {
       console.log('  => Le carnet reste fige nettement plus longtemps que ta latence.');

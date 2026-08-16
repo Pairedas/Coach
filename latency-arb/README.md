@@ -154,6 +154,17 @@ ta propre latence :
 | entre 1x et 3x | Fenetre etroite, marge fragile. Mesure avant d'engager. |
 | < ta latence | Le carnet se re-cote plus vite que tu n'agis. Rien a prendre ici. |
 
+**Seuls les marches vivants comptent** dans cette statistique — deux cotes
+presentes et prix entre `MIN_PRICE` et `MAX_PRICE`. Un carnet cote 0,999 n'est
+pas lent : il est deja joue, et son immobilite ne dit rien d'un retard
+exploitable. Confondre les deux fait voir une fenetre de trois minutes la ou il
+n'y a qu'un marche termine.
+
+Le rapport affiche aussi la **volatilite implicite du marche** face a la
+volatilite realisee que l'on mesure. Si les deux divergent d'un facteur
+superieur a 1,3, tout ecart de prix observe est du desaccord de modele et non du
+retard — et sur un marche liquide, celui qui se trompe est rarement le marche.
+
 Le rapport affiche aussi, marche par marche, le juste prix implique par le spot
 face a la cote affichee, et le motif exact pour lequel chaque signal a ete
 ecarte. C'est le diagnostic a lancer avant toute autre chose.
@@ -204,7 +215,7 @@ src/
     sim.js / replay.js   Simulation hors ligne et rejeu de seances
 ```
 
-76 tests couvrent la valorisation, le carnet, la detection de retard, les
+83 tests couvrent la valorisation, le carnet, la detection de retard, les
 plafonds de risque, la pagination de la decouverte et la comparaison
 retard / sans retard : `npm test`.
 
@@ -224,9 +235,23 @@ Le bac a sable de developpement bloque `api.binance.com`,
   identifies), flux WebSocket Binance et Coinbase connectes, WebSocket CLOB
   connecte et 18 carnets amorces. Le parsing ecarte correctement les marches a
   barriere.
+- **Premiere mesure reelle, 16 aout 2026** : avec le BTC a 63 040 USD, les neuf
+  marches BTC disponibles etaient tous joues (cotes a 0,999 ou 0,001, carnets a
+  sens unique). Aucun signal, ce qui est le comportement correct. Le marche a
+  64 000 cotait 0,002 la ou le modele calculait 0,094 — soit une volatilite
+  implicite d'environ 29 % contre 65 % mesures sur le spot. Ce genre d'ecart est
+  un probleme de calibration ou d'heure de resolution, pas une opportunite.
 - **Reste a valider par la mesure** : la rentabilite. Lance `npm run probe` — si
   le rapport n'affiche aucun tick spot ou aucune re-cotation, c'est un flux qui
   ne remonte plus, pas un marche calme.
+
+Autre point de vigilance : le prix consolide melange **BTCUSDT** (Binance) et
+**BTCUSD** (Coinbase). L'ecart entre les deux — la base USDT/USD — vaut
+couramment une dizaine de points de base, soit une soixantaine de dollars sur un
+BTC a 63 000. Les seuils Polymarket sont libelles en dollars : sur un marche
+proche de la monnaie, ce decalage se transforme directement en erreur de juste
+prix. Le rapport de `probe` affiche cet ecart entre places ; s'il est important,
+mets `WEIGHT_BINANCE=0` pour ne garder qu'une reference en vrais dollars.
 
 Un point merite une verification manuelle systematique : pour les marches
 « Up or Down », le seuil est reconstruit depuis l'ouverture de la bougie horaire
