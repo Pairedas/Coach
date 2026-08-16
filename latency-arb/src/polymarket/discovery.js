@@ -36,26 +36,52 @@ export async function discoverMarkets(cfg, deps = {}) {
   const getHourOpen = deps.fetchHourOpen ?? fetchHourOpen;
   const now = deps.now ?? Date.now();
 
-  // L'API Gamma plafonne le nombre de resultats par appel : sans pagination, on
-  // ne voit que les marches les plus gros, et les marches horaires — les plus
-  // interessants pour cette strategie — passent sous le radar.
-  const raws = [];
+  // Deux balayages complementaires, dedupliques.
+  //
+  // Trier par volume ne suffit pas : un marche horaire a un volume individuel
+  // faible et se retrouve noyé sous les gros marches annuels, alors que c'est
+  // exactement le type de marche que cette strategie vise. Le second balayage
+  // trie par echeance croissante, la ou vivent les marches courts.
   const pageSize = cfg.polymarket.pageSize;
-  for (let page = 0; page < cfg.polymarket.maxPages; page += 1) {
-    const url = `${cfg.polymarket.gammaUrl}/markets`
-      + `?closed=false&active=true&archived=false`
-      + `&limit=${pageSize}&offset=${page * pageSize}`
-      + `&order=volume24hr&ascending=false`;
-    const batch = await fetchJson(url);
-    if (!Array.isArray(batch)) throw new Error('reponse Gamma inattendue');
-    raws.push(...batch);
-    if (batch.length < pageSize) break; // derniere page atteinte
+  const sweep = async (order, ascending) => {
+    const out = [];
+    for (let page = 0; page < cfg.polymarket.maxPages; page += 1) {
+      const url = `${cfg.polymarket.gammaUrl}/markets`
+        + `?closed=false&active=true&archived=false`
+        + `&limit=${pageSize}&offset=${page * pageSize}`
+        + `&order=${order}&ascending=${ascending}`;
+      const batch = await fetchJson(url);
+      if (!Array.isArray(batch)) throw new Error('reponse Gamma inattendue');
+      out.push(...batch);
+      if (batch.length < pageSize) break; // derniere page atteinte
+    }
+    return out;
+  };
+
+  const parVolume = await sweep('volume24hr', false);
+  const parEcheance = await sweep('endDate', true);
+
+  const vus = new Set();
+  const raws = [];
+  for (const raw of [...parVolume, ...parEcheance]) {
+    const cle = raw?.conditionId ?? raw?.condition_id ?? raw?.id;
+    if (cle === undefined || vus.has(cle)) continue;
+    vus.add(cle);
+    raws.push(raw);
   }
 
   const keywords = cfg.polymarket.keywords.map((k) => k.toLowerCase());
   const rejected = new Map();
+  // Un exemple de question par motif : sans ca, « sens du seuil ambigu : 3 » ne
+  // dit pas quel format de libelle le parseur ne sait pas encore lire.
+  const exemples = new Map();
   const kept = [];
   let matched = 0;
+
+  const rejeter = (motif, question) => {
+    rejected.set(motif, (rejected.get(motif) ?? 0) + 1);
+    if (!exemples.has(motif)) exemples.set(motif, question);
+  };
 
   for (const raw of raws) {
     const haystack = `${raw?.question ?? ''} ${raw?.slug ?? ''}`.toLowerCase();
@@ -64,17 +90,17 @@ export async function discoverMarkets(cfg, deps = {}) {
 
     const parsed = parseMarket(raw);
     if (!parsed.ok) {
-      rejected.set(parsed.reason, (rejected.get(parsed.reason) ?? 0) + 1);
+      rejeter(parsed.reason, raw.question ?? '');
       continue;
     }
     const m = parsed.market;
     const tte = m.expiryTs - now;
     if (tte < cfg.strategy.minTimeToExpiryMs) {
-      rejected.set('echeance trop proche', (rejected.get('echeance trop proche') ?? 0) + 1);
+      rejeter('echeance trop proche', m.question);
       continue;
     }
     if (tte > cfg.strategy.maxTimeToExpiryMs) {
-      rejected.set('echeance trop lointaine', (rejected.get('echeance trop lointaine') ?? 0) + 1);
+      rejeter('echeance trop lointaine', m.question);
       continue;
     }
     kept.push(m);
@@ -103,6 +129,9 @@ export async function discoverMarkets(cfg, deps = {}) {
     + `-> ${kept.length} valorisables -> ${usable.length} retenus`,
     rejected.size ? Object.fromEntries(rejected) : undefined,
   );
+  for (const [motif, question] of exemples) {
+    log.debug(`rejet « ${motif} » — exemple : ${question}`);
+  }
   if (matched > 0 && usable.length === 0) {
     log.warn('des marches BTC existent mais aucun n\'est exploitable : elargis MIN_TTE_MS / MAX_TTE_MS ou MARKET_KEYWORDS');
   }

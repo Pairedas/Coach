@@ -130,6 +130,18 @@ npm run record                                  # idem, en journalisant les flux
 npm run replay -- ./data/session.ndjson         # rejoue la seance enregistree
 ```
 
+### Deux balayages a la decouverte
+
+`scan` interroge Gamma deux fois : une fois par volume decroissant, une fois par
+echeance croissante, puis deduplique. Le tri par volume seul noie les marches
+courts — un marche horaire a un volume individuel faible et se retrouve derriere
+des dizaines de marches annuels, alors que c'est exactement ce que la strategie
+vise.
+
+Passe `LOG_LEVEL=debug` pour voir un exemple de libelle par motif de rejet :
+c'est ce qui permet d'etendre le parseur quand Polymarket introduit un nouveau
+format de question.
+
 ### La commande qui decide de tout : `probe`
 
 Elle observe les carnets sans jamais engager d'ordre et mesure **combien de temps
@@ -192,7 +204,7 @@ src/
     sim.js / replay.js   Simulation hors ligne et rejeu de seances
 ```
 
-74 tests couvrent la valorisation, le carnet, la detection de retard, les
+76 tests couvrent la valorisation, le carnet, la detection de retard, les
 plafonds de risque, la pagination de la decouverte et la comparaison
 retard / sans retard : `npm test`.
 
@@ -207,13 +219,14 @@ Le bac a sable de developpement bloque `api.binance.com`,
 - **Verifie et teste** : valorisation, detection de retard, dimensionnement,
   plafonds de risque, execution simulee, rejeu, boucle complete sur marche
   synthetique.
-- **Confirme en execution reelle le 16 aout 2026** : la decouverte Gamma repond,
-  le parsing des marches fonctionne, les marches a barriere sont bien ecartes
-  (`npm run scan`).
-- **Toujours non verifie contre les serveurs reels** : les flux WebSocket
-  Binance et Coinbase, et les carnets CLOB. Lance `npm run probe` avant toute
-  autre chose : si le rapport n'affiche aucun tick spot ou aucune re-cotation,
-  c'est un flux qui ne remonte pas, pas un marche calme.
+- **Confirme en execution reelle le 16 aout 2026** : les quatre connecteurs
+  fonctionnent. Decouverte Gamma (1 000 marches balayes, 49 marches BTC
+  identifies), flux WebSocket Binance et Coinbase connectes, WebSocket CLOB
+  connecte et 18 carnets amorces. Le parsing ecarte correctement les marches a
+  barriere.
+- **Reste a valider par la mesure** : la rentabilite. Lance `npm run probe` — si
+  le rapport n'affiche aucun tick spot ou aucune re-cotation, c'est un flux qui
+  ne remonte plus, pas un marche calme.
 
 Un point merite une verification manuelle systematique : pour les marches
 « Up or Down », le seuil est reconstruit depuis l'ouverture de la bougie horaire
