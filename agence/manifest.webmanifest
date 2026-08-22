@@ -1,0 +1,15 @@
+{
+  "name": "Agence Pro — Gestion UV & Espèces",
+  "short_name": "Agence Pro",
+  "description": "Gestion d'agence mobile money : soldes UV Orange/MTN/Moov/Wave + espèces, pointages 3x/jour, calcul du manquant, rapport Telegram à l'admin.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#070b12",
+  "theme_color": "#070b12",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
