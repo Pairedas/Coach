@@ -170,6 +170,13 @@ const KEY = 'agencePro_v1';
 
 /* ══════════ ÉTAT ══════════ */
 let S = load();
+migrate();
+function migrate(){
+  if(S.config.adminPin === undefined) S.config.adminPin = '';
+  if(S.config.autoSend === undefined) S.config.autoSend = true;
+  if(S.config.lateAlert === undefined) S.config.lateAlert = true;
+  if(!S.audit) S.audit = [];
+}
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
@@ -180,6 +187,7 @@ function load(){
       agence:'Mon Agence', agent:'',
       tgToken:'', tgChat:'',
       notif:false,
+      adminPin:'', autoSend:true, lateAlert:true,
       checkpoints:[
         {t:'09:00', label:'Matin 09H'},
         {t:'14:00', label:'Après-midi 14H'},
@@ -187,7 +195,8 @@ function load(){
       ]
     },
     days:{},
-    notified:{}
+    notified:{},
+    audit:[]
   };
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
@@ -228,6 +237,29 @@ function toast(msg){
   clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2600);
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ══════════ ANTI-TRICHE ══════════ */
+/* Journal : chaque action sensible est tracée (max 500 entrées) */
+function audit(action){
+  S.audit.push({d: todayKey(), t: nowHM(), a: action});
+  if(S.audit.length > 500) S.audit = S.audit.slice(-500);
+  save();
+}
+/* Alerte silencieuse à l'admin (n'affiche rien à l'agent, n'échoue jamais) */
+function alertTg(text){
+  tgSend('🚨 <b>ALERTE SÉCURITÉ</b>\n🏪 '+esc(S.config.agence)+' — '+nowHM()+'\n\n'+text, true);
+}
+/* Demande le code admin si un PIN est configuré. Toute tentative refusée est signalée. */
+function pinOk(action){
+  if(!S.config.adminPin) return true;
+  const p = prompt('🔐 Code admin requis pour : '+action);
+  if(p === null) return false;
+  if(p === S.config.adminPin){ audit('🔓 Code admin validé : '+action); return true; }
+  audit('⛔ CODE REFUSÉ : tentative de '+action);
+  alertTg('⛔ <b>Code admin incorrect !</b>\nQuelqu\'un a tenté : <b>'+esc(action)+'</b>'+(S.config.agent?'\n👤 Agent en poste : '+esc(S.config.agent):''));
+  toast('⛔ Code incorrect — tentative signalée à l\'admin');
+  return false;
+}
 
 /* ══════════ NAVIGATION ══════════ */
 function go(t){ tab = t; render(); window.scrollTo(0,0); }
@@ -375,11 +407,24 @@ function ouvrirJour(){
     ouverture:{ time: nowHM(), soldes, manquantInitial },
     entrees:[], sorties:[], checkpoints:[], cloture:false
   };
+  audit('🌅 Ouverture — total '+fmt(totalOf(soldes))+', ancien manquant '+fmt(manquantInitial));
+  // rapport d'ouverture auto → l'admin voit si l'ancien manquant a été modifié
+  let t = '🌅 <b>OUVERTURE</b> — '+esc(S.config.agence).toUpperCase()+'\n📅 '+frDate(todayKey())+' à '+nowHM()+(S.config.agent?'\n👤 '+esc(S.config.agent):'')+'\n\n';
+  SERVICES.forEach(s=>{ t += s.e+' '+s.n+' : <b>'+fmt(soldes[s.k])+'</b>\n'; });
+  t += 'Σ Total départ : <b>'+fmt(totalOf(soldes))+'</b>\n📉 Ancien manquant déclaré : <b>'+fmt(manquantInitial)+'</b>';
+  const prev = lastClosedDay();
+  if(prev && Math.round(prev.manquantTotal) !== Math.round(manquantInitial)){
+    t += '\n\n⚠️ <b>ATTENTION</b> : le manquant reporté ('+fmt(manquantInitial)+') est différent de celui de la dernière fermeture ('+fmt(prev.manquantTotal)+') !';
+  }
+  tgSend(t, true);
   save(); toast('✅ Journée ouverte — bon travail !'); go('jour');
 }
 
 function resetJour(){
+  if(!pinOk('réinitialiser la journée')) return;
   if(!confirm('Réinitialiser TOUTE la journée d\'aujourd\'hui ? (ouverture, pointages, mouvements)')) return;
+  audit('♻️ Journée réinitialisée');
+  alertTg('♻️ La journée du '+frDate(todayKey())+' a été <b>réinitialisée</b> (ouverture, pointages et mouvements effacés).');
   delete S.days[todayKey()]; save(); go('jour');
 }
 
@@ -468,15 +513,30 @@ function savePointage(){
   const c = S.config.checkpoints[cpSel];
   if(!day.checkpoints) day.checkpoints = [];
   const existing = day.checkpoints[cpSel];
-  if(existing && !confirm('Un pointage '+c.t+' existe déjà. Le remplacer ?')) return;
+  if(existing){
+    // corriger un pointage validé = action protégée + signalée à l'admin
+    if(!pinOk('corriger le pointage '+c.t)) return;
+    if(!confirm('Un pointage '+c.t+' existe déjà. Le remplacer ?')) return;
+  }
   day.checkpoints[cpSel] = {
     idx: cpSel, label: c.label, time: nowHM(),
     soldes, reelTotal: totalOf(soldes), theorique: theorique(day),
-    sent: existing ? existing.sent : null
+    sent: existing ? existing.sent : null,
+    corrections: existing ? (existing.corrections||0)+1 : 0
   };
   save();
-  const manq = day.checkpoints[cpSel].theorique - day.checkpoints[cpSel].reelTotal;
+  const cp = day.checkpoints[cpSel];
+  const manq = cp.theorique - cp.reelTotal;
+  audit('✅ Pointage '+c.t+(existing?' CORRIGÉ':'')+' — réel '+fmt(cp.reelTotal)+', écart '+fmt(manq));
+  if(existing){
+    const oldManq = existing.theorique - existing.reelTotal;
+    alertTg('✏️ <b>Pointage '+esc(c.label)+' CORRIGÉ</b> ('+cp.corrections+'× au total)\n'
+      +'Ancien réel : '+fmt(existing.reelTotal)+' (écart '+fmt(oldManq)+')\n'
+      +'Nouveau réel : <b>'+fmt(cp.reelTotal)+'</b> (écart <b>'+fmt(manq)+'</b>)'
+      +(S.config.agent?'\n👤 '+esc(S.config.agent):''));
+  }
   toast(manq>0 ? '⚠️ Manquant du jour : '+fmt(manq) : '✅ Pointage OK — rien ne manque !');
+  if(S.config.autoSend) sendCp(cpSel, true); // envoi auto : l'agent ne peut pas "oublier"
   render();
 }
 
@@ -531,7 +591,12 @@ function addMv(){
 
 function delMv(type,i){
   const day = getDay(); if(!day) return;
-  if(!confirm('Supprimer ce mouvement ?')) return;
+  const m = day[type][i]; if(!m) return;
+  const lbl = (type==='sorties'?'la sortie':'l\'entrée')+' « '+m.motif+' » ('+fmt(m.montant)+')';
+  if(!pinOk('supprimer '+lbl)) return;
+  if(!confirm('Supprimer '+lbl+' ?')) return;
+  audit('🗑 Suppression : '+lbl);
+  alertTg('🗑 <b>Mouvement supprimé</b> : '+esc(lbl)+' (saisi à '+m.time+')'+(S.config.agent?'\n👤 '+esc(S.config.agent):''));
   day[type].splice(i,1); save(); render();
 }
 
@@ -603,6 +668,24 @@ function vReglages(){
     <button class="btn blue" onclick="saveCfg();testTg()">🧪 Tester l'envoi Telegram</button>
   </div>`;
 
+  h += `<div class="card"><h2>🛡️ Anti-triche</h2>
+    <div class="hint">Configure un <b>code admin</b> : corriger un pointage, supprimer un mouvement, réinitialiser la journée ou modifier ces réglages demandera le code. Toute tentative avec un mauvais code est <b>immédiatement signalée à l'admin sur Telegram</b>.</div>
+    <label class="fl">🔐 Code admin (PIN)</label>
+    <input type="password" inputmode="numeric" id="cfg-pin" value="${esc(c.adminPin)}" placeholder="ex : 4 à 6 chiffres — vide = désactivé">
+    <label class="fl" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:13px;font-family:'Outfit'">
+      <input type="checkbox" id="cfg-autosend" style="width:20px;height:20px" ${c.autoSend?'checked':''}> Envoi automatique de chaque pointage à l'admin
+    </label>
+    <label class="fl" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:13px;font-family:'Outfit'">
+      <input type="checkbox" id="cfg-latealert" style="width:20px;height:20px" ${c.lateAlert?'checked':''}> Alerter l'admin si un pointage a +30 min de retard
+    </label>
+    <div class="small">✅ Sont aussi envoyés automatiquement : le rapport d'ouverture (avec l'ancien manquant déclaré), les corrections de pointage (ancien → nouveau), les suppressions de mouvements et les réinitialisations.</div>
+  </div>`;
+
+  h += `<div class="card"><h2>📜 Journal des actions <span class="tag">${S.audit.length} entrées</span></h2>`+
+    (S.audit.length
+      ? S.audit.slice(-25).reverse().map(a=>`<div class="mv"><div><div class="tt">${esc(a.a)}</div><div class="ts">${a.d} · ${a.t}</div></div></div>`).join('')
+      : `<div class="empty">Aucune action enregistrée</div>`) + `</div>`;
+
   h += `<button class="btn primary" onclick="saveCfg(true)">💾 Enregistrer les réglages</button>`;
   h += `<button class="btn red" onclick="wipeAll()">🗑 Tout effacer (réinitialiser l'app)</button>`;
   return h;
@@ -610,6 +693,16 @@ function vReglages(){
 
 function saveCfg(showToast){
   const c = S.config;
+  // si un PIN est actif, modifier les réglages (Telegram, heures, PIN…) demande le code
+  if(c.adminPin && !pinOk('modifier les réglages')) { render(); return; }
+  const newPin = $('cfg-pin').value.trim();
+  if(newPin !== c.adminPin){
+    audit(newPin ? '🔐 Code admin '+(c.adminPin?'modifié':'activé') : '🔓 Code admin désactivé');
+    if(c.tgToken && c.tgChat) alertTg(newPin ? '🔐 Le code admin a été '+(c.adminPin?'<b>modifié</b>':'<b>activé</b>')+'.' : '🔓 Le code admin a été <b>désactivé</b> !');
+    c.adminPin = newPin;
+  }
+  c.autoSend = $('cfg-autosend').checked;
+  c.lateAlert = $('cfg-latealert').checked;
   c.agence = $('cfg-agence').value.trim() || 'Mon Agence';
   c.agent = $('cfg-agent').value.trim();
   c.tgToken = $('cfg-tgtoken').value.trim();
@@ -627,17 +720,18 @@ function saveCfg(showToast){
 }
 
 function wipeAll(){
+  if(!pinOk('EFFACER TOUTES les données de l\'app')) return;
   if(!confirm('⚠️ Effacer TOUTES les données (historique, réglages) ?')) return;
   if(!confirm('Vraiment sûr ? Cette action est définitive.')) return;
-  localStorage.removeItem(KEY); S = load(); go('jour');
+  alertTg('🗑 <b>TOUTES les données de l\'app ont été effacées</b> (historique + réglages).');
+  localStorage.removeItem(KEY); S = load(); migrate(); go('jour');
 }
 
 /* ══════════ TELEGRAM ══════════ */
-async function tgSend(text){
+async function tgSend(text, silent){
   const c = S.config;
   if(!c.tgToken || !c.tgChat){
-    toast('⚠️ Configure d\'abord Telegram dans ⚙️ Réglages');
-    go('reglages');
+    if(!silent){ toast('⚠️ Configure d\'abord Telegram dans ⚙️ Réglages'); go('reglages'); }
     return false;
   }
   try{
@@ -649,7 +743,7 @@ async function tgSend(text){
     if(!j.ok) throw new Error(j.description||'Erreur Telegram');
     return true;
   }catch(e){
-    toast('❌ Échec envoi : '+e.message);
+    if(!silent) toast('❌ Échec envoi : '+e.message);
     return false;
   }
 }
@@ -666,8 +760,10 @@ function reportCp(day, cp){
   const manqJour = cp.theorique - cp.reelTotal;
   const manqTotal = manqJour + (+day.ouverture.manquantInitial||0);
   const delta = manqJour - prevManquant(day, cp.idx);
-  let t = '🏪 <b>'+c.agence.toUpperCase()+'</b> — POINTAGE '+cp.label.toUpperCase()+'\n';
-  t += '📅 '+frDate(todayKey())+' à '+cp.time + (c.agent? '\n👤 '+c.agent : '') + '\n\n';
+  let t = '🏪 <b>'+esc(c.agence).toUpperCase()+'</b> — POINTAGE '+esc(cp.label).toUpperCase()+'\n';
+  t += '📅 '+frDate(todayKey())+' à '+cp.time + (c.agent? '\n👤 '+esc(c.agent) : '') + '\n';
+  if(cp.corrections) t += '✏️ <b>Pointage corrigé '+cp.corrections+' fois</b>\n';
+  t += '\n';
   t += '━━ SOLDES RÉELS ━━\n';
   SERVICES.forEach(s=>{ t += s.e+' '+s.n+' : <b>'+fmt(+cp.soldes[s.k]||0)+'</b>\n'; });
   t += 'Σ Total réel : <b>'+fmt(cp.reelTotal)+'</b>\n\n';
@@ -687,24 +783,25 @@ function reportCp(day, cp){
   const sorties = day.sorties||[];
   if(sorties.length){
     t += '\n━━ SORTIES ━━\n';
-    sorties.forEach(m=>{ t += '• '+m.time+' — '+m.motif+' : '+fmt(m.montant)+'\n'; });
+    sorties.forEach(m=>{ t += '• '+m.time+' — '+esc(m.motif)+' : '+fmt(m.montant)+'\n'; });
   }
   const entrees = day.entrees||[];
   if(entrees.length){
     t += '\n━━ ENTRÉES ━━\n';
-    entrees.forEach(m=>{ t += '• '+m.time+' — '+m.motif+' : '+fmt(m.montant)+'\n'; });
+    entrees.forEach(m=>{ t += '• '+m.time+' — '+esc(m.motif)+' : '+fmt(m.montant)+'\n'; });
   }
   return t;
 }
 
-async function sendCp(idx){
+async function sendCp(idx, auto){
   const day = getDay(); if(!day) return;
   const cp = day.checkpoints && day.checkpoints[idx];
   if(!cp){ toast('⚠️ Fais d\'abord le pointage'); return; }
-  toast('⏳ Envoi en cours…');
-  if(await tgSend(reportCp(day, cp))){
+  if(!auto) toast('⏳ Envoi en cours…');
+  if(await tgSend(reportCp(day, cp), !!auto)){
     cp.sent = nowHM(); save();
-    toast('✅ Rapport envoyé à l\'admin !'); render();
+    toast(auto ? '📨 Rapport envoyé automatiquement à l\'admin' : '✅ Rapport envoyé à l\'admin !');
+    render();
   }
 }
 
@@ -730,9 +827,17 @@ function checkReminders(){
   // purge vieux marqueurs
   Object.keys(S.notified).forEach(k=>{ if(k!==tk) delete S.notified[k]; });
   const now = nowHM();
+  const toMin = h => { const p = h.split(':'); return (+p[0])*60 + (+p[1]); };
   S.config.checkpoints.forEach((c,i)=>{
     const done = day && day.checkpoints && day.checkpoints[i];
-    if(done || S.notified[tk][i]) return;
+    if(done) return;
+    // pointage en retard de +30 min → alerte silencieuse à l'admin
+    if(S.config.lateAlert && day && !S.notified[tk]['late'+i] && toMin(now) >= toMin(c.t)+30){
+      S.notified[tk]['late'+i] = true; save();
+      audit('⏰ Pointage '+c.t+' en retard (+30 min)');
+      alertTg('⏰ Le pointage <b>'+esc(c.label)+'</b> n\'est <b>toujours pas fait</b> à '+now+' (plus de 30 min de retard).'+(S.config.agent?'\n👤 Agent en poste : '+esc(S.config.agent):''));
+    }
+    if(S.notified[tk][i]) return;
     if(now >= c.t){
       S.notified[tk][i] = true; save();
       const msg = '⏰ Pointage « '+c.label+' » — compte tes caisses et saisis les soldes réels !';
