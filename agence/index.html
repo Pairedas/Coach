@@ -175,6 +175,7 @@ function migrate(){
   if(S.config.adminPin === undefined) S.config.adminPin = '';
   if(S.config.autoSend === undefined) S.config.autoSend = true;
   if(S.config.lateAlert === undefined) S.config.lateAlert = true;
+  if(S.config.dimancheOff === undefined) S.config.dimancheOff = true;
   if(!S.audit) S.audit = [];
 }
 function load(){
@@ -187,7 +188,7 @@ function load(){
       agence:'Mon Agence', agent:'',
       tgToken:'', tgChat:'',
       notif:false,
-      adminPin:'', autoSend:true, lateAlert:true,
+      adminPin:'', autoSend:true, lateAlert:true, dimancheOff:true,
       checkpoints:[
         {t:'09:00', label:'Matin 09H'},
         {t:'14:00', label:'Après-midi 14H'},
@@ -204,6 +205,7 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 let tab = 'jour';
 let cpSel = null;      // index du checkpoint en cours de saisie
 let mvType = 'sortie'; // onglet mouvements
+let forceOpen = false; // ouvrir exceptionnellement un dimanche
 
 /* ══════════ HELPERS ══════════ */
 const $ = id => document.getElementById(id);
@@ -225,6 +227,8 @@ function nowHM(){
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
 function getDay(){ return S.days[todayKey()] || null; }
+/* dimanche fermé (sauf si une journée a quand même été ouverte) */
+function isOffDay(){ return S.config.dimancheOff && new Date().getDay() === 0; }
 function totalOf(soldes){ return SERVICES.reduce((a,s)=> a + (+soldes[s.k]||0), 0); }
 function sumMv(day, type){ return (day[type]||[]).reduce((a,m)=> a + (+m.montant||0), 0); }
 function theorique(day){ return totalOf(day.ouverture.soldes) + sumMv(day,'entrees') - sumMv(day,'sorties'); }
@@ -288,6 +292,17 @@ function header(){
 function vJour(){
   const day = getDay();
   let h = header();
+
+  if(!day && isOffDay() && !forceOpen){
+    // dimanche : agence fermée, pas de pointage
+    h += `<div class="big ok">
+      <div class="lbl">Dimanche</div>
+      <div class="num">🛌 Fermé</div>
+      <div class="sub">L'agence ne travaille pas aujourd'hui. Pas de pointage, pas de rappel. Repose-toi bien !</div>
+    </div>
+    <button class="btn ghost" onclick="forceOpen=true;render()">🔓 Ouvrir quand même (travail exceptionnel)</button>`;
+    return h;
+  }
 
   if(!day){
     // pas encore ouvert → formulaire d'ouverture
@@ -654,6 +669,10 @@ function vReglages(){
         <input type="time" id="cfg-cp-${i}" value="${cp.t}">
       </div>`).join('')+
     `<label class="fl" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;font-size:13px;font-family:'Outfit'">
+      <input type="checkbox" id="cfg-dimanche" style="width:20px;height:20px" ${c.dimancheOff?'checked':''}> 🛌 L'agence est fermée le dimanche
+    </label>
+    <div class="small">Le dimanche : aucun rappel de pointage, aucune alerte de retard. Tu pourras quand même ouvrir une journée exceptionnelle depuis l'onglet Jour.</div>
+    <label class="fl" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;font-size:13px;font-family:'Outfit'">
       <input type="checkbox" id="cfg-notif" style="width:20px;height:20px" ${c.notif?'checked':''}> Activer les rappels (notifications)
     </label>
     <div class="small">📱 Les rappels sonnent quand l'app est ouverte ou installée sur l'écran d'accueil. Installe l'app (menu navigateur → « Ajouter à l'écran d'accueil ») pour ne rien rater.</div>
@@ -703,6 +722,7 @@ function saveCfg(showToast){
   }
   c.autoSend = $('cfg-autosend').checked;
   c.lateAlert = $('cfg-latealert').checked;
+  c.dimancheOff = $('cfg-dimanche').checked;
   c.agence = $('cfg-agence').value.trim() || 'Mon Agence';
   c.agent = $('cfg-agent').value.trim();
   c.tgToken = $('cfg-tgtoken').value.trim();
@@ -828,7 +848,10 @@ function checkReminders(){
   Object.keys(S.notified).forEach(k=>{ if(k!==tk) delete S.notified[k]; });
   const now = nowHM();
   const toMin = h => { const p = h.split(':'); return (+p[0])*60 + (+p[1]); };
+  // dimanche fermé et aucune journée ouverte → aucun rappel, aucune alerte
+  const offToday = isOffDay() && !day;
   S.config.checkpoints.forEach((c,i)=>{
+    if(offToday) return;
     const done = day && day.checkpoints && day.checkpoints[i];
     if(done) return;
     // pointage en retard de +30 min → alerte silencieuse à l'admin
