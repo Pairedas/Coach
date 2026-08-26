@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Agence Pro — Gestion UV &amp; Espèces</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#070b12">
@@ -15,167 +15,267 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#070b12;--ink2:#0d1420;--ink3:#131e2f;--ink4:#1a2942;
-  --line:#1f3048;--line2:#28405e;
+  --ink:#070b12;--ink2:#0d1420;--ink3:#131e2f;--ink4:#1a2942;--ink5:#22334f;
+  --line:#1c2c42;--line2:#28405e;
   --green:#4ade80;--red:#ff5f5f;--amber:#ffb830;--blue:#4d9eff;--cyan:#38f0d0;
-  --orange:#ff7900;--mtn:#ffcc00;--moov:#4d9eff;--wave:#1dc4ff;--cash:#4ade80;
-  --txt:#dce8f5;--txt2:#7a93ae;--txt3:#42597a;
-  --r:14px;
+  --orange:#ff7900;
+  --txt:#e2ecf7;--txt2:#8aa2bd;--txt3:#4a6284;
+  --r:16px;--r2:12px;
+  --sh:0 10px 34px rgba(0,0,0,.42);
+  --tr:.18s cubic-bezier(.4,0,.2,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--ink);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:76px;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:84px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 700px 500px at 90% -5%,rgba(255,121,0,.05) 0%,transparent 55%),
-  radial-gradient(ellipse 600px 600px at -5% 95%,rgba(56,240,208,.04) 0%,transparent 55%)}
-#app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:14px 14px 30px}
+  background:radial-gradient(ellipse 700px 480px at 92% -6%,rgba(255,121,0,.06) 0%,transparent 55%),
+  radial-gradient(ellipse 620px 620px at -8% 96%,rgba(56,240,208,.045) 0%,transparent 55%)}
+#app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px 32px}
+.view{animation:fadeUp .28s cubic-bezier(.3,.8,.4,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* header */
-.hdr{display:flex;align-items:center;gap:10px;padding:6px 2px 14px}
-.hdr-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--amber));display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 0 20px rgba(255,121,0,.3)}
-.hdr h1{font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;line-height:1.1}
+/* ── header ── */
+.hdr{display:flex;align-items:center;gap:11px;padding:6px 2px 16px}
+.hdr-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#ff7900,#ffb340);display:flex;align-items:center;justify-content:center;font-size:21px;box-shadow:0 4px 18px rgba(255,121,0,.35);flex-shrink:0}
+.hdr h1{font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:900;line-height:1.1;letter-spacing:-.2px}
 .hdr h1 em{color:var(--orange);font-style:normal}
-.hdr .sub{font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3)}
-.hdr .date{margin-left:auto;text-align:right;font-size:11px;color:var(--txt2);line-height:1.4}
-.hdr .date b{color:var(--txt);font-size:13px}
+.hdr .sub{font-size:10.5px;color:var(--txt3);font-weight:500;margin-top:1px}
+.hdr-right{margin-left:auto;text-align:right}
+.hdr-date{font-size:11px;color:var(--txt2);font-weight:600;text-transform:capitalize}
+.hdr-clock{font-family:'Fira Code',monospace;font-size:15px;font-weight:500;color:var(--txt)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:3px;letter-spacing:.3px}
+.chip .dot{width:6px;height:6px;border-radius:50%}
+.chip.open{background:rgba(74,222,128,.12);color:var(--green)}.chip.open .dot{background:var(--green);box-shadow:0 0 6px var(--green)}
+.chip.closed{background:rgba(122,147,174,.12);color:var(--txt2)}.chip.closed .dot{background:var(--txt3)}
+.chip.locked{background:rgba(77,158,255,.12);color:var(--blue)}.chip.locked .dot{background:var(--blue)}
 
-/* cards */
-.card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.card h2{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.card h2 .tag{margin-left:auto;font-size:9px;font-family:'Fira Code',monospace;color:var(--txt3);font-weight:400}
-.hint{font-size:11.5px;color:var(--txt2);line-height:1.55;background:var(--ink3);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:9px 11px;margin:8px 0}
+/* ── cards ── */
+.card{background:linear-gradient(180deg,var(--ink2),rgba(13,20,32,.85));border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.22)}
+.card h2{font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.card h2 .hic{width:28px;height:28px;border-radius:8px;background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card h2 .tag{margin-left:auto;font-size:9.5px;font-family:'Fira Code',monospace;color:var(--txt3);font-weight:400}
+.hint{font-size:11.5px;color:var(--txt2);line-height:1.6;background:rgba(77,158,255,.06);border:1px solid rgba(77,158,255,.14);border-radius:10px;padding:10px 12px;margin:10px 0}
+.hint.warn{background:rgba(255,184,48,.07);border-color:rgba(255,184,48,.2);color:#ffd98a}
+.hint.danger{background:rgba(255,95,95,.07);border-color:rgba(255,95,95,.22);color:#ffb3b3}
 
-/* big status card */
-.big{border-radius:var(--r);padding:18px 16px;margin-bottom:12px;text-align:center;border:1px solid var(--line)}
-.big .lbl{font-size:10px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2)}
-.big .num{font-family:'Nunito',sans-serif;font-size:34px;font-weight:900;line-height:1.15;margin:4px 0}
-.big .sub{font-size:11.5px;color:var(--txt2)}
-.big.ok{background:linear-gradient(160deg,rgba(74,222,128,.09),var(--ink2));border-color:rgba(74,222,128,.3)}
-.big.ok .num{color:var(--green)}
-.big.bad{background:linear-gradient(160deg,rgba(255,95,95,.1),var(--ink2));border-color:rgba(255,95,95,.35)}
-.big.bad .num{color:var(--red)}
-.big.warn{background:linear-gradient(160deg,rgba(255,184,48,.08),var(--ink2));border-color:rgba(255,184,48,.3)}
-.big.warn .num{color:var(--amber)}
+/* ── KPI tiles ── */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r2);padding:13px 14px}
+.kpi .kl{font-size:9px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt3)}
+.kpi .kv{font-family:'Nunito',sans-serif;font-size:19px;font-weight:900;margin-top:5px;line-height:1.1;letter-spacing:-.3px}
+.kpi .ks{font-size:10px;color:var(--txt3);margin-top:3px}
+.kpi.hero{grid-column:1/-1;text-align:center;padding:20px 16px;border-radius:var(--r)}
+.kpi.hero .kv{font-size:38px}
+.kpi.hero.bad{background:linear-gradient(165deg,rgba(255,95,95,.12),var(--ink2));border-color:rgba(255,95,95,.4)}
+.kpi.hero.bad .kv{color:var(--red);text-shadow:0 0 30px rgba(255,95,95,.3)}
+.kpi.hero.ok{background:linear-gradient(165deg,rgba(74,222,128,.1),var(--ink2));border-color:rgba(74,222,128,.35)}
+.kpi.hero.ok .kv{color:var(--green)}
+.kpi.hero.warn{background:linear-gradient(165deg,rgba(255,184,48,.1),var(--ink2));border-color:rgba(255,184,48,.32)}
+.kpi.hero.warn .kv{color:var(--amber)}
 
-/* alert banner */
-.banner{display:flex;gap:10px;align-items:center;background:rgba(255,184,48,.1);border:1px solid rgba(255,184,48,.4);border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.45;color:#ffd98a}
-.banner.red{background:rgba(255,95,95,.1);border-color:rgba(255,95,95,.4);color:#ffb3b3}
-.banner .em{font-size:20px}
+/* ── banner ── */
+.banner{display:flex;gap:11px;align-items:center;background:rgba(255,184,48,.09);border:1px solid rgba(255,184,48,.38);border-radius:13px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.5;color:#ffd98a}
+.banner.green{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.32);color:#a8f0c4}
+.banner .em{font-size:22px;flex-shrink:0}
 
-/* service rows */
-.svc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+/* ── répartition (stacked bar) ── */
+.stack{display:flex;gap:2px;height:16px;border-radius:5px;overflow:hidden;margin:4px 0 12px}
+.stack .seg{height:100%;min-width:3px;transition:width .5s cubic-bezier(.3,.8,.3,1);cursor:pointer}
+.stack .seg:first-child{border-radius:4px 0 0 4px}
+.stack .seg:last-child{border-radius:0 4px 4px 0}
+.legend{display:flex;flex-wrap:wrap;gap:7px 14px}
+.lg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)}
+.lg .ld{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.lg b{color:var(--txt);font-family:'Nunito',sans-serif;font-weight:800}
+
+/* ── chart ── */
+.chart-wrap{position:relative}
+.chart-tip{position:absolute;background:var(--ink5);border:1px solid var(--line2);border-radius:9px;padding:7px 11px;font-size:11px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5;box-shadow:var(--sh);transform:translate(-50%,-110%)}
+.chart-tip b{font-family:'Nunito',sans-serif}
+.chart-tip .td{color:var(--txt3);font-size:9.5px;font-family:'Fira Code',monospace}
+svg .bar{cursor:pointer}
+svg text{font-family:'Fira Code',monospace}
+
+/* ── service rows ── */
+.svc-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
 .svc-row:last-child{border-bottom:none}
-.svc-dot{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--ink3)}
+.svc-dot{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--ink3);border:1px solid var(--line)}
 .svc-name{font-size:13px;font-weight:600}
-.svc-val{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px}
-.svc-sub{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace}
+.svc-val{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;letter-spacing:-.2px}
+.svc-sub{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:1px}
+.delta{font-size:10px;font-family:'Fira Code',monospace;margin-left:6px}
 
-/* inputs */
-label.fl{display:block;font-size:10.5px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);margin:12px 0 5px}
-input,select,textarea{width:100%;background:var(--ink3);border:1px solid var(--line2);border-radius:10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;padding:11px 12px;outline:none}
-input:focus,select:focus{border-color:var(--orange)}
-.in-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.in-row .svc-dot{width:36px;height:36px}
-.in-row .in-name{width:86px;font-size:12.5px;font-weight:600;flex-shrink:0;line-height:1.2}
-.in-row input{text-align:right;font-family:'Nunito',sans-serif;font-weight:700}
+/* ── inputs ── */
+label.fl{display:block;font-size:10px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt2);margin:13px 0 6px}
+input,select,textarea{width:100%;background:var(--ink3);border:1.5px solid var(--line2);border-radius:11px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;padding:12px 13px;outline:none;transition:border-color var(--tr),box-shadow var(--tr)}
+input:focus,select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,121,0,.12)}
+input.money{text-align:right;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;letter-spacing:.3px}
+.in-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.in-row .svc-dot{width:38px;height:38px}
+.in-row .in-name{width:84px;font-size:12.5px;font-weight:600;flex-shrink:0;line-height:1.25}
+.suffix{position:relative}
+.ck{display:flex;align-items:center;gap:11px;margin-top:14px;font-size:13px;font-weight:500;cursor:pointer;line-height:1.4}
+.ck input{width:21px;height:21px;flex-shrink:0;accent-color:var(--orange)}
 
-/* buttons */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;cursor:pointer;margin-top:12px;transition:transform .1s}
-.btn:active{transform:scale(.98)}
-.btn.primary{background:linear-gradient(135deg,var(--orange),#ffa040);color:#1a0d00}
-.btn.green{background:linear-gradient(135deg,var(--green),#7cf0a8);color:#03140a}
-.btn.blue{background:linear-gradient(135deg,var(--blue),#7db9ff);color:#041020}
+/* ── buttons ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:13px;font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;cursor:pointer;margin-top:12px;transition:transform .12s,box-shadow .12s,filter .12s;letter-spacing:.1px}
+.btn:active{transform:scale(.97);filter:brightness(1.08)}
+.btn.primary{background:linear-gradient(135deg,#ff7900,#ffa040);color:#1a0d00;box-shadow:0 6px 20px rgba(255,121,0,.28)}
+.btn.green{background:linear-gradient(135deg,#22c55e,#6cebA0);color:#03140a;box-shadow:0 6px 20px rgba(74,222,128,.22)}
+.btn.blue{background:linear-gradient(135deg,#3b82f6,#7db9ff);color:#041020;box-shadow:0 6px 20px rgba(77,158,255,.22)}
 .btn.ghost{background:var(--ink3);color:var(--txt2);border:1px solid var(--line2)}
-.btn.red{background:rgba(255,95,95,.14);color:var(--red);border:1px solid rgba(255,95,95,.4)}
+.btn.red{background:rgba(255,95,95,.12);color:var(--red);border:1px solid rgba(255,95,95,.38)}
 .btn:disabled{opacity:.45;pointer-events:none}
-.btn-sm{width:auto;padding:8px 14px;font-size:12px;margin-top:0;border-radius:9px}
+.btn-sm{width:auto;padding:9px 15px;font-size:12px;margin-top:0;border-radius:10px}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{margin-top:12px}
 
-/* checkpoint pills */
-.cp-strip{display:flex;gap:8px;margin-bottom:12px}
-.cp-pill{flex:1;text-align:center;background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:10px 6px}
+/* ── checkpoint pills ── */
+.cp-strip{display:flex;gap:9px;margin-bottom:14px}
+.cp-pill{flex:1;text-align:center;background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:11px 6px;transition:border-color var(--tr)}
 .cp-pill .t{font-family:'Fira Code',monospace;font-size:11px;color:var(--txt2)}
-.cp-pill .s{font-size:17px;margin:3px 0}
-.cp-pill .v{font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3)}
-.cp-pill.done{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.06)}
+.cp-pill .s{font-size:18px;margin:4px 0 2px}
+.cp-pill .v{font-size:9.5px;font-family:'Fira Code',monospace;color:var(--txt3)}
+.cp-pill.done{border-color:rgba(74,222,128,.42);background:linear-gradient(180deg,rgba(74,222,128,.07),var(--ink2))}
 .cp-pill.done .v{color:var(--green)}
-.cp-pill.due{border-color:rgba(255,184,48,.5);background:rgba(255,184,48,.07);animation:blink 1.6s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.65}}
+.cp-pill.due{border-color:rgba(255,184,48,.55);background:linear-gradient(180deg,rgba(255,184,48,.08),var(--ink2));animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 
-/* calc table */
+/* ── calc ── */
 .calc{font-size:13px}
-.calc .cr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}
+.calc .cr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
 .calc .cr:last-child{border-bottom:none}
-.calc .cr b{font-family:'Nunito',sans-serif}
-.calc .cr.total{font-size:14.5px;padding-top:9px}
+.calc .cr b{font-family:'Nunito',sans-serif;font-weight:800}
+.calc .cr.total{font-size:14.5px;padding-top:10px}
 .pos{color:var(--green)}.neg{color:var(--red)}.mut{color:var(--txt2)}
 
-/* movement list */
-.mv{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+/* ── movements ── */
+.mv{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .mv:last-child{border-bottom:none}
-.mv .ic{width:30px;height:30px;border-radius:8px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.mv .tt{font-weight:600;line-height:1.25}
-.mv .ts{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace}
-.mv .amt{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800;white-space:nowrap}
-.mv .del{background:none;border:none;color:var(--txt3);font-size:15px;cursor:pointer;padding:4px}
+.mv .ic{width:32px;height:32px;border-radius:9px;background:var(--ink3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mv .tt{font-weight:600;line-height:1.3}
+.mv .ts{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:1px}
+.mv .amt{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800;white-space:nowrap;font-size:13.5px}
+.mv .del{background:var(--ink3);border:1px solid var(--line);border-radius:8px;color:var(--txt3);font-size:13px;cursor:pointer;padding:6px 9px;margin-left:4px;transition:color var(--tr)}
+.mv .del:active{color:var(--red)}
 
-/* segmented */
-.seg{display:flex;background:var(--ink3);border-radius:11px;padding:4px;gap:4px;margin-bottom:12px}
-.seg button{flex:1;padding:9px 4px;border:none;background:none;color:var(--txt2);font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;border-radius:8px;cursor:pointer}
-.seg button.on{background:var(--ink4);color:var(--txt)}
+/* ── segmented ── */
+.seg{display:flex;background:var(--ink3);border-radius:12px;padding:4px;gap:4px;margin-bottom:14px;border:1px solid var(--line)}
+.seg button{flex:1;padding:10px 4px;border:none;background:none;color:var(--txt2);font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;border-radius:9px;cursor:pointer;transition:background var(--tr),color var(--tr)}
+.seg button.on{background:var(--ink5);color:var(--txt);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 
-/* history */
-.hday{background:var(--ink2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
-.hday-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
-.hday-head .d{font-weight:700;font-size:13.5px}
-.hday-head .s{font-size:10.5px;color:var(--txt3);font-family:'Fira Code',monospace}
-.hday-head .m{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px}
-.hday-body{padding:0 14px 12px;border-top:1px solid var(--line);font-size:12.5px}
+/* ── history ── */
+.hday{background:var(--ink2);border:1px solid var(--line);border-radius:14px;margin-bottom:11px;overflow:hidden}
+.hday-head{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer}
+.hday-head .hcal{width:40px;height:40px;border-radius:11px;background:var(--ink3);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.hday-head .hcal .hd1{font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;line-height:1}
+.hday-head .hcal .hd2{font-size:8px;text-transform:uppercase;color:var(--txt3);letter-spacing:.5px}
+.hday-head .d{font-weight:700;font-size:13px;text-transform:capitalize}
+.hday-head .s{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px}
+.hday-head .m{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:900;font-size:14.5px;text-align:right}
+.hday-head .chev{color:var(--txt3);font-size:11px;margin-left:6px;transition:transform var(--tr)}
+.hday.open .chev{transform:rotate(90deg)}
+.hday-body{padding:2px 15px 14px;border-top:1px solid var(--line);font-size:12.5px}
 
-/* nav */
-.nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(7,11,18,.97);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:7px 4px calc(7px + env(safe-area-inset-bottom))}
-.nav button{background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:9.5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 10px;border-radius:10px;min-width:58px}
-.nav button .i{font-size:19px}
+/* ── nav ── */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(9,13,21,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+.nav button{position:relative;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:9.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 10px;border-radius:11px;min-width:56px;transition:color var(--tr)}
+.nav button .i{font-size:20px;transition:transform .15s}
 .nav button.on{color:var(--orange)}
-.nav button .bdg{position:absolute;margin-left:26px;width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.6s infinite}
+.nav button.on .i{transform:translateY(-1px)}
+.nav button.on::after{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:0 0 4px 4px;background:var(--orange);box-shadow:0 2px 8px rgba(255,121,0,.5)}
+.nav button .bdg{position:absolute;top:2px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.6s infinite}
 
-/* toast */
-#toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:var(--ink4);border:1px solid var(--line2);color:var(--txt);padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-#toast.show{opacity:1}
-.empty{text-align:center;color:var(--txt3);font-size:12.5px;padding:18px 0}
-.small{font-size:11px;color:var(--txt3);line-height:1.5;margin-top:8px}
-h3.sec{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px}
+/* ── modal ── */
+.modal{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal.on{opacity:1;pointer-events:auto}
+.modal .veil{position:absolute;inset:0;background:rgba(3,5,9,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.modal .sheet{position:relative;width:100%;max-width:640px;background:var(--ink2);border:1px solid var(--line2);border-bottom:none;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));transform:translateY(30px);transition:transform .22s cubic-bezier(.3,.8,.4,1);box-shadow:0 -12px 50px rgba(0,0,0,.55)}
+.modal.on .sheet{transform:none}
+.modal .grip{width:38px;height:4px;border-radius:3px;background:var(--line2);margin:0 auto 16px}
+.md-ic{width:52px;height:52px;border-radius:15px;background:var(--ink4);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:25px;margin:0 auto 12px}
+.modal h3{font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;text-align:center}
+.modal .md-sub{font-size:12.5px;color:var(--txt2);text-align:center;margin-top:6px;line-height:1.55}
+.md-btns{display:flex;gap:10px;margin-top:18px}
+.md-btns .btn{margin-top:0}
+/* PIN pad */
+.pin-dots{display:flex;gap:12px;justify-content:center;margin:18px 0 6px;min-height:14px}
+.pin-dots .pd{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--line2);transition:background var(--tr),border-color var(--tr)}
+.pin-dots .pd.f{background:var(--orange);border-color:var(--orange);box-shadow:0 0 8px rgba(255,121,0,.5)}
+.pin-dots.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:270px;margin:14px auto 0}
+.pin-pad button{padding:15px;border-radius:13px;background:var(--ink3);border:1px solid var(--line);color:var(--txt);font-family:'Nunito',sans-serif;font-size:19px;font-weight:800;cursor:pointer;transition:background .1s,transform .1s}
+.pin-pad button:active{background:var(--ink5);transform:scale(.94)}
+.pin-pad button.soft{color:var(--txt3);font-size:15px}
+
+/* ── toast ── */
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink5);border:1px solid var(--line2);color:var(--txt);padding:12px 18px;border-radius:13px;font-size:13px;font-weight:600;z-index:400;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;max-width:88vw;text-align:center;box-shadow:var(--sh);line-height:1.45}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── wizard ── */
+.wiz-dots{display:flex;gap:7px;justify-content:center;margin:4px 0 18px}
+.wiz-dots .wd{width:7px;height:7px;border-radius:4px;background:var(--line2);transition:all var(--tr)}
+.wiz-dots .wd.on{width:22px;background:var(--orange)}
+.wiz-hero{text-align:center;padding:26px 0 8px}
+.wiz-hero .wic{font-size:56px;margin-bottom:12px;display:block}
+.wiz-hero h2{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;line-height:1.25}
+.wiz-hero p{font-size:13px;color:var(--txt2);margin-top:9px;line-height:1.65}
+.feat{display:flex;gap:13px;align-items:flex-start;padding:11px 0}
+.feat .fi{width:38px;height:38px;border-radius:11px;background:var(--ink3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.feat .ft{font-size:13px;font-weight:700}
+.feat .fs{font-size:11.5px;color:var(--txt2);margin-top:2px;line-height:1.5}
+
+.empty{text-align:center;color:var(--txt3);font-size:12.5px;padding:22px 0;line-height:1.6}
+.empty .ei{font-size:30px;display:block;margin-bottom:8px;opacity:.6}
+.small{font-size:11px;color:var(--txt3);line-height:1.55;margin-top:8px}
+h3.sec{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:1.2px;margin:16px 0 8px}
+.foot{text-align:center;font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;padding:18px 0 4px}
 </style>
 </head>
 <body>
 <div id="app"></div>
 
-<nav class="nav">
+<nav class="nav" id="nav" style="display:none">
   <button id="nav-jour" onclick="go('jour')"><span class="i">📊</span>Jour</button>
-  <button id="nav-pointage" onclick="go('pointage')"><span class="i">✅</span>Pointage</button>
+  <button id="nav-pointage" onclick="go('pointage')"><span class="i">✅</span>Pointage<span class="bdg" id="bdg-cp" style="display:none"></span></button>
   <button id="nav-mouvements" onclick="go('mouvements')"><span class="i">💸</span>Mouvements</button>
   <button id="nav-historique" onclick="go('historique')"><span class="i">📅</span>Historique</button>
   <button id="nav-reglages" onclick="go('reglages')"><span class="i">⚙️</span>Réglages</button>
 </nav>
+
+<div class="modal" id="modal">
+  <div class="veil" onclick="resolveModal(null)"></div>
+  <div class="sheet"><div class="grip"></div><div id="modal-body"></div></div>
+</div>
 <div id="toast"></div>
 
 <script>
 /* ══════════ CONSTANTES ══════════ */
+const VERSION = '2.0';
+/* c = couleur d'accent UI (valeurs, pastilles) · cc = couleur validée pour les graphiques (contraste + daltonisme) */
 const SERVICES = [
-  {k:'orange', n:'UV Orange', e:'🟠', c:'#ff7900'},
-  {k:'mtn',    n:'UV MTN',    e:'🟡', c:'#ffcc00'},
-  {k:'moov',   n:'UV Moov',   e:'🔵', c:'#4d9eff'},
-  {k:'wave',   n:'UV Wave',   e:'🌊', c:'#1dc4ff'},
-  {k:'espece', n:'Espèces',   e:'💵', c:'#4ade80'},
+  {k:'orange', n:'UV Orange', e:'🟠', c:'#ff7900', cc:'#d96a10'},
+  {k:'mtn',    n:'UV MTN',    e:'🟡', c:'#ffcc00', cc:'#b08d00'},
+  {k:'moov',   n:'UV Moov',   e:'🔵', c:'#4d9eff', cc:'#4a5fe0'},
+  {k:'wave',   n:'UV Wave',   e:'🌊', c:'#1dc4ff', cc:'#0aa0d8'},
+  {k:'espece', n:'Espèces',   e:'💵', c:'#4ade80', cc:'#2f9e4f'},
 ];
+/* ordre des segments du graphique : chaud/froid alternés pour rester lisible en daltonisme */
+const STACK_ORDER = ['orange','moov','mtn','wave','espece'];
 const KEY = 'agencePro_v1';
 
 /* ══════════ ÉTAT ══════════ */
 let S = load();
 migrate();
 function migrate(){
-  if(S.config.adminPin === undefined) S.config.adminPin = '';
-  if(S.config.autoSend === undefined) S.config.autoSend = true;
-  if(S.config.lateAlert === undefined) S.config.lateAlert = true;
-  if(S.config.dimancheOff === undefined) S.config.dimancheOff = true;
+  const c = S.config;
+  if(c.adminPin === undefined) c.adminPin = '';
+  if(c.autoSend === undefined) c.autoSend = true;
+  if(c.lateAlert === undefined) c.lateAlert = true;
+  if(c.dimancheOff === undefined) c.dimancheOff = true;
+  if(c.setupDone === undefined) c.setupDone = Object.keys(S.days).length > 0;
   if(!S.audit) S.audit = [];
 }
 function load(){
@@ -188,7 +288,7 @@ function load(){
       agence:'Mon Agence', agent:'',
       tgToken:'', tgChat:'',
       notif:false,
-      adminPin:'', autoSend:true, lateAlert:true, dimancheOff:true,
+      adminPin:'', autoSend:true, lateAlert:true, dimancheOff:true, setupDone:false,
       checkpoints:[
         {t:'09:00', label:'Matin 09H'},
         {t:'14:00', label:'Après-midi 14H'},
@@ -203,31 +303,50 @@ function load(){
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 
 let tab = 'jour';
-let cpSel = null;      // index du checkpoint en cours de saisie
-let mvType = 'sortie'; // onglet mouvements
-let forceOpen = false; // ouvrir exceptionnellement un dimanche
+let cpSel = null;
+let mvType = 'sortie';
+let forceOpen = false;
+let wizStep = 0;
+let hOpen = null;
 
 /* ══════════ HELPERS ══════════ */
 const $ = id => document.getElementById(id);
 function fmt(n){
   n = Math.round(+n||0);
-  return n.toLocaleString('fr-FR').replace(/ | /g,' ') + ' F';
+  return n.toLocaleString('fr-FR').replace(/[  ]/g,' ') + ' F';
 }
+function fmtK(n){
+  n = Math.round(+n||0);
+  if(Math.abs(n) >= 1000000) return (n/1000000).toLocaleString('fr-FR',{maximumFractionDigits:1}).replace(/[  ]/g,' ')+'M';
+  if(Math.abs(n) >= 10000) return Math.round(n/1000)+'k';
+  return String(n);
+}
+/* champs montant : saisie libre, affichage groupé par milliers */
+function fmtIn(el){
+  const neg = el.value.trim().startsWith('-');
+  const d = el.value.replace(/\D/g,'');
+  el.value = d ? (neg?'-':'') + (+d).toLocaleString('fr-FR').replace(/[  ]/g,' ') : (neg?'-':'');
+}
+function num(v){
+  const s = String(v==null?'':v);
+  const neg = s.trim().startsWith('-');
+  const d = s.replace(/\D/g,'');
+  return d ? (neg?-1:1) * +d : 0;
+}
+function moneyVal(n){ return n ? (+n).toLocaleString('fr-FR').replace(/[  ]/g,' ') : ''; }
 function todayKey(d){
   d = d || new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function frDate(key){
   const [y,m,d] = key.split('-');
-  const dt = new Date(+y, m-1, +d);
-  return dt.toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'});
+  return new Date(+y, m-1, +d).toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'});
 }
 function nowHM(){
   const d = new Date();
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
 function getDay(){ return S.days[todayKey()] || null; }
-/* dimanche fermé (sauf si une journée a quand même été ouverte) */
 function isOffDay(){ return S.config.dimancheOff && new Date().getDay() === 0; }
 function totalOf(soldes){ return SERVICES.reduce((a,s)=> a + (+soldes[s.k]||0), 0); }
 function sumMv(day, type){ return (day[type]||[]).reduce((a,m)=> a + (+m.montant||0), 0); }
@@ -238,25 +357,87 @@ function lastCp(day){
 }
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2600);
+  clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2800);
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function vibrate(ms){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
+
+/* ══════════ MODALES ══════════ */
+let modalResolve = null;
+function openModal(html){
+  $('modal-body').innerHTML = html;
+  $('modal').classList.add('on');
+}
+function closeModal(){
+  $('modal').classList.remove('on');
+}
+function resolveModal(v){
+  const r = modalResolve; modalResolve = null;
+  closeModal();
+  if(r) r(v);
+}
+function askConfirm(title, msg, opts){
+  opts = opts || {};
+  return new Promise(res=>{
+    modalResolve = res;
+    openModal(`<div class="md-ic">${opts.icon||'❓'}</div>
+      <h3>${esc(title)}</h3>
+      <p class="md-sub">${msg}</p>
+      <div class="md-btns">
+        <button class="btn ghost" onclick="resolveModal(false)">Annuler</button>
+        <button class="btn ${opts.danger?'red':'primary'}" onclick="resolveModal(true)">${esc(opts.ok||'Confirmer')}</button>
+      </div>`);
+  });
+}
+
+/* ── pavé PIN ── */
+let pinBuf = '';
+function askPinModal(action){
+  return new Promise(res=>{
+    modalResolve = res; pinBuf = '';
+    const L = Math.max(S.config.adminPin.length, 4);
+    openModal(`<div class="md-ic">🔐</div>
+      <h3>Code admin</h3>
+      <p class="md-sub">${esc(action)}</p>
+      <div class="pin-dots" id="pin-dots">${Array.from({length:L},()=>'<span class="pd"></span>').join('')}</div>
+      <div class="pin-pad">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="pinKey('${n}')">${n}</button>`).join('')}
+        <button class="soft" onclick="resolveModal(null)">Annuler</button>
+        <button onclick="pinKey('0')">0</button>
+        <button class="soft" onclick="pinKey('back')">⌫</button>
+      </div>`);
+  });
+}
+function pinKey(k){
+  if(k==='back') pinBuf = pinBuf.slice(0,-1);
+  else pinBuf += k;
+  const dots = document.querySelectorAll('#pin-dots .pd');
+  dots.forEach((d,i)=> d.classList.toggle('f', i < pinBuf.length));
+  if(pinBuf.length >= S.config.adminPin.length && S.config.adminPin){
+    const v = pinBuf;
+    setTimeout(()=>{
+      if(v === S.config.adminPin){ resolveModal(v); }
+      else{
+        const pd = $('pin-dots');
+        if(pd){ pd.classList.add('shake'); vibrate(120); setTimeout(()=>{ pinBuf=''; if($('pin-dots')){ $('pin-dots').classList.remove('shake'); document.querySelectorAll('#pin-dots .pd').forEach(d=>d.classList.remove('f')); } resolveModal(v); }, 420); }
+        else resolveModal(v);
+      }
+    }, 130);
+  }
+}
 
 /* ══════════ ANTI-TRICHE ══════════ */
-/* Journal : chaque action sensible est tracée (max 500 entrées) */
 function audit(action){
   S.audit.push({d: todayKey(), t: nowHM(), a: action});
   if(S.audit.length > 500) S.audit = S.audit.slice(-500);
   save();
 }
-/* Alerte silencieuse à l'admin (n'affiche rien à l'agent, n'échoue jamais) */
 function alertTg(text){
   tgSend('🚨 <b>ALERTE SÉCURITÉ</b>\n🏪 '+esc(S.config.agence)+' — '+nowHM()+'\n\n'+text, true);
 }
-/* Demande le code admin si un PIN est configuré. Toute tentative refusée est signalée. */
-function pinOk(action){
+async function pinOk(action){
   if(!S.config.adminPin) return true;
-  const p = prompt('🔐 Code admin requis pour : '+action);
+  const p = await askPinModal(action);
   if(p === null) return false;
   if(p === S.config.adminPin){ audit('🔓 Code admin validé : '+action); return true; }
   audit('⛔ CODE REFUSÉ : tentative de '+action);
@@ -269,23 +450,214 @@ function pinOk(action){
 function go(t){ tab = t; render(); window.scrollTo(0,0); }
 
 function render(){
-  document.querySelectorAll('.nav button').forEach(b=> b.classList.remove('on'));
+  const nav = $('nav');
+  if(!S.config.setupDone){
+    nav.style.display = 'none';
+    $('app').innerHTML = `<div class="view">${vWizard()}</div>`;
+    return;
+  }
+  nav.style.display = '';
+  document.querySelectorAll('.nav > button').forEach(b=> b.classList.remove('on'));
   const nb = $('nav-'+tab); if(nb) nb.classList.add('on');
+  const day = getDay();
+  const due = day ? checkpointDue(day) : null;
+  const bdg = $('bdg-cp'); if(bdg) bdg.style.display = (due !== null) ? '' : 'none';
   const app = $('app');
-  if(tab==='jour') app.innerHTML = vJour();
-  else if(tab==='pointage') app.innerHTML = vPointage();
-  else if(tab==='mouvements') app.innerHTML = vMouvements();
-  else if(tab==='historique') app.innerHTML = vHistorique();
-  else app.innerHTML = vReglages();
+  let h = '';
+  if(tab==='jour') h = vJour();
+  else if(tab==='pointage') h = vPointage();
+  else if(tab==='mouvements') h = vMouvements();
+  else if(tab==='historique') h = vHistorique();
+  else h = vReglages();
+  app.innerHTML = `<div class="view">${h}</div>`;
 }
 
+function statusChip(){
+  const day = getDay();
+  if(day && day.cloture) return `<span class="chip locked"><span class="dot"></span>Clôturée</span>`;
+  if(day) return `<span class="chip open"><span class="dot"></span>Ouverte</span>`;
+  return `<span class="chip closed"><span class="dot"></span>Fermée</span>`;
+}
 function header(){
   const d = new Date();
   return `<div class="hdr">
     <div class="hdr-icon">🏪</div>
     <div><h1><em>Agence</em> Pro</h1><div class="sub">${esc(S.config.agence)}</div></div>
-    <div class="date"><b>${d.toLocaleDateString('fr-FR',{weekday:'short', day:'numeric', month:'short'})}</b><br>${nowHM()}</div>
+    <div class="hdr-right">
+      <div class="hdr-date">${d.toLocaleDateString('fr-FR',{weekday:'short', day:'numeric', month:'short'})}</div>
+      <div class="hdr-clock" id="clock">${nowHM()}</div>
+      ${statusChip()}
+    </div>
   </div>`;
+}
+
+/* ══════════ ASSISTANT DE CONFIGURATION ══════════ */
+function vWizard(){
+  const c = S.config;
+  const dots = `<div class="wiz-dots">${[0,1,2,3,4].map(i=>`<span class="wd ${i===wizStep?'on':''}"></span>`).join('')}</div>`;
+  if(wizStep===0) return `
+    <div class="wiz-hero">
+      <span class="wic">🏪</span>
+      <h2>Bienvenue sur<br><span style="color:var(--orange)">Agence Pro</span></h2>
+      <p>L'application qui met fin aux manquants inexpliqués.<br>2 minutes de configuration et c'est parti.</p>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <div class="feat"><div class="fi">💼</div><div><div class="ft">5 caisses suivies</div><div class="fs">UV Orange, MTN, Moov, Wave et Espèces — soldes de départ chaque matin.</div></div></div>
+      <div class="feat"><div class="fi">✅</div><div><div class="ft">3 pointages par jour</div><div class="fs">L'app compare le réel au théorique et localise le manquant dans la journée.</div></div></div>
+      <div class="feat"><div class="fi">📨</div><div><div class="ft">Rapports Telegram automatiques</div><div class="fs">Chaque pointage part chez l'admin, impossible de l'oublier.</div></div></div>
+      <div class="feat"><div class="fi">🛡️</div><div><div class="ft">Anti-triche intégré</div><div class="fs">Code admin, alertes en cas de correction ou suppression, journal complet.</div></div></div>
+    </div>
+    <button class="btn primary" onclick="wizStep=1;render()">Commencer →</button>`;
+
+  if(wizStep===1) return dots+`
+    <div class="card"><h2><span class="hic">🏪</span>Ton agence</h2>
+      <label class="fl">Nom de l'agence</label>
+      <input id="wz-agence" value="${esc(c.agence==='Mon Agence'?'':c.agence)}" placeholder="ex : Agence Yopougon Marché">
+      <label class="fl">Ton nom (agent)</label>
+      <input id="wz-agent" value="${esc(c.agent)}" placeholder="ex : Hervé">
+    </div>
+    <button class="btn primary" onclick="wizSave(1)">Continuer →</button>`;
+
+  if(wizStep===2) return dots+`
+    <div class="card"><h2><span class="hic">⏰</span>Les pointages</h2>
+      <div class="hint">3 pointages par jour : tu comptes tes caisses et l'app compare au théorique. Adapte les heures à ton agence.</div>
+      ${c.checkpoints.map((cp,i)=>`<div class="in-row">
+        <div class="in-name" style="width:118px">${i===0?'☀️ Matin':(i===1?'🌤 Après-midi':'🌙 Fermeture')}</div>
+        <input type="time" id="wz-cp-${i}" value="${cp.t}">
+      </div>`).join('')}
+      <label class="ck"><input type="checkbox" id="wz-dimanche" ${c.dimancheOff?'checked':''}> 🛌 L'agence est fermée le dimanche</label>
+      <label class="ck"><input type="checkbox" id="wz-notif" ${c.notif?'checked':''}> 🔔 Activer les rappels de pointage</label>
+    </div>
+    <button class="btn primary" onclick="wizSave(2)">Continuer →</button>`;
+
+  if(wizStep===3) return dots+`
+    <div class="card"><h2><span class="hic">🔐</span>Code admin</h2>
+      <div class="hint">Ce code protège les actions sensibles : corriger un pointage, supprimer une sortie, changer les réglages. <b>Garde-le pour toi.</b> Toute tentative avec un mauvais code sera signalée sur Telegram.</div>
+      <label class="fl">Code admin (4 à 6 chiffres)</label>
+      <input type="password" inputmode="numeric" id="wz-pin" maxlength="6" placeholder="••••">
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="wizStep=4;render()">Passer</button>
+      <button class="btn primary" onclick="wizSave(3)">Continuer →</button>
+    </div>`;
+
+  return dots+`
+    <div class="card"><h2><span class="hic">📨</span>Telegram (admin)</h2>
+      <div class="hint">1️⃣ Sur Telegram, cherche <b>@BotFather</b> → /newbot → copie le <b>token</b>.<br>
+      2️⃣ L'admin envoie un message au bot, puis ouvre <b>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</b> pour lire son <b>chat_id</b>.<br>
+      3️⃣ Colle les deux ici — configurable plus tard dans ⚙️ Réglages.</div>
+      <label class="fl">Token du bot</label>
+      <input id="wz-tgtoken" value="${esc(c.tgToken)}" placeholder="123456:ABC-DEF…">
+      <label class="fl">Chat ID de l'admin</label>
+      <input id="wz-tgchat" value="${esc(c.tgChat)}" placeholder="ex : 123456789">
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="wizFinish(false)">Passer</button>
+      <button class="btn primary" onclick="wizFinish(true)">Terminer ✓</button>
+    </div>`;
+}
+function wizSave(step){
+  const c = S.config;
+  if(step===1){
+    c.agence = $('wz-agence').value.trim() || 'Mon Agence';
+    c.agent = $('wz-agent').value.trim();
+    wizStep = 2;
+  }else if(step===2){
+    c.checkpoints.forEach((cp,i)=>{ cp.t = $('wz-cp-'+i).value || cp.t; });
+    relabelCps();
+    c.dimancheOff = $('wz-dimanche').checked;
+    c.notif = $('wz-notif').checked;
+    if(c.notif && 'Notification' in window && Notification.permission==='default') Notification.requestPermission();
+    wizStep = 3;
+  }else if(step===3){
+    const p = $('wz-pin').value.trim();
+    if(p && !/^\d{4,6}$/.test(p)){ toast('⚠️ Le code doit faire 4 à 6 chiffres'); return; }
+    c.adminPin = p;
+    wizStep = 4;
+  }
+  save(); render();
+}
+function wizFinish(withTg){
+  const c = S.config;
+  if(withTg){
+    c.tgToken = $('wz-tgtoken').value.trim();
+    c.tgChat = $('wz-tgchat').value.trim();
+  }
+  c.setupDone = true;
+  audit('🚀 Configuration initiale terminée');
+  save();
+  toast('🎉 Configuration terminée — bienvenue !');
+  go('jour');
+}
+function relabelCps(){
+  const c = S.config;
+  c.checkpoints[0].label = 'Matin '+c.checkpoints[0].t.slice(0,2)+'H';
+  c.checkpoints[1].label = 'Après-midi '+c.checkpoints[1].t.slice(0,2)+'H';
+  c.checkpoints[2].label = 'Fermeture '+c.checkpoints[2].t.slice(0,2)+'H';
+}
+
+/* ══════════ GRAPHIQUES ══════════ */
+function stackBar(soldes){
+  const total = totalOf(soldes);
+  if(total <= 0) return '';
+  const segs = STACK_ORDER.map(k=>{
+    const s = SERVICES.find(x=>x.k===k);
+    const v = +soldes[k]||0;
+    return {s, v, w: v/total*100};
+  }).filter(x=>x.v>0);
+  return `<div class="stack">${segs.map(x=>
+    `<div class="seg" style="width:${x.w}%;background:${x.s.cc}" onclick="toast('${x.s.e} ${x.s.n} : ${fmt(x.v)} (${Math.round(x.w)}%)')"></div>`
+  ).join('')}</div>
+  <div class="legend">${SERVICES.filter(s=>(+soldes[s.k]||0)>0).map(s=>
+    `<span class="lg"><span class="ld" style="background:${s.cc}"></span>${s.n.replace('UV ','')} <b>${fmtK(+soldes[s.k]||0)}</b></span>`
+  ).join('')}</div>`;
+}
+
+function chartManquant(){
+  const keys = Object.keys(S.days).sort().slice(-14);
+  const data = keys.map(k=>{
+    const d = S.days[k];
+    const cp = lastCp(d);
+    if(!cp) return null;
+    return {k, v: (cp.theorique - cp.reelTotal) + 0};
+  }).filter(Boolean);
+  if(data.length < 2) return '';
+  const W = 320, H = 130, padT = 18, padB = 18, padL = 4, padR = 4;
+  const maxAbs = Math.max(...data.map(d=>Math.abs(d.v)), 1);
+  const zero = padT + (H-padT-padB) * (maxAbs / (maxAbs*2));
+  const bw = Math.min(22, (W-padL-padR) / data.length - 4);
+  const iMax = data.reduce((mi,d,i)=> Math.abs(d.v) > Math.abs(data[mi].v) ? i : mi, 0);
+  let bars = '', labels = '';
+  data.forEach((d,i)=>{
+    const cx = padL + (W-padL-padR) * (i+.5)/data.length;
+    const hpx = Math.max(3, Math.abs(d.v)/maxAbs * (H-padT-padB)/2);
+    const y = d.v >= 0 ? zero - hpx : zero;
+    const col = d.v > 0 ? 'var(--red)' : 'var(--green)';
+    const dd = d.k.slice(8);
+    bars += `<rect class="bar" x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${hpx.toFixed(1)}" rx="3" fill="${col}" fill-opacity="${d.v>0?'.92':'.85'}" onclick="chartTip(event,'${d.k}',${d.v})"><title>${frDate(d.k)} : ${d.v>0?'manquant ':''}${fmt(Math.abs(d.v))}${d.v<0?' de surplus':''}</title></rect>`;
+    if(i===iMax && d.v!==0) labels += `<text x="${cx.toFixed(1)}" y="${(d.v>=0? y-5 : y+hpx+11).toFixed(1)}" font-size="9" fill="${d.v>0?'var(--red)':'var(--green)'}" text-anchor="middle" font-weight="600">${d.v>0?'−':'+'}${fmtK(Math.abs(d.v))}</text>`;
+    labels += `<text x="${cx.toFixed(1)}" y="${H-4}" font-size="8" fill="var(--txt3)" text-anchor="middle">${dd}</text>`;
+  });
+  return `<div class="chart-wrap">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">
+      <line x1="${padL}" y1="${zero.toFixed(1)}" x2="${W-padR}" y2="${zero.toFixed(1)}" stroke="var(--line2)" stroke-width="1"/>
+      ${bars}${labels}
+    </svg>
+    <div class="chart-tip" id="chart-tip"></div>
+  </div>
+  <div class="legend" style="margin-top:8px">
+    <span class="lg"><span class="ld" style="background:var(--red)"></span>Manquant du jour</span>
+    <span class="lg"><span class="ld" style="background:var(--green)"></span>Surplus</span>
+  </div>`;
+}
+function chartTip(ev, k, v){
+  const tip = $('chart-tip'); if(!tip) return;
+  const wrap = tip.parentElement.getBoundingClientRect();
+  tip.innerHTML = `<div class="td">${frDate(k)}</div><b class="${v>0?'neg':'pos'}">${v>0?'−':'+'}${fmt(Math.abs(v))}</b>`;
+  tip.style.left = Math.min(Math.max(ev.clientX - wrap.left, 60), wrap.width-60)+'px';
+  tip.style.top = (ev.clientY - wrap.top)+'px';
+  tip.style.opacity = 1;
+  clearTimeout(tip._h); tip._h = setTimeout(()=> tip.style.opacity = 0, 2200);
 }
 
 /* ══════════ VUE : JOUR ══════════ */
@@ -294,82 +666,86 @@ function vJour(){
   let h = header();
 
   if(!day && isOffDay() && !forceOpen){
-    // dimanche : agence fermée, pas de pointage
-    h += `<div class="big ok">
-      <div class="lbl">Dimanche</div>
-      <div class="num">🛌 Fermé</div>
-      <div class="sub">L'agence ne travaille pas aujourd'hui. Pas de pointage, pas de rappel. Repose-toi bien !</div>
+    h += `<div class="kpi hero ok" style="margin-bottom:14px">
+      <div class="kl">Dimanche</div>
+      <div class="kv">🛌 Fermé</div>
+      <div class="ks" style="font-size:11.5px;margin-top:8px">L'agence ne travaille pas aujourd'hui.<br>Pas de pointage, pas de rappel. Repose-toi bien !</div>
     </div>
     <button class="btn ghost" onclick="forceOpen=true;render()">🔓 Ouvrir quand même (travail exceptionnel)</button>`;
     return h;
   }
 
   if(!day){
-    // pas encore ouvert → formulaire d'ouverture
     const prev = lastClosedDay();
-    h += `<div class="card">
-      <h2>🌅 Ouverture de la journée</h2>
-      <div class="hint">Saisis les soldes de <b>départ</b> de chaque caisse + le <b>manquant déjà existant</b> (ancien manquant). L'app comparera à chaque pointage.</div>
+    h += `<div class="card"><h2><span class="hic">🌅</span>Ouverture de la journée</h2>
+      <div class="hint">Saisis les soldes de <b>départ</b> de chaque caisse + le <b>manquant déjà existant</b>. L'app comparera à chaque pointage.</div>
       ${SERVICES.map(s=>{
-        const pre = prev ? (prev.reel && prev.reel[s.k]!=null ? prev.reel[s.k] : '') : '';
+        const pre = prev && prev.reel && prev.reel[s.k]!=null ? moneyVal(prev.reel[s.k]) : '';
         return `<div class="in-row">
           <div class="svc-dot">${s.e}</div><div class="in-name">${s.n}</div>
-          <input type="number" inputmode="numeric" id="ouv-${s.k}" placeholder="0" value="${pre}">
+          <input type="text" inputmode="numeric" class="money" id="ouv-${s.k}" placeholder="0" value="${pre}" oninput="fmtIn(this)">
         </div>`;
       }).join('')}
-      <label class="fl">📉 Ancien manquant (total manquant existant)</label>
-      <input type="number" inputmode="numeric" id="ouv-manquant" placeholder="0" value="${prev && prev.manquantTotal ? prev.manquantTotal : ''}">
-      ${prev ? `<div class="small">Pré-rempli avec la fermeture du ${frDate(prev.key)}. Modifie si besoin.</div>` : ''}
+      <label class="fl">📉 Ancien manquant (total existant)</label>
+      <input type="text" inputmode="numeric" class="money" id="ouv-manquant" placeholder="0" value="${prev && prev.manquantTotal ? moneyVal(prev.manquantTotal) : ''}" oninput="fmtIn(this)">
+      ${prev ? `<div class="small">↳ Pré-rempli avec la fermeture du ${frDate(prev.key)}. Modifie si besoin.</div>` : ''}
       <button class="btn primary" onclick="ouvrirJour()">🚀 Ouvrir la journée</button>
     </div>`;
     return h;
   }
 
-  // journée ouverte
   const th = theorique(day);
   const cp = lastCp(day);
   const dueIdx = checkpointDue(day);
 
   if(dueIdx !== null){
-    h += `<div class="banner"><span class="em">⏰</span><div><b>Pointage « ${esc(S.config.checkpoints[dueIdx].label)} » à faire !</b><br>Va dans l'onglet Pointage et saisis tes soldes réels.</div></div>`;
+    h += `<div class="banner"><span class="em">⏰</span><div><b>Pointage « ${esc(S.config.checkpoints[dueIdx].label)} » à faire !</b><br>Compte tes caisses et saisis les soldes réels.</div></div>`;
   }
   if(day.cloture){
-    h += `<div class="banner" style="background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35);color:#a8f0c4"><span class="em">🔒</span><div><b>Journée clôturée.</b> Demain, l'ouverture sera pré-remplie avec tes soldes de fermeture.</div></div>`;
+    h += `<div class="banner green"><span class="em">🔒</span><div><b>Journée clôturée.</b> Demain, l'ouverture sera pré-remplie avec tes soldes de fermeture.</div></div>`;
   }
 
-  // carte manquant
+  const ancien = +day.ouverture.manquantInitial||0;
   if(cp){
     const manqJour = cp.theorique - cp.reelTotal;
-    const manqTotal = manqJour + (+day.ouverture.manquantInitial||0);
-    const cls = manqTotal > 0 ? 'bad' : (manqTotal < 0 ? 'ok' : 'ok');
-    h += `<div class="big ${cls}">
-      <div class="lbl">Manquant total ${manqTotal<0?'(surplus)':''}</div>
-      <div class="num">${fmt(Math.abs(manqTotal))}</div>
-      <div class="sub">Jour : ${manqJour>0?'−':'+'}${fmt(Math.abs(manqJour))} · Ancien : ${fmt(+day.ouverture.manquantInitial||0)} · au pointage ${esc(cp.label)}</div>
+    const manqTotal = manqJour + ancien;
+    h += `<div class="kpis">
+      <div class="kpi hero ${manqTotal>0?'bad':'ok'}">
+        <div class="kl">Manquant total${manqTotal<0?' (surplus)':''}</div>
+        <div class="kv">${fmt(Math.abs(manqTotal))}</div>
+        <div class="ks">au pointage ${esc(cp.label)} · ${cp.time}</div>
+      </div>
+      <div class="kpi"><div class="kl">Écart du jour</div><div class="kv ${manqJour>0?'neg':'pos'}">${manqJour>0?'−':'+'}${fmt(Math.abs(manqJour))}</div><div class="ks">théorique − réel</div></div>
+      <div class="kpi"><div class="kl">Ancien manquant</div><div class="kv">${fmt(ancien)}</div><div class="ks">reporté à l'ouverture</div></div>
     </div>`;
   }else{
-    h += `<div class="big warn">
-      <div class="lbl">Ancien manquant reporté</div>
-      <div class="num">${fmt(+day.ouverture.manquantInitial||0)}</div>
-      <div class="sub">Aucun pointage encore aujourd'hui</div>
+    h += `<div class="kpis">
+      <div class="kpi hero warn">
+        <div class="kl">Ancien manquant reporté</div>
+        <div class="kv">${fmt(ancien)}</div>
+        <div class="ks">aucun pointage encore aujourd'hui</div>
+      </div>
     </div>`;
   }
 
-  // pastilles checkpoints
   h += `<div class="cp-strip">` + S.config.checkpoints.map((c,i)=>{
     const done = day.checkpoints && day.checkpoints[i];
     const due = dueIdx === i;
-    return `<div class="cp-pill ${done?'done':''} ${due?'due':''}">
+    return `<div class="cp-pill ${done?'done':''} ${due?'due':''}" onclick="cpSel=${i};go('pointage')">
       <div class="t">${c.t}</div>
       <div class="s">${done?'✅':(due?'⏰':'▫️')}</div>
-      <div class="v">${done? (done.theorique-done.reelTotal>0 ? '−'+fmt(done.theorique-done.reelTotal) : 'OK') : (due?'À faire':'—')}</div>
+      <div class="v">${done? (done.theorique-done.reelTotal>0 ? '−'+fmtK(done.theorique-done.reelTotal) : 'OK') : (due?'À faire':'—')}</div>
     </div>`;
   }).join('') + `</div>`;
 
-  // calcul du théorique
-  h += `<div class="card"><h2>🧮 Situation <span class="tag">temps réel</span></h2>
+  const ref = cp ? cp.soldes : day.ouverture.soldes;
+  h += `<div class="card"><h2><span class="hic">💼</span>Répartition des caisses <span class="tag">${cp? esc(cp.label) : 'ouverture'}</span></h2>
+    ${stackBar(ref)}
+  </div>`;
+
+  h += `<div class="card"><h2><span class="hic">🧮</span>Situation <span class="tag">temps réel</span></h2>
     <div class="calc">
-      <div class="cr"><span class="mut">Total ouverture</span><b>${fmt(totalOf(day.ouverture.soldes))}</b></div>
+      <div class="cr"><span class="mut">Total ouverture (${day.ouverture.time})</span><b>${fmt(totalOf(day.ouverture.soldes))}</b></div>
       <div class="cr"><span class="mut">+ Entrées / Appro</span><b class="pos">+${fmt(sumMv(day,'entrees'))}</b></div>
       <div class="cr"><span class="mut">− Sorties</span><b class="neg">−${fmt(sumMv(day,'sorties'))}</b></div>
       <div class="cr total"><span>= Total théorique</span><b style="color:var(--cyan)">${fmt(th)}</b></div>
@@ -378,23 +754,27 @@ function vJour(){
     <div class="hint">💡 Les dépôts/retraits clients ne changent pas le total (UV ↔ espèces). Tu ne saisis que les <b>sorties</b> et les <b>entrées</b>.</div>
   </div>`;
 
-  // soldes
-  const ref = cp ? cp.soldes : day.ouverture.soldes;
-  h += `<div class="card"><h2>💼 Soldes ${cp? 'réels — '+esc(cp.label) : "d'ouverture"}</h2>`+
-    SERVICES.map(s=>`<div class="svc-row">
-      <div class="svc-dot">${s.e}</div>
-      <div><div class="svc-name">${s.n}</div><div class="svc-sub">ouverture ${fmt(+day.ouverture.soldes[s.k]||0)}</div></div>
-      <div class="svc-val" style="color:${s.c}">${fmt(+ref[s.k]||0)}</div>
-    </div>`).join('') +
+  h += `<div class="card"><h2><span class="hic">💰</span>Soldes ${cp? 'réels — '+esc(cp.label) : "d'ouverture"}</h2>`+
+    SERVICES.map(s=>{
+      const cur = +ref[s.k]||0, ouv = +day.ouverture.soldes[s.k]||0, d = cur - ouv;
+      return `<div class="svc-row">
+        <div class="svc-dot">${s.e}</div>
+        <div><div class="svc-name">${s.n}</div><div class="svc-sub">ouverture ${fmt(ouv)}${cp&&d!==0?`<span class="delta ${d>0?'pos':'neg'}">${d>0?'▲':'▼'}${fmtK(Math.abs(d))}</span>`:''}</div></div>
+        <div class="svc-val" style="color:${s.c}">${fmt(cur)}</div>
+      </div>`;
+    }).join('') +
     `<div class="svc-row"><div class="svc-dot">Σ</div><div class="svc-name">TOTAL</div><div class="svc-val">${fmt(totalOf(ref))}</div></div>
   </div>`;
 
-  // actions
+  const evo = chartManquant();
+  if(evo) h += `<div class="card"><h2><span class="hic">📈</span>Manquant — 14 derniers jours</h2>${evo}</div>`;
+
   h += `<button class="btn blue" onclick="go('pointage')">✅ Faire un pointage</button>`;
   if(cp && !day.cloture && day.checkpoints && day.checkpoints[S.config.checkpoints.length-1]){
     h += `<button class="btn green" onclick="cloturer()">🔒 Clôturer la journée + rapport Telegram</button>`;
   }
-  h += `<button class="btn ghost" onclick="resetJour()">♻️ Réinitialiser la journée (erreur d'ouverture)</button>`;
+  h += `<button class="btn ghost" onclick="resetJour()">♻️ Réinitialiser la journée</button>`;
+  h += `<div class="foot">Agence Pro v${VERSION}</div>`;
   return h;
 }
 
@@ -415,15 +795,14 @@ function lastClosedDay(){
 
 function ouvrirJour(){
   const soldes = {};
-  SERVICES.forEach(s=> soldes[s.k] = +($('ouv-'+s.k).value||0));
-  const manquantInitial = +($('ouv-manquant').value||0);
+  SERVICES.forEach(s=> soldes[s.k] = num($('ouv-'+s.k).value));
+  const manquantInitial = num($('ouv-manquant').value);
   if(totalOf(soldes) <= 0){ toast('⚠️ Saisis au moins un solde de départ'); return; }
   S.days[todayKey()] = {
     ouverture:{ time: nowHM(), soldes, manquantInitial },
     entrees:[], sorties:[], checkpoints:[], cloture:false
   };
   audit('🌅 Ouverture — total '+fmt(totalOf(soldes))+', ancien manquant '+fmt(manquantInitial));
-  // rapport d'ouverture auto → l'admin voit si l'ancien manquant a été modifié
   let t = '🌅 <b>OUVERTURE</b> — '+esc(S.config.agence).toUpperCase()+'\n📅 '+frDate(todayKey())+' à '+nowHM()+(S.config.agent?'\n👤 '+esc(S.config.agent):'')+'\n\n';
   SERVICES.forEach(s=>{ t += s.e+' '+s.n+' : <b>'+fmt(soldes[s.k])+'</b>\n'; });
   t += 'Σ Total départ : <b>'+fmt(totalOf(soldes))+'</b>\n📉 Ancien manquant déclaré : <b>'+fmt(manquantInitial)+'</b>';
@@ -432,18 +811,17 @@ function ouvrirJour(){
     t += '\n\n⚠️ <b>ATTENTION</b> : le manquant reporté ('+fmt(manquantInitial)+') est différent de celui de la dernière fermeture ('+fmt(prev.manquantTotal)+') !';
   }
   tgSend(t, true);
-  save(); toast('✅ Journée ouverte — bon travail !'); go('jour');
+  save(); vibrate(40); toast('✅ Journée ouverte — bon travail !'); go('jour');
 }
 
-function resetJour(){
-  if(!pinOk('réinitialiser la journée')) return;
-  if(!confirm('Réinitialiser TOUTE la journée d\'aujourd\'hui ? (ouverture, pointages, mouvements)')) return;
+async function resetJour(){
+  if(!await pinOk('réinitialiser la journée')) return;
+  if(!await askConfirm('Réinitialiser la journée ?','Ouverture, pointages et mouvements d\'aujourd\'hui seront <b>définitivement effacés</b>.',{icon:'♻️',danger:true,ok:'Tout effacer'})) return;
   audit('♻️ Journée réinitialisée');
   alertTg('♻️ La journée du '+frDate(todayKey())+' a été <b>réinitialisée</b> (ouverture, pointages et mouvements effacés).');
   delete S.days[todayKey()]; save(); go('jour');
 }
 
-/* quel checkpoint est dû maintenant ? */
 function checkpointDue(day){
   const now = nowHM();
   for(let i=0;i<S.config.checkpoints.length;i++){
@@ -457,12 +835,12 @@ function checkpointDue(day){
 function vPointage(){
   const day = getDay();
   let h = header();
-  if(!day) return h + `<div class="card"><h2>✅ Pointage</h2><div class="empty">Ouvre d'abord la journée dans l'onglet 📊 Jour.</div></div>`;
+  if(!day) return h + `<div class="card"><h2><span class="hic">✅</span>Pointage</h2><div class="empty"><span class="ei">🌅</span>Ouvre d'abord la journée<br>dans l'onglet 📊 Jour.</div></div>`;
 
   const due = checkpointDue(day);
   if(cpSel === null) cpSel = (due !== null) ? due : firstUndone(day);
 
-  h += `<div class="card"><h2>✅ Pointage des soldes réels</h2>
+  h += `<div class="card"><h2><span class="hic">✅</span>Pointage des soldes réels</h2>
     <div class="seg">` + S.config.checkpoints.map((c,i)=>{
       const done = day.checkpoints && day.checkpoints[i];
       return `<button class="${cpSel===i?'on':''}" onclick="cpSel=${i};render()">${done?'✅ ':''}${c.t}</button>`;
@@ -472,21 +850,20 @@ function vPointage(){
   const done = day.checkpoints && day.checkpoints[cpSel];
   const pre = done ? done.soldes : (lastCp(day) ? lastCp(day).soldes : day.ouverture.soldes);
 
-  h += `<div class="hint">Compte <b>réellement</b> chaque caisse (${esc(c.label)}) et saisis ce que tu as devant toi. Pas ce que tu "devrais" avoir.</div>`;
+  h += `<div class="hint">Compte <b>réellement</b> chaque caisse (${esc(c.label)}) et saisis ce que tu as devant toi — pas ce que tu « devrais » avoir.</div>`;
   h += SERVICES.map(s=>`<div class="in-row">
       <div class="svc-dot">${s.e}</div><div class="in-name">${s.n}</div>
-      <input type="number" inputmode="numeric" id="cp-${s.k}" placeholder="0" value="${done? (+done.soldes[s.k]||0) : (+pre[s.k]||0)}">
+      <input type="text" inputmode="numeric" class="money" id="cp-${s.k}" placeholder="0" value="${moneyVal(done? (+done.soldes[s.k]||0) : (+pre[s.k]||0))}" oninput="fmtIn(this)">
     </div>`).join('');
 
-  h += `<button class="btn primary" onclick="savePointage()">${done?'✏️ Corriger ce pointage':'💾 Valider le pointage '+c.t}</button>`;
+  h += `<button class="btn primary" id="btn-savecp" onclick="savePointage()">${done?'✏️ Corriger ce pointage':'💾 Valider le pointage '+c.t}</button>`;
+  h += `</div>`;
   if(done){
     const manqJour = done.theorique - done.reelTotal;
     const manqTotal = manqJour + (+day.ouverture.manquantInitial||0);
-    h += `</div>` + resultCard(day, done, manqJour, manqTotal) +
-      `<button class="btn blue" onclick="sendCp(${cpSel})">📨 Envoyer ce pointage à l'admin (Telegram)</button>`;
+    h += resultCard(day, done, manqJour, manqTotal);
+    h += `<button class="btn blue" onclick="sendCp(${cpSel})">📨 Envoyer ce pointage à l'admin</button>`;
     if(done.sent) h += `<div class="small" style="text-align:center">✅ Déjà envoyé à ${done.sent}</div>`;
-  }else{
-    h += `</div>`;
   }
   return h;
 }
@@ -500,7 +877,7 @@ function firstUndone(day){
 function resultCard(day, cp, manqJour, manqTotal){
   const prevManq = prevManquant(day, cp.idx);
   const delta = manqJour - prevManq;
-  return `<div class="card"><h2>🧾 Résultat — ${esc(cp.label)}</h2>
+  return `<div class="card"><h2><span class="hic">🧾</span>Résultat — ${esc(cp.label)}${cp.corrections?` <span class="tag">✏️ corrigé ${cp.corrections}×</span>`:''}</h2>
     <div class="calc">
       <div class="cr"><span class="mut">Théorique (ouverture + entrées − sorties)</span><b>${fmt(cp.theorique)}</b></div>
       <div class="cr"><span class="mut">Réel compté</span><b>${fmt(cp.reelTotal)}</b></div>
@@ -509,7 +886,7 @@ function resultCard(day, cp, manqJour, manqTotal){
       <div class="cr"><span class="mut">Ancien manquant</span><b>${fmt(+day.ouverture.manquantInitial||0)}</b></div>
       <div class="cr total"><span>MANQUANT TOTAL</span><b class="${manqTotal>0?'neg':'pos'}">${fmt(Math.abs(manqTotal))}${manqTotal<0?' (surplus)':''}</b></div>
     </div>
-    ${delta>0? `<div class="hint" style="border-left-color:var(--red)">🔎 <b>${fmt(delta)}</b> de manquant sont apparus <b>entre le pointage précédent et ${esc(cp.label)}</b>. C'est dans cette tranche qu'il faut chercher.</div>`:''}
+    ${delta>0? `<div class="hint danger">🔎 <b>${fmt(delta)}</b> de manquant sont apparus <b>entre le pointage précédent et ${esc(cp.label)}</b>. C'est dans cette tranche qu'il faut chercher.</div>`:''}
   </div>`;
 }
 
@@ -521,17 +898,16 @@ function prevManquant(day, idx){
   return 0;
 }
 
-function savePointage(){
+async function savePointage(){
   const day = getDay(); if(!day) return;
   const soldes = {};
-  SERVICES.forEach(s=> soldes[s.k] = +($('cp-'+s.k).value||0));
+  SERVICES.forEach(s=> soldes[s.k] = num($('cp-'+s.k).value));
   const c = S.config.checkpoints[cpSel];
   if(!day.checkpoints) day.checkpoints = [];
   const existing = day.checkpoints[cpSel];
   if(existing){
-    // corriger un pointage validé = action protégée + signalée à l'admin
-    if(!pinOk('corriger le pointage '+c.t)) return;
-    if(!confirm('Un pointage '+c.t+' existe déjà. Le remplacer ?')) return;
+    if(!await pinOk('corriger le pointage '+c.t)) return;
+    if(!await askConfirm('Corriger le pointage '+c.t+' ?','L\'ancien pointage sera remplacé et <b>l\'admin sera notifié</b> de la correction.',{icon:'✏️',ok:'Corriger'})) return;
   }
   day.checkpoints[cpSel] = {
     idx: cpSel, label: c.label, time: nowHM(),
@@ -550,8 +926,9 @@ function savePointage(){
       +'Nouveau réel : <b>'+fmt(cp.reelTotal)+'</b> (écart <b>'+fmt(manq)+'</b>)'
       +(S.config.agent?'\n👤 '+esc(S.config.agent):''));
   }
+  vibrate(manq>0? [60,40,60] : 40);
   toast(manq>0 ? '⚠️ Manquant du jour : '+fmt(manq) : '✅ Pointage OK — rien ne manque !');
-  if(S.config.autoSend) sendCp(cpSel, true); // envoi auto : l'agent ne peut pas "oublier"
+  if(S.config.autoSend) sendCp(cpSel, true);
   render();
 }
 
@@ -559,9 +936,9 @@ function savePointage(){
 function vMouvements(){
   const day = getDay();
   let h = header();
-  if(!day) return h + `<div class="card"><h2>💸 Mouvements</h2><div class="empty">Ouvre d'abord la journée dans l'onglet 📊 Jour.</div></div>`;
+  if(!day) return h + `<div class="card"><h2><span class="hic">💸</span>Mouvements</h2><div class="empty"><span class="ei">🌅</span>Ouvre d'abord la journée<br>dans l'onglet 📊 Jour.</div></div>`;
 
-  h += `<div class="card"><h2>💸 Nouveau mouvement</h2>
+  h += `<div class="card"><h2><span class="hic">💸</span>Nouveau mouvement</h2>
     <div class="seg">
       <button class="${mvType==='sortie'?'on':''}" onclick="mvType='sortie';render()">📤 Sortie</button>
       <button class="${mvType==='entree'?'on':''}" onclick="mvType='entree';render()">📥 Entrée / Appro</button>
@@ -570,16 +947,16 @@ function vMouvements(){
       ? '<b>Sortie</b> = argent qui quitte l\'agence : dépense, versement à l\'admin, transport, crédit pris…'
       : '<b>Entrée</b> = argent injecté dans l\'agence : appro UV offert par l\'admin, dépôt de fonds, commission reçue…'}</div>
     <label class="fl">Montant (F CFA)</label>
-    <input type="number" inputmode="numeric" id="mv-montant" placeholder="0">
+    <input type="text" inputmode="numeric" class="money" id="mv-montant" placeholder="0" oninput="fmtIn(this)">
     <label class="fl">Motif</label>
     <input type="text" id="mv-motif" placeholder="${mvType==='sortie'?'ex : versement admin, transport, eau…':'ex : appro UV Orange, dépôt patron…'}">
     <button class="btn ${mvType==='sortie'?'red':'green'}" onclick="addMv()">${mvType==='sortie'?'📤 Enregistrer la sortie':'📥 Enregistrer l\'entrée'}</button>
   </div>`;
 
-  h += `<div class="card"><h2>📤 Sorties du jour <span class="tag">−${fmt(sumMv(day,'sorties'))}</span></h2>`+
-    (day.sorties.length ? day.sorties.map((m,i)=>mvRow(m,i,'sorties')).join('') : `<div class="empty">Aucune sortie</div>`) + `</div>`;
-  h += `<div class="card"><h2>📥 Entrées du jour <span class="tag">+${fmt(sumMv(day,'entrees'))}</span></h2>`+
-    (day.entrees.length ? day.entrees.map((m,i)=>mvRow(m,i,'entrees')).join('') : `<div class="empty">Aucune entrée</div>`) + `</div>`;
+  h += `<div class="card"><h2><span class="hic">📤</span>Sorties du jour <span class="tag">−${fmt(sumMv(day,'sorties'))}</span></h2>`+
+    (day.sorties.length ? day.sorties.map((m,i)=>mvRow(m,i,'sorties')).join('') : `<div class="empty"><span class="ei">📤</span>Aucune sortie aujourd'hui</div>`) + `</div>`;
+  h += `<div class="card"><h2><span class="hic">📥</span>Entrées du jour <span class="tag">+${fmt(sumMv(day,'entrees'))}</span></h2>`+
+    (day.entrees.length ? day.entrees.map((m,i)=>mvRow(m,i,'entrees')).join('') : `<div class="empty"><span class="ei">📥</span>Aucune entrée aujourd'hui</div>`) + `</div>`;
   return h;
 }
 
@@ -595,51 +972,70 @@ function mvRow(m,i,type){
 
 function addMv(){
   const day = getDay(); if(!day) return;
-  const montant = +($('mv-montant').value||0);
+  const montant = num($('mv-montant').value);
   const motif = $('mv-motif').value.trim();
   if(montant<=0){ toast('⚠️ Saisis un montant'); return; }
   if(!motif){ toast('⚠️ Indique le motif — c\'est ça qui structure !'); return; }
   const list = mvType==='sortie' ? day.sorties : day.entrees;
   list.push({time: nowHM(), montant, motif});
-  save(); toast('✅ Enregistré'); render();
+  save(); vibrate(35); toast('✅ Enregistré'); render();
 }
 
-function delMv(type,i){
+async function delMv(type,i){
   const day = getDay(); if(!day) return;
   const m = day[type][i]; if(!m) return;
   const lbl = (type==='sorties'?'la sortie':'l\'entrée')+' « '+m.motif+' » ('+fmt(m.montant)+')';
-  if(!pinOk('supprimer '+lbl)) return;
-  if(!confirm('Supprimer '+lbl+' ?')) return;
+  if(!await pinOk('supprimer '+lbl)) return;
+  if(!await askConfirm('Supprimer ce mouvement ?', esc(lbl)+'<br>L\'admin sera notifié de la suppression.',{icon:'🗑',danger:true,ok:'Supprimer'})) return;
   audit('🗑 Suppression : '+lbl);
   alertTg('🗑 <b>Mouvement supprimé</b> : '+esc(lbl)+' (saisi à '+m.time+')'+(S.config.agent?'\n👤 '+esc(S.config.agent):''));
   day[type].splice(i,1); save(); render();
 }
 
 /* ══════════ VUE : HISTORIQUE ══════════ */
-let hOpen = null;
 function vHistorique(){
   let h = header();
   const keys = Object.keys(S.days).sort().reverse();
-  h += `<div class="card"><h2>📅 Historique</h2>`;
-  if(!keys.length){ return h + `<div class="empty">Aucune journée enregistrée</div></div>`; }
-  h += `</div>`;
+  if(!keys.length){
+    return h + `<div class="card"><h2><span class="hic">📅</span>Historique</h2><div class="empty"><span class="ei">📅</span>Aucune journée enregistrée pour l'instant</div></div>`;
+  }
+
+  /* stats 7 derniers jours */
+  const last7 = keys.slice(0,7).map(k=>({k, d:S.days[k]})).filter(x=>lastCp(x.d));
+  if(last7.length){
+    const manq7 = last7.reduce((a,x)=>{ const cp=lastCp(x.d); return a + Math.max(0, cp.theorique-cp.reelTotal); },0);
+    const sort7 = last7.reduce((a,x)=> a + sumMv(x.d,'sorties'), 0);
+    const okDays = last7.filter(x=>{ const cp=lastCp(x.d); return cp.theorique-cp.reelTotal <= 0; }).length;
+    h += `<div class="kpis">
+      <div class="kpi"><div class="kl">Manquant creusé · 7j</div><div class="kv ${manq7>0?'neg':'pos'}">${fmt(manq7)}</div><div class="ks">${last7.length} jour${last7.length>1?'s':''} pointé${last7.length>1?'s':''}</div></div>
+      <div class="kpi"><div class="kl">Sorties · 7j</div><div class="kv">${fmt(sort7)}</div><div class="ks">total des dépenses</div></div>
+      <div class="kpi" style="grid-column:1/-1"><div class="kl">Jours sans manquant</div><div class="kv ${okDays===last7.length?'pos':''}">${okDays} / ${last7.length}</div><div class="ks">${okDays===last7.length?'parfait, continue comme ça 💪':'objectif : tous les jours à 0'}</div></div>
+    </div>`;
+  }
+
+  const evo = chartManquant();
+  if(evo) h += `<div class="card"><h2><span class="hic">📈</span>Évolution du manquant</h2>${evo}</div>`;
+
   keys.forEach(k=>{
     const d = S.days[k];
     const cp = lastCp(d);
     const manqJour = cp ? cp.theorique - cp.reelTotal : 0;
     const manqTotal = manqJour + (+d.ouverture.manquantInitial||0);
     const open = hOpen === k;
-    h += `<div class="hday">
+    const [yy,mm,dd] = k.split('-');
+    h += `<div class="hday ${open?'open':''}">
       <div class="hday-head" onclick="hOpen=hOpen==='${k}'?null:'${k}';render()">
-        <div><div class="d">${frDate(k)}</div><div class="s">${d.cloture?'🔒 clôturée':'ouverte'} · ${(d.checkpoints||[]).filter(c=>c).length}/${S.config.checkpoints.length} pointages</div></div>
+        <div class="hcal"><div class="hd1">${+dd}</div><div class="hd2">${new Date(+yy,mm-1,+dd).toLocaleDateString('fr-FR',{month:'short'}).replace('.','')}</div></div>
+        <div><div class="d">${new Date(+yy,mm-1,+dd).toLocaleDateString('fr-FR',{weekday:'long'})}</div><div class="s">${d.cloture?'🔒 clôturée':'ouverte'} · ${(d.checkpoints||[]).filter(c=>c).length}/${S.config.checkpoints.length} pointages</div></div>
         <div class="m ${manqTotal>0?'neg':'pos'}">${manqTotal>0?'−':''}${fmt(Math.abs(manqTotal))}</div>
+        <span class="chev">▶</span>
       </div>
       ${open ? `<div class="hday-body">
         <div class="calc">
           <div class="cr"><span class="mut">Ouverture (${d.ouverture.time})</span><b>${fmt(totalOf(d.ouverture.soldes))}</b></div>
           ${(d.checkpoints||[]).filter(c=>c).map(c=>{
             const mj = c.theorique - c.reelTotal;
-            return `<div class="cr"><span class="mut">${esc(c.label)} (${c.time})</span><b class="${mj>0?'neg':'pos'}">réel ${fmt(c.reelTotal)} · écart ${mj>0?'−':'+'}${fmt(Math.abs(mj))}</b></div>`;
+            return `<div class="cr"><span class="mut">${esc(c.label)} (${c.time})${c.corrections?' ✏️':''}</span><b class="${mj>0?'neg':'pos'}">réel ${fmt(c.reelTotal)} · ${mj>0?'−':'+'}${fmt(Math.abs(mj))}</b></div>`;
           }).join('')}
           <div class="cr"><span class="mut">Sorties</span><b class="neg">−${fmt(sumMv(d,'sorties'))}</b></div>
           <div class="cr"><span class="mut">Entrées</span><b class="pos">+${fmt(sumMv(d,'entrees'))}</b></div>
@@ -656,65 +1052,66 @@ function vHistorique(){
 function vReglages(){
   const c = S.config;
   let h = header();
-  h += `<div class="card"><h2>🏪 Agence</h2>
+  h += `<div class="card"><h2><span class="hic">🏪</span>Agence</h2>
     <label class="fl">Nom de l'agence</label><input id="cfg-agence" value="${esc(c.agence)}">
     <label class="fl">Ton nom (agent)</label><input id="cfg-agent" value="${esc(c.agent)}" placeholder="ex : Hervé">
   </div>`;
 
-  h += `<div class="card"><h2>⏰ Heures de pointage</h2>
-    <div class="hint">3 pointages par jour. Modifie les heures si ton agence ouvre/ferme à d'autres heures.</div>`+
+  h += `<div class="card"><h2><span class="hic">⏰</span>Heures de pointage</h2>`+
     c.checkpoints.map((cp,i)=>`
       <div class="in-row">
-        <div class="in-name" style="width:120px">${i===0?'☀️ Matin':(i===1?'🌤 Après-midi':'🌙 Fermeture')}</div>
+        <div class="in-name" style="width:118px">${i===0?'☀️ Matin':(i===1?'🌤 Après-midi':'🌙 Fermeture')}</div>
         <input type="time" id="cfg-cp-${i}" value="${cp.t}">
       </div>`).join('')+
-    `<label class="fl" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;font-size:13px;font-family:'Outfit'">
-      <input type="checkbox" id="cfg-dimanche" style="width:20px;height:20px" ${c.dimancheOff?'checked':''}> 🛌 L'agence est fermée le dimanche
-    </label>
-    <div class="small">Le dimanche : aucun rappel de pointage, aucune alerte de retard. Tu pourras quand même ouvrir une journée exceptionnelle depuis l'onglet Jour.</div>
-    <label class="fl" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;font-size:13px;font-family:'Outfit'">
-      <input type="checkbox" id="cfg-notif" style="width:20px;height:20px" ${c.notif?'checked':''}> Activer les rappels (notifications)
-    </label>
-    <div class="small">📱 Les rappels sonnent quand l'app est ouverte ou installée sur l'écran d'accueil. Installe l'app (menu navigateur → « Ajouter à l'écran d'accueil ») pour ne rien rater.</div>
+    `<label class="ck"><input type="checkbox" id="cfg-dimanche" ${c.dimancheOff?'checked':''}> 🛌 L'agence est fermée le dimanche</label>
+    <label class="ck"><input type="checkbox" id="cfg-notif" ${c.notif?'checked':''}> 🔔 Activer les rappels (notifications)</label>
+    <div class="small">📱 Installe l'app sur l'écran d'accueil (menu navigateur → « Ajouter à l'écran d'accueil ») pour ne rien rater.</div>
   </div>`;
 
-  h += `<div class="card"><h2>📨 Telegram (envoi à l'admin)</h2>
+  h += `<div class="card"><h2><span class="hic">📨</span>Telegram (envoi à l'admin)</h2>
     <div class="hint">1️⃣ Sur Telegram, cherche <b>@BotFather</b> → /newbot → copie le <b>token</b>.<br>
-    2️⃣ L'admin envoie un message au bot, puis ouvre <b>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</b> pour voir son <b>chat_id</b>.<br>
+    2️⃣ L'admin envoie un message au bot, puis ouvre <b>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</b> pour lire son <b>chat_id</b>.<br>
     3️⃣ Colle les deux ici.</div>
-    <label class="fl">Token du bot</label><input id="cfg-tgtoken" value="${esc(c.tgToken)}" placeholder="123456:ABC-DEF...">
+    <label class="fl">Token du bot</label><input id="cfg-tgtoken" value="${esc(c.tgToken)}" placeholder="123456:ABC-DEF…">
     <label class="fl">Chat ID de l'admin</label><input id="cfg-tgchat" value="${esc(c.tgChat)}" placeholder="ex : 123456789">
-    <button class="btn blue" onclick="saveCfg();testTg()">🧪 Tester l'envoi Telegram</button>
+    <button class="btn blue" onclick="testTg()">🧪 Tester l'envoi Telegram</button>
   </div>`;
 
-  h += `<div class="card"><h2>🛡️ Anti-triche</h2>
-    <div class="hint">Configure un <b>code admin</b> : corriger un pointage, supprimer un mouvement, réinitialiser la journée ou modifier ces réglages demandera le code. Toute tentative avec un mauvais code est <b>immédiatement signalée à l'admin sur Telegram</b>.</div>
-    <label class="fl">🔐 Code admin (PIN)</label>
-    <input type="password" inputmode="numeric" id="cfg-pin" value="${esc(c.adminPin)}" placeholder="ex : 4 à 6 chiffres — vide = désactivé">
-    <label class="fl" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:13px;font-family:'Outfit'">
-      <input type="checkbox" id="cfg-autosend" style="width:20px;height:20px" ${c.autoSend?'checked':''}> Envoi automatique de chaque pointage à l'admin
-    </label>
-    <label class="fl" style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:13px;font-family:'Outfit'">
-      <input type="checkbox" id="cfg-latealert" style="width:20px;height:20px" ${c.lateAlert?'checked':''}> Alerter l'admin si un pointage a +30 min de retard
-    </label>
+  h += `<div class="card"><h2><span class="hic">🛡️</span>Anti-triche</h2>
+    <div class="hint">Le <b>code admin</b> protège : correction de pointage, suppression de mouvement, réinitialisation, réglages, effacement. Toute tentative avec un mauvais code est <b>signalée à l'admin sur Telegram</b>.</div>
+    <label class="fl">🔐 Code admin (PIN, 4-6 chiffres)</label>
+    <input type="password" inputmode="numeric" id="cfg-pin" maxlength="6" value="${esc(c.adminPin)}" placeholder="vide = désactivé">
+    <label class="ck"><input type="checkbox" id="cfg-autosend" ${c.autoSend?'checked':''}> 📨 Envoi automatique de chaque pointage à l'admin</label>
+    <label class="ck"><input type="checkbox" id="cfg-latealert" ${c.lateAlert?'checked':''}> ⏰ Alerter l'admin si un pointage a +30 min de retard</label>
     <div class="small">✅ Sont aussi envoyés automatiquement : le rapport d'ouverture (avec l'ancien manquant déclaré), les corrections de pointage (ancien → nouveau), les suppressions de mouvements et les réinitialisations.</div>
   </div>`;
 
-  h += `<div class="card"><h2>📜 Journal des actions <span class="tag">${S.audit.length} entrées</span></h2>`+
+  h += `<div class="card"><h2><span class="hic">💾</span>Données</h2>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="exportJSON()">⬇️ Sauvegarde</button>
+      <button class="btn ghost" onclick="$('imp-file').click()">⬆️ Restaurer</button>
+    </div>
+    <input type="file" id="imp-file" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
+    <button class="btn ghost" onclick="exportCSV()">📊 Exporter l'historique (CSV pour Excel)</button>
+    <div class="small">La sauvegarde contient tout : historique, réglages, journal. Garde-en une copie régulièrement (WhatsApp, Drive…).</div>
+  </div>`;
+
+  h += `<div class="card"><h2><span class="hic">📜</span>Journal des actions <span class="tag">${S.audit.length} entrées</span></h2>`+
     (S.audit.length
       ? S.audit.slice(-25).reverse().map(a=>`<div class="mv"><div><div class="tt">${esc(a.a)}</div><div class="ts">${a.d} · ${a.t}</div></div></div>`).join('')
-      : `<div class="empty">Aucune action enregistrée</div>`) + `</div>`;
+      : `<div class="empty"><span class="ei">📜</span>Aucune action enregistrée</div>`) + `</div>`;
 
   h += `<button class="btn primary" onclick="saveCfg(true)">💾 Enregistrer les réglages</button>`;
   h += `<button class="btn red" onclick="wipeAll()">🗑 Tout effacer (réinitialiser l'app)</button>`;
+  h += `<div class="foot">Agence Pro v${VERSION} · données stockées sur cet appareil</div>`;
   return h;
 }
 
-function saveCfg(showToast){
+async function saveCfg(showToast){
   const c = S.config;
-  // si un PIN est actif, modifier les réglages (Telegram, heures, PIN…) demande le code
-  if(c.adminPin && !pinOk('modifier les réglages')) { render(); return; }
+  if(c.adminPin && !await pinOk('modifier les réglages')){ render(); return false; }
   const newPin = $('cfg-pin').value.trim();
+  if(newPin && !/^\d{4,6}$/.test(newPin)){ toast('⚠️ Le code doit faire 4 à 6 chiffres'); return false; }
   if(newPin !== c.adminPin){
     audit(newPin ? '🔐 Code admin '+(c.adminPin?'modifié':'activé') : '🔓 Code admin désactivé');
     if(c.tgToken && c.tgChat) alertTg(newPin ? '🔐 Le code admin a été '+(c.adminPin?'<b>modifié</b>':'<b>activé</b>')+'.' : '🔓 Le code admin a été <b>désactivé</b> !');
@@ -729,22 +1126,70 @@ function saveCfg(showToast){
   c.tgChat = $('cfg-tgchat').value.trim();
   c.notif = $('cfg-notif').checked;
   c.checkpoints.forEach((cp,i)=>{ cp.t = $('cfg-cp-'+i).value || cp.t; });
-  c.checkpoints[0].label = 'Matin '+c.checkpoints[0].t.slice(0,2)+'H';
-  c.checkpoints[1].label = 'Après-midi '+c.checkpoints[1].t.slice(0,2)+'H';
-  c.checkpoints[2].label = 'Fermeture '+c.checkpoints[2].t.slice(0,2)+'H';
+  relabelCps();
   save();
   if(c.notif && 'Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
   }
   if(showToast===true) toast('✅ Réglages enregistrés');
+  return true;
 }
 
-function wipeAll(){
-  if(!pinOk('EFFACER TOUTES les données de l\'app')) return;
-  if(!confirm('⚠️ Effacer TOUTES les données (historique, réglages) ?')) return;
-  if(!confirm('Vraiment sûr ? Cette action est définitive.')) return;
+async function wipeAll(){
+  if(!await pinOk('EFFACER TOUTES les données de l\'app')) return;
+  if(!await askConfirm('Tout effacer ?','Historique, réglages et journal seront <b>définitivement perdus</b>. Fais une sauvegarde avant !',{icon:'🗑',danger:true,ok:'Tout effacer'})) return;
   alertTg('🗑 <b>TOUTES les données de l\'app ont été effacées</b> (historique + réglages).');
-  localStorage.removeItem(KEY); S = load(); migrate(); go('jour');
+  localStorage.removeItem(KEY); S = load(); migrate(); wizStep = 0; go('jour');
+}
+
+/* ══════════ SAUVEGARDE / EXPORT ══════════ */
+function dl(filename, content, type){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type}));
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function exportJSON(){
+  dl('agence-pro-sauvegarde-'+todayKey()+'.json', JSON.stringify(S, null, 1), 'application/json');
+  audit('⬇️ Sauvegarde exportée');
+  toast('⬇️ Sauvegarde téléchargée');
+}
+async function importJSON(input){
+  const f = input.files && input.files[0];
+  input.value = '';
+  if(!f) return;
+  if(!await pinOk('restaurer une sauvegarde')) return;
+  try{
+    const txt = await f.text();
+    const data = JSON.parse(txt);
+    if(!data.config || !data.days) throw new Error('format invalide');
+    if(!await askConfirm('Restaurer cette sauvegarde ?', Object.keys(data.days).length+' journée(s) · agence « '+esc(data.config.agence||'?')+' »<br>Les données actuelles seront remplacées.',{icon:'⬆️',ok:'Restaurer'})) return;
+    S = data; migrate();
+    S.config.setupDone = true;
+    audit('⬆️ Sauvegarde restaurée ('+f.name+')');
+    save(); toast('✅ Sauvegarde restaurée'); go('jour');
+  }catch(e){
+    toast('❌ Fichier invalide : '+e.message);
+  }
+}
+function exportCSV(){
+  const rows = [['date','ouverture','entrees','sorties','theorique','reel','manquant_jour','ancien_manquant','manquant_total','pointages','cloturee']];
+  Object.keys(S.days).sort().forEach(k=>{
+    const d = S.days[k];
+    const cp = lastCp(d);
+    const mj = cp ? cp.theorique - cp.reelTotal : '';
+    rows.push([
+      k, totalOf(d.ouverture.soldes), sumMv(d,'entrees'), sumMv(d,'sorties'),
+      cp?cp.theorique:'', cp?cp.reelTotal:'', mj,
+      +d.ouverture.manquantInitial||0,
+      cp? mj + (+d.ouverture.manquantInitial||0) : '',
+      (d.checkpoints||[]).filter(c=>c).length,
+      d.cloture?'oui':'non'
+    ]);
+  });
+  dl('agence-pro-historique-'+todayKey()+'.csv', '﻿'+rows.map(r=>r.join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+  toast('📊 Historique CSV téléchargé');
 }
 
 /* ══════════ TELEGRAM ══════════ */
@@ -769,8 +1214,9 @@ async function tgSend(text, silent){
 }
 
 async function testTg(){
+  if(!await saveCfg()) return;
   toast('⏳ Envoi du test…');
-  if(await tgSend('✅ <b>Test réussi !</b>\nL\'agence « '+S.config.agence+' » est bien connectée à Telegram.')){
+  if(await tgSend('✅ <b>Test réussi !</b>\nL\'agence « '+esc(S.config.agence)+' » est bien connectée à Telegram.')){
     toast('✅ Message test envoyé à l\'admin !');
   }
 }
@@ -827,14 +1273,16 @@ async function sendCp(idx, auto){
 
 async function cloturer(){
   const day = getDay(); if(!day) return;
-  if(!confirm('Clôturer la journée et envoyer le rapport final à l\'admin ?')) return;
+  if(!await askConfirm('Clôturer la journée ?','Le rapport final sera envoyé à l\'admin. Demain, l\'ouverture sera pré-remplie avec tes soldes de fermeture.',{icon:'🔒',ok:'Clôturer'})) return;
   const cp = lastCp(day);
-  day.cloture = true; save();
+  day.cloture = true;
+  audit('🔒 Journée clôturée');
+  save();
   if(cp){
     toast('⏳ Envoi du rapport de clôture…');
-    let t = reportCp(day, cp);
-    t = '🔒 <b>RAPPORT DE CLÔTURE</b>\n\n' + t;
-    if(await tgSend(t)){ cp.sent = nowHM(); save(); toast('🔒 Journée clôturée + rapport envoyé !'); }
+    let t = '🔒 <b>RAPPORT DE CLÔTURE</b>\n\n' + reportCp(day, cp);
+    if(await tgSend(t, true)){ cp.sent = nowHM(); save(); toast('🔒 Journée clôturée + rapport envoyé !'); }
+    else toast('🔒 Journée clôturée (rapport non envoyé — vérifie Telegram)');
   }
   render();
 }
@@ -844,17 +1292,14 @@ function checkReminders(){
   const day = getDay();
   const tk = todayKey();
   if(!S.notified[tk]) S.notified[tk] = {};
-  // purge vieux marqueurs
   Object.keys(S.notified).forEach(k=>{ if(k!==tk) delete S.notified[k]; });
   const now = nowHM();
   const toMin = h => { const p = h.split(':'); return (+p[0])*60 + (+p[1]); };
-  // dimanche fermé et aucune journée ouverte → aucun rappel, aucune alerte
   const offToday = isOffDay() && !day;
   S.config.checkpoints.forEach((c,i)=>{
     if(offToday) return;
     const done = day && day.checkpoints && day.checkpoints[i];
     if(done) return;
-    // pointage en retard de +30 min → alerte silencieuse à l'admin
     if(S.config.lateAlert && day && !S.notified[tk]['late'+i] && toMin(now) >= toMin(c.t)+30){
       S.notified[tk]['late'+i] = true; save();
       audit('⏰ Pointage '+c.t+' en retard (+30 min)');
@@ -877,12 +1322,8 @@ function checkReminders(){
       if(tab==='jour') render();
     }
   });
-  // rafraîchit l'heure du header à la minute
-  const el = document.querySelector('.hdr .date');
-  if(el){
-    const d = new Date();
-    el.innerHTML = '<b>'+d.toLocaleDateString('fr-FR',{weekday:'short', day:'numeric', month:'short'})+'</b><br>'+nowHM();
-  }
+  const clock = $('clock');
+  if(clock) clock.textContent = nowHM();
 }
 setInterval(checkReminders, 30000);
 
