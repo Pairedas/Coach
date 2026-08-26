@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Agence Pro — Admin</title>
+<meta name="theme-color" content="#070b12">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#070b12;--ink2:#0d1420;--ink3:#131e2f;--ink4:#1a2942;--ink5:#22334f;
+  --line:#1c2c42;--line2:#28405e;
+  --green:#4ade80;--red:#ff5f5f;--amber:#ffb830;--blue:#4d9eff;--cyan:#38f0d0;
+  --orange:#ff7900;
+  --txt:#e2ecf7;--txt2:#8aa2bd;--txt3:#4a6284;
+  --r:16px;--r2:12px;
+  --tr:.18s cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--ink);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 700px 480px at 92% -6%,rgba(77,158,255,.06) 0%,transparent 55%),
+  radial-gradient(ellipse 620px 620px at -8% 96%,rgba(56,240,208,.045) 0%,transparent 55%)}
+#app{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 16px 40px}
+.view{animation:fadeUp .28s cubic-bezier(.3,.8,.4,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.hdr{display:flex;align-items:center;gap:11px;padding:6px 2px 16px}
+.hdr-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#3b82f6,#7db9ff);display:flex;align-items:center;justify-content:center;font-size:21px;box-shadow:0 4px 18px rgba(77,158,255,.35);flex-shrink:0}
+.hdr h1{font-family:'Nunito',sans-serif;font-size:17.5px;font-weight:900;line-height:1.1}
+.hdr h1 em{color:var(--blue);font-style:normal}
+.hdr .sub{font-size:10.5px;color:var(--txt3);font-weight:500;margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ic-btn{width:38px;height:38px;border-radius:11px;background:var(--ink3);border:1px solid var(--line);color:var(--txt2);font-size:15px;cursor:pointer;transition:transform .12s}
+.ic-btn:active{transform:scale(.92)}
+
+.card{background:linear-gradient(180deg,var(--ink2),rgba(13,20,32,.85));border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.22)}
+.card h2{font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.card h2 .hic{width:28px;height:28px;border-radius:8px;background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card h2 .tag{margin-left:auto;font-size:9.5px;font-family:'Fira Code',monospace;color:var(--txt3);font-weight:400}
+.hint{font-size:11.5px;color:var(--txt2);line-height:1.6;background:rgba(77,158,255,.06);border:1px solid rgba(77,158,255,.14);border-radius:10px;padding:10px 12px;margin:10px 0}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r2);padding:13px 14px}
+.kpi .kl{font-size:9px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt3)}
+.kpi .kv{font-family:'Nunito',sans-serif;font-size:19px;font-weight:900;margin-top:5px;line-height:1.1}
+.kpi .ks{font-size:10px;color:var(--txt3);margin-top:3px}
+.kpi.hero{grid-column:1/-1;text-align:center;padding:20px 16px;border-radius:var(--r)}
+.kpi.hero .kv{font-size:38px}
+.kpi.hero.bad{background:linear-gradient(165deg,rgba(255,95,95,.12),var(--ink2));border-color:rgba(255,95,95,.4)}
+.kpi.hero.bad .kv{color:var(--red)}
+.kpi.hero.ok{background:linear-gradient(165deg,rgba(74,222,128,.1),var(--ink2));border-color:rgba(74,222,128,.35)}
+.kpi.hero.ok .kv{color:var(--green)}
+
+.legend{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:8px}
+.lg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)}
+.lg .ld{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.chart-wrap{position:relative}
+.chart-tip{position:absolute;background:var(--ink5);border:1px solid var(--line2);border-radius:9px;padding:7px 11px;font-size:11px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5;transform:translate(-50%,-110%);box-shadow:0 10px 34px rgba(0,0,0,.42)}
+.chart-tip b{font-family:'Nunito',sans-serif}
+.chart-tip .td{color:var(--txt3);font-size:9.5px;font-family:'Fira Code',monospace}
+svg .bar{cursor:pointer}
+svg text{font-family:'Fira Code',monospace}
+.pos{color:var(--green)}.neg{color:var(--red)}.mut{color:var(--txt2)}
+
+.calc{font-size:13px}
+.calc .cr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.calc .cr:last-child{border-bottom:none}
+.calc .cr b{font-family:'Nunito',sans-serif;font-weight:800}
+.calc .cr.total{font-size:14.5px;padding-top:10px}
+
+.hday{background:var(--ink2);border:1px solid var(--line);border-radius:14px;margin-bottom:11px;overflow:hidden}
+.hday-head{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer}
+.hday-head .hcal{width:40px;height:40px;border-radius:11px;background:var(--ink3);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.hday-head .hcal .hd1{font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;line-height:1}
+.hday-head .hcal .hd2{font-size:8px;text-transform:uppercase;color:var(--txt3);letter-spacing:.5px}
+.hday-head .d{font-weight:700;font-size:13px;text-transform:capitalize}
+.hday-head .s{font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px}
+.hday-head .m{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:900;font-size:14.5px;text-align:right}
+.hday-head .chev{color:var(--txt3);font-size:11px;margin-left:6px;transition:transform var(--tr)}
+.hday.open .chev{transform:rotate(90deg)}
+.hday-body{padding:2px 15px 14px;border-top:1px solid var(--line);font-size:12.5px}
+
+.ev{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px;line-height:1.5}
+.ev:last-child{border-bottom:none}
+.ev .eic{width:28px;height:28px;border-radius:8px;background:var(--ink3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.ev .ets{font-size:9.5px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px}
+.ev.alert{color:#ffb3b3}
+.ev.alert .eic{background:rgba(255,95,95,.1);border-color:rgba(255,95,95,.3)}
+
+label.fl{display:block;font-size:10px;font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt2);margin:13px 0 6px}
+input,textarea{width:100%;background:var(--ink3);border:1.5px solid var(--line2);border-radius:11px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 13px;outline:none;transition:border-color var(--tr)}
+input:focus{border-color:var(--blue)}
+textarea{font-family:'Fira Code',monospace;font-size:10px;min-height:120px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:13px;font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;cursor:pointer;margin-top:12px;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.blue{background:linear-gradient(135deg,#3b82f6,#7db9ff);color:#041020;box-shadow:0 6px 20px rgba(77,158,255,.22)}
+.btn.ghost{background:var(--ink3);color:var(--txt2);border:1px solid var(--line2)}
+.btn:disabled{opacity:.45;pointer-events:none}
+
+.wiz-hero{text-align:center;padding:26px 0 8px}
+.wiz-hero .wic{font-size:52px;margin-bottom:12px;display:block}
+.wiz-hero h2{font-family:'Nunito',sans-serif;font-size:21px;font-weight:900;line-height:1.25}
+.wiz-hero p{font-size:13px;color:var(--txt2);margin-top:9px;line-height:1.65}
+details{background:var(--ink3);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-top:12px}
+details summary{font-size:13px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+details summary::after{content:'▸';margin-left:auto;color:var(--txt3);transition:transform var(--tr)}
+details[open] summary::after{transform:rotate(90deg)}
+details .step{display:flex;gap:11px;padding:9px 0;font-size:12.5px;line-height:1.55;color:var(--txt2)}
+details .step .n{width:22px;height:22px;border-radius:7px;background:var(--ink4);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:var(--blue);flex-shrink:0}
+details .step b{color:var(--txt)}
+
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink5);border:1px solid var(--line2);color:var(--txt);padding:12px 18px;border-radius:13px;font-size:13px;font-weight:600;z-index:400;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;max-width:88vw;text-align:center;line-height:1.45}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;color:var(--txt3);font-size:12.5px;padding:22px 0;line-height:1.6}
+.empty .ei{font-size:30px;display:block;margin-bottom:8px;opacity:.6}
+.small{font-size:11px;color:var(--txt3);line-height:1.55;margin-top:8px}
+.foot{text-align:center;font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;padding:18px 0 4px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--blue);border-radius:50%;animation:rot .8s linear infinite;vertical-align:-2px}
+@keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+const AKEY = 'agenceProAdmin_v1';
+let A = loadA();
+function loadA(){
+  try{ const r = localStorage.getItem(AKEY); if(r) return JSON.parse(r); }catch(e){}
+  return {url:'', secret:''};
+}
+function saveA(){ localStorage.setItem(AKEY, JSON.stringify(A)); }
+
+let DATA = null;       // {days:[], events:[]}
+let hOpen = null;
+let loading = false;
+let lastFetch = null;
+
+const $ = id => document.getElementById(id);
+function fmt(n){
+  if(n==='' || n==null || isNaN(+n)) return '—';
+  return Math.round(+n).toLocaleString('fr-FR').replace(/[  ]/g,' ') + ' F';
+}
+function fmtK(n){
+  n = Math.round(+n||0);
+  if(Math.abs(n) >= 1000000) return (n/1000000).toLocaleString('fr-FR',{maximumFractionDigits:1}).replace(/[  ]/g,' ')+'M';
+  if(Math.abs(n) >= 10000) return Math.round(n/1000)+'k';
+  return String(n);
+}
+function frDate(key){
+  const [y,m,d] = String(key).split('-');
+  return new Date(+y, m-1, +d).toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'});
+}
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2800);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ══════════ CONNEXION ══════════ */
+function vLogin(){
+  return `<div class="view">
+    <div class="wiz-hero">
+      <span class="wic">🖥️</span>
+      <h2>Agence Pro<br><span style="color:var(--blue)">Espace Admin</span></h2>
+      <p>Suis ton agence à distance : manquants, pointages,<br>sorties et alertes — en temps réel.</p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2><span class="hic">🔗</span>Connexion</h2>
+      <label class="fl">URL du script Google (…/exec)</label>
+      <input id="lg-url" value="${esc(A.url)}" placeholder="https://script.google.com/macros/s/…/exec">
+      <label class="fl">Code secret</label>
+      <input type="password" id="lg-secret" value="${esc(A.secret)}" placeholder="celui choisi dans le script">
+      <button class="btn blue" id="btn-login" onclick="login()">Se connecter</button>
+    </div>
+    <details>
+      <summary>🛠️ Première fois ? Créer le lien (5 min)</summary>
+      <div class="step"><div class="n">1</div><div>Va sur <b>sheets.new</b> (avec le compte Google de l'admin) pour créer un tableau vide.</div></div>
+      <div class="step"><div class="n">2</div><div>Menu <b>Extensions → Apps Script</b>. Supprime le contenu et colle le code ci-dessous.</div></div>
+      <div class="step"><div class="n">3</div><div>Dans le code, remplace <b>CHANGE-MOI-ABSOLUMENT</b> par ton propre code secret (long).</div></div>
+      <div class="step"><div class="n">4</div><div><b>Déployer → Nouveau déploiement → Application Web</b> : exécuter en tant que <b>Moi</b>, accès <b>Tout le monde</b>. Autorise quand Google le demande.</div></div>
+      <div class="step"><div class="n">5</div><div>Copie l'<b>URL /exec</b> : colle-la ici et dans l'app de l'agent (⚙️ Réglages → Synchronisation) avec le même code secret.</div></div>
+      <label class="fl">Le code à coller</label>
+      <textarea id="gs-code" readonly>Chargement…</textarea>
+      <button class="btn ghost" onclick="copyCode()">📋 Copier le code</button>
+      <div class="small">« Tout le monde » ne rend pas tes données publiques : chaque requête doit contenir ton code secret, sinon elle est rejetée.</div>
+    </details>
+    <div class="foot">Agence Pro Admin v1.0</div>
+  </div>`;
+}
+async function loadGsCode(){
+  try{
+    const r = await fetch('Code.gs');
+    const t = await r.text();
+    const el = $('gs-code'); if(el) el.value = t;
+  }catch(e){}
+}
+function copyCode(){
+  const el = $('gs-code');
+  el.select(); el.setSelectionRange(0, 999999);
+  try{ navigator.clipboard.writeText(el.value); }catch(e){ document.execCommand('copy'); }
+  toast('📋 Code copié — colle-le dans Apps Script');
+}
+async function login(){
+  const url = $('lg-url').value.trim();
+  const secret = $('lg-secret').value.trim();
+  if(!url.includes('script.google') || !url.endsWith('/exec')){ toast('⚠️ L\'URL doit être celle du script, finissant par /exec'); return; }
+  if(!secret){ toast('⚠️ Saisis le code secret'); return; }
+  const btn = $('btn-login'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Connexion…';
+  try{
+    const r = await fetch(url+'?action=ping&secret='+encodeURIComponent(secret));
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'réponse invalide');
+    A = {url, secret}; saveA();
+    toast('✅ Connecté !');
+    refresh();
+  }catch(e){
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    toast('❌ Connexion impossible : '+e.message);
+  }
+}
+function logout(){
+  A = {url:'', secret:''}; saveA(); DATA = null; render();
+}
+
+/* ══════════ DONNÉES ══════════ */
+async function refresh(){
+  if(!A.url || loading) return;
+  loading = true; render();
+  try{
+    const r = await fetch(A.url+'?action=data&secret='+encodeURIComponent(A.secret));
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'réponse invalide');
+    DATA = j; lastFetch = new Date();
+  }catch(e){
+    toast('❌ Actualisation impossible : '+e.message);
+  }
+  loading = false; render();
+}
+setInterval(()=>{ if(A.url && DATA) refresh(); }, 60000);
+
+/* ══════════ GRAPHIQUES ══════════ */
+function chartBars(items, opts){
+  /* items : [{k:'2026-08-26', v:nombre}] triés du plus ancien au plus récent */
+  if(items.length < 2) return '';
+  const W = 340, H = 130, padT = 18, padB = 18, padL = 4, padR = 4;
+  const maxAbs = Math.max(...items.map(d=>Math.abs(d.v)), 1);
+  const zero = padT + (H-padT-padB)/2;
+  const bw = Math.min(20, (W-padL-padR)/items.length - 3);
+  const iMax = items.reduce((mi,d,i)=> Math.abs(d.v) > Math.abs(items[mi].v) ? i : mi, 0);
+  let bars = '', labels = '';
+  items.forEach((d,i)=>{
+    const cx = padL + (W-padL-padR)*(i+.5)/items.length;
+    const hpx = Math.max(3, Math.abs(d.v)/maxAbs * (H-padT-padB)/2);
+    const y = d.v >= 0 ? zero - hpx : zero;
+    const col = d.v > 0 ? 'var(--red)' : 'var(--green)';
+    bars += `<rect class="bar" x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${hpx.toFixed(1)}" rx="3" fill="${col}" fill-opacity=".9" onclick="chartTip(event,'${d.k}',${d.v},'${opts.tipId}')"><title>${frDate(d.k)} : ${fmt(Math.abs(d.v))}</title></rect>`;
+    if(i===iMax && d.v!==0) labels += `<text x="${cx.toFixed(1)}" y="${(d.v>=0? y-5 : y+hpx+11).toFixed(1)}" font-size="9" fill="${d.v>0?'var(--red)':'var(--green)'}" text-anchor="middle" font-weight="600">${d.v>0?'−':'+'}${fmtK(Math.abs(d.v))}</text>`;
+    if(items.length<=16 || i%2===0) labels += `<text x="${cx.toFixed(1)}" y="${H-4}" font-size="8" fill="var(--txt3)" text-anchor="middle">${d.k.slice(8)}</text>`;
+  });
+  return `<div class="chart-wrap">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">
+      <line x1="${padL}" y1="${zero.toFixed(1)}" x2="${W-padR}" y2="${zero.toFixed(1)}" stroke="var(--line2)" stroke-width="1"/>
+      ${bars}${labels}
+    </svg>
+    <div class="chart-tip" id="${opts.tipId}"></div>
+  </div>
+  <div class="legend"><span class="lg"><span class="ld" style="background:var(--red)"></span>Manquant</span><span class="lg"><span class="ld" style="background:var(--green)"></span>Surplus</span></div>`;
+}
+function chartLine(items){
+  /* évolution du manquant total — une seule série */
+  if(items.length < 2) return '';
+  const W = 340, H = 110, padT = 14, padB = 16, padL = 4, padR = 4;
+  const vals = items.map(d=>d.v);
+  const lo = Math.min(...vals, 0), hi = Math.max(...vals, 1);
+  const X = i => padL + (W-padL-padR)*(items.length===1?.5:i/(items.length-1));
+  const Y = v => padT + (H-padT-padB)*(1-(v-lo)/(hi-lo||1));
+  const path = items.map((d,i)=> (i?'L':'M')+X(i).toFixed(1)+' '+Y(d.v).toFixed(1)).join(' ');
+  const last = items[items.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">
+    ${lo<0? `<line x1="${padL}" y1="${Y(0).toFixed(1)}" x2="${W-padR}" y2="${Y(0).toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 3"/>`:''}
+    <path d="${path}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(items.length-1).toFixed(1)}" cy="${Y(last.v).toFixed(1)}" r="4" fill="var(--amber)" stroke="var(--ink2)" stroke-width="2"/>
+    <text x="${(X(items.length-1)-6).toFixed(1)}" y="${(Y(last.v)-8).toFixed(1)}" font-size="9" fill="var(--txt2)" text-anchor="end" font-weight="600">${fmtK(last.v)}</text>
+    <text x="${padL}" y="${H-3}" font-size="8" fill="var(--txt3)">${items[0].k.slice(5)}</text>
+    <text x="${W-padR}" y="${H-3}" font-size="8" fill="var(--txt3)" text-anchor="end">${last.k.slice(5)}</text>
+  </svg>`;
+}
+function chartTip(ev, k, v, id){
+  const tip = $(id); if(!tip) return;
+  const wrap = tip.parentElement.getBoundingClientRect();
+  tip.innerHTML = `<div class="td">${frDate(k)}</div><b class="${v>0?'neg':'pos'}">${v>0?'−':'+'}${fmt(Math.abs(v))}</b>`;
+  tip.style.left = Math.min(Math.max(ev.clientX - wrap.left, 60), wrap.width-60)+'px';
+  tip.style.top = (ev.clientY - wrap.top)+'px';
+  tip.style.opacity = 1;
+  clearTimeout(tip._h); tip._h = setTimeout(()=> tip.style.opacity = 0, 2200);
+}
+
+/* ══════════ TABLEAU DE BORD ══════════ */
+const EV_ICONS = {alerte:'🚨', pointage:'✅', ouverture:'🌅', cloture:'🔒', info:'ℹ️'};
+function vDash(){
+  const days = DATA.days || [];
+  const events = DATA.events || [];
+  const latest = days.find(d=> d.reel !== '' && d.reel != null) || days[0];
+  const today = days.find(d=> d.date === todayKey());
+
+  let h = `<div class="view"><div class="hdr">
+    <div class="hdr-icon">🖥️</div>
+    <div><h1><em>Admin</em> — ${esc(latest? latest.agence : 'Agence Pro')}</h1>
+      <div class="sub">${latest && latest.agent ? 'Agent : '+esc(latest.agent)+' · ' : ''}actualisé ${lastFetch? lastFetch.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '—'}</div></div>
+    <div class="hdr-right">
+      <button class="ic-btn" onclick="refresh()" title="Actualiser">${loading?'<span class="spin"></span>':'↻'}</button>
+      <button class="ic-btn" onclick="logout()" title="Déconnexion">⏻</button>
+    </div>
+  </div>`;
+
+  if(!days.length){
+    h += `<div class="card"><div class="empty"><span class="ei">📭</span>Aucune donnée reçue pour l'instant.<br>Vérifie que l'app de l'agent a bien l'URL et le code secret<br>dans ⚙️ Réglages → Synchronisation.</div></div></div>`;
+    return h;
+  }
+
+  /* KPI */
+  const mt = latest ? +latest.manquant_total : null;
+  h += `<div class="kpis">
+    <div class="kpi hero ${mt>0?'bad':'ok'}">
+      <div class="kl">Manquant total${mt<0?' (surplus)':''}</div>
+      <div class="kv">${mt==null?'—':fmt(Math.abs(mt))}</div>
+      <div class="ks">dernier pointage : ${latest? frDate(latest.date) : '—'} à ${latest? esc(String(latest.maj)) : ''}</div>
+    </div>
+    <div class="kpi"><div class="kl">Aujourd'hui</div><div class="kv">${today? (today.pointages||0)+' / 3' : '—'}</div><div class="ks">${today? (today.cloturee==='oui'?'journée clôturée 🔒':'pointages faits') : 'journée pas encore ouverte'}</div></div>
+    <div class="kpi"><div class="kl">Écart du jour</div><div class="kv ${latest && +latest.manquant_jour>0?'neg':'pos'}">${latest && latest.manquant_jour!==''? (+latest.manquant_jour>0?'−':'+')+fmt(Math.abs(+latest.manquant_jour)) : '—'}</div><div class="ks">théorique − réel</div></div>
+  </div>`;
+
+  /* graphiques */
+  const serie = days.slice(0, 30).reverse().filter(d=> d.manquant_jour !== '' && d.manquant_jour != null)
+    .map(d=> ({k:d.date, v:+d.manquant_jour}));
+  const serieTotal = days.slice(0, 30).reverse().filter(d=> d.manquant_total !== '' && d.manquant_total != null)
+    .map(d=> ({k:d.date, v:+d.manquant_total}));
+  if(serie.length >= 2){
+    h += `<div class="card"><h2><span class="hic">📊</span>Manquant du jour <span class="tag">30 derniers jours</span></h2>${chartBars(serie,{tipId:'tip-mj'})}</div>`;
+  }
+  if(serieTotal.length >= 2){
+    h += `<div class="card"><h2><span class="hic">📈</span>Manquant total <span class="tag">évolution</span></h2>${chartLine(serieTotal)}</div>`;
+  }
+
+  /* alertes récentes */
+  const alerts = events.filter(e=> e.type==='alerte').slice(0, 6);
+  if(alerts.length){
+    h += `<div class="card"><h2><span class="hic">🚨</span>Alertes récentes</h2>`+
+      alerts.map(e=>`<div class="ev alert"><div class="eic">🚨</div><div>${esc(e.texte)}<div class="ets">${esc(e.date)} · ${esc(e.ts)}</div></div></div>`).join('')+`</div>`;
+  }
+
+  /* journées */
+  h += `<h2 style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px">📅 Journées</h2>`;
+  days.slice(0, 30).forEach(d=>{
+    const open = hOpen === d.date;
+    const [yy,mm,dd] = d.date.split('-');
+    const mt2 = d.manquant_total===''||d.manquant_total==null ? null : +d.manquant_total;
+    const det = d.detail || {};
+    h += `<div class="hday ${open?'open':''}">
+      <div class="hday-head" onclick="hOpen=hOpen==='${d.date}'?null:'${d.date}';render()">
+        <div class="hcal"><div class="hd1">${+dd}</div><div class="hd2">${new Date(+yy,mm-1,+dd).toLocaleDateString('fr-FR',{month:'short'}).replace('.','')}</div></div>
+        <div><div class="d">${new Date(+yy,mm-1,+dd).toLocaleDateString('fr-FR',{weekday:'long'})}</div>
+          <div class="s">${d.cloturee==='oui'?'🔒 clôturée':'ouverte'} · ${d.pointages||0}/3 pointages · maj ${esc(String(d.maj||''))}</div></div>
+        <div class="m ${mt2>0?'neg':'pos'}">${mt2==null?'—':(mt2>0?'−':'')+fmt(Math.abs(mt2))}</div>
+        <span class="chev">▶</span>
+      </div>
+      ${open? `<div class="hday-body">
+        <div class="calc">
+          <div class="cr"><span class="mut">Ouverture</span><b>${fmt(d.ouverture)}</b></div>
+          <div class="cr"><span class="mut">+ Entrées</span><b class="pos">+${fmt(d.entrees)}</b></div>
+          <div class="cr"><span class="mut">− Sorties</span><b class="neg">−${fmt(d.sorties)}</b></div>
+          <div class="cr"><span class="mut">= Théorique</span><b>${fmt(d.theorique)}</b></div>
+          ${(det.checkpoints||[]).map(c=>{
+            const mj = c.theorique - c.reelTotal;
+            return `<div class="cr"><span class="mut">${esc(c.label)} (${esc(c.time)})${c.corrections?' ✏️'+c.corrections+'×':''}</span><b class="${mj>0?'neg':'pos'}">réel ${fmt(c.reelTotal)} · ${mj>0?'−':'+'}${fmt(Math.abs(mj))}</b></div>`;
+          }).join('')}
+          <div class="cr"><span class="mut">Ancien manquant</span><b>${fmt(d.ancien_manquant)}</b></div>
+          <div class="cr total"><span>Manquant total</span><b class="${mt2>0?'neg':'pos'}">${mt2==null?'—':fmt(Math.abs(mt2))}${mt2<0?' (surplus)':''}</b></div>
+        </div>
+        ${(det.sorties||[]).length? `<div style="margin-top:8px;font-size:11px;color:var(--txt2);font-weight:700;text-transform:uppercase;letter-spacing:1px">Sorties</div>`+
+          det.sorties.map(m=>`<div class="ev"><div class="eic">📤</div><div>${esc(m.motif)}<div class="ets">${esc(m.time)}</div></div><div style="margin-left:auto;font-family:'Nunito',sans-serif;font-weight:800" class="neg">−${fmt(m.montant)}</div></div>`).join(''):''}
+      </div>`:''}
+    </div>`;
+  });
+
+  /* fil d'activité */
+  h += `<div class="card" style="margin-top:14px"><h2><span class="hic">📜</span>Fil d'activité <span class="tag">${events.length} événements</span></h2>`+
+    (events.length ? events.slice(0, 40).map(e=>`<div class="ev ${e.type==='alerte'?'alert':''}">
+      <div class="eic">${EV_ICONS[e.type]||'ℹ️'}</div>
+      <div>${esc(e.texte)}<div class="ets">${esc(e.date)} · ${esc(e.ts)}</div></div>
+    </div>`).join('') : `<div class="empty"><span class="ei">📜</span>Aucun événement</div>`) + `</div>`;
+
+  h += `<div class="foot">Agence Pro Admin v1.0 · actualisation auto chaque minute</div></div>`;
+  return h;
+}
+
+/* ══════════ RENDER ══════════ */
+function render(){
+  const app = $('app');
+  if(!A.url || !DATA){
+    app.innerHTML = vLogin();
+    loadGsCode();
+    return;
+  }
+  app.innerHTML = vDash();
+}
+render();
+if(A.url && A.secret) refresh();
+</script>
+</body>
+</html>

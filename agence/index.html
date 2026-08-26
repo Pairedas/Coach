@@ -253,7 +253,7 @@ h3.sec{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;color:va
 
 <script>
 /* ══════════ CONSTANTES ══════════ */
-const VERSION = '2.0';
+const VERSION = '2.1';
 /* c = couleur d'accent UI (valeurs, pastilles) · cc = couleur validée pour les graphiques (contraste + daltonisme) */
 const SERVICES = [
   {k:'orange', n:'UV Orange', e:'🟠', c:'#ff7900', cc:'#d96a10'},
@@ -276,7 +276,11 @@ function migrate(){
   if(c.lateAlert === undefined) c.lateAlert = true;
   if(c.dimancheOff === undefined) c.dimancheOff = true;
   if(c.setupDone === undefined) c.setupDone = Object.keys(S.days).length > 0;
+  if(c.syncUrl === undefined) c.syncUrl = '';
+  if(c.syncSecret === undefined) c.syncSecret = '';
   if(!S.audit) S.audit = [];
+  if(!S.evQueue) S.evQueue = [];
+  if(S.dayDirty === undefined) S.dayDirty = false;
 }
 function load(){
   try{
@@ -289,6 +293,7 @@ function load(){
       tgToken:'', tgChat:'',
       notif:false,
       adminPin:'', autoSend:true, lateAlert:true, dimancheOff:true, setupDone:false,
+      syncUrl:'', syncSecret:'',
       checkpoints:[
         {t:'09:00', label:'Matin 09H'},
         {t:'14:00', label:'Après-midi 14H'},
@@ -297,7 +302,9 @@ function load(){
     },
     days:{},
     notified:{},
-    audit:[]
+    audit:[],
+    evQueue:[],
+    dayDirty:false
   };
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
@@ -426,6 +433,84 @@ function pinKey(k){
   }
 }
 
+/* ══════════ SYNCHRONISATION PAGE ADMIN (Google Sheets) ══════════ */
+function syncOn(){ return !!(S.config.syncUrl && S.config.syncSecret); }
+/* POST en text/plain : pas de préflight CORS, Apps Script répond en JSON */
+async function cloudPost(body){
+  if(!syncOn()) return false;
+  try{
+    const r = await fetch(S.config.syncUrl, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(Object.assign({secret:S.config.syncSecret}, body))
+    });
+    const j = await r.json();
+    return !!j.ok;
+  }catch(e){ return false; }
+}
+function daySnapshot(){
+  const day = getDay(); if(!day) return null;
+  const cp = lastCp(day);
+  const mj = cp ? cp.theorique - cp.reelTotal : null;
+  const ancien = +day.ouverture.manquantInitial||0;
+  return {
+    date: todayKey(), maj: nowHM(), agence: S.config.agence, agent: S.config.agent,
+    ouverture: totalOf(day.ouverture.soldes),
+    entrees: sumMv(day,'entrees'), sorties: sumMv(day,'sorties'),
+    theorique: theorique(day),
+    reel: cp ? cp.reelTotal : '', manquantJour: cp ? mj : '',
+    ancien, manquantTotal: cp ? mj + ancien : '',
+    nbPointages: (day.checkpoints||[]).filter(c=>c).length,
+    cloturee: !!day.cloture,
+    detail: {
+      ouverture: day.ouverture,
+      checkpoints: (day.checkpoints||[]).filter(c=>c),
+      sorties: day.sorties, entrees: day.entrees
+    }
+  };
+}
+/* dernier état gagne : si l'envoi échoue (hors-ligne), on marque « à renvoyer » */
+function syncDay(){
+  if(!syncOn()) return;
+  const snap = daySnapshot(); if(!snap) return;
+  S.dayDirty = true; save();
+  cloudPost({action:'day', day:snap}).then(ok=>{ if(ok){ S.dayDirty = false; save(); } });
+}
+function syncEvent(type, texte){
+  if(!syncOn()) return;
+  const ev = {ts: nowHM(), date: todayKey(), type, texte: String(texte).replace(/<[^>]+>/g,'')};
+  cloudPost({action:'event', event:ev}).then(ok=>{
+    if(!ok){ S.evQueue.push(ev); if(S.evQueue.length>100) S.evQueue = S.evQueue.slice(-100); save(); }
+  });
+}
+/* file d'attente hors-ligne, vidée à chaque tick des rappels */
+async function flushSync(){
+  if(!syncOn()) return;
+  if(S.dayDirty && getDay()){
+    const ok = await cloudPost({action:'day', day:daySnapshot()});
+    if(ok){ S.dayDirty = false; save(); }
+  }
+  while(S.evQueue.length){
+    const ok = await cloudPost({action:'event', event:S.evQueue[0]});
+    if(!ok) break;
+    S.evQueue.shift(); save();
+  }
+}
+async function testSync(){
+  if(!await saveCfg()) return;
+  if(!syncOn()){ toast('⚠️ Renseigne l\'URL du script et le code secret'); return; }
+  toast('⏳ Test de connexion…');
+  try{
+    const r = await fetch(S.config.syncUrl+'?action=ping&secret='+encodeURIComponent(S.config.syncSecret));
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'réponse invalide');
+    toast('✅ Synchronisation connectée !');
+    syncDay();
+  }catch(e){
+    toast('❌ Connexion impossible : '+e.message);
+  }
+}
+
 /* ══════════ ANTI-TRICHE ══════════ */
 function audit(action){
   S.audit.push({d: todayKey(), t: nowHM(), a: action});
@@ -434,6 +519,7 @@ function audit(action){
 }
 function alertTg(text){
   tgSend('🚨 <b>ALERTE SÉCURITÉ</b>\n🏪 '+esc(S.config.agence)+' — '+nowHM()+'\n\n'+text, true);
+  syncEvent('alerte', text);
 }
 async function pinOk(action){
   if(!S.config.adminPin) return true;
@@ -811,7 +897,10 @@ function ouvrirJour(){
     t += '\n\n⚠️ <b>ATTENTION</b> : le manquant reporté ('+fmt(manquantInitial)+') est différent de celui de la dernière fermeture ('+fmt(prev.manquantTotal)+') !';
   }
   tgSend(t, true);
-  save(); vibrate(40); toast('✅ Journée ouverte — bon travail !'); go('jour');
+  save();
+  syncDay();
+  syncEvent('ouverture', 'Ouverture — total '+fmt(totalOf(soldes))+', ancien manquant '+fmt(manquantInitial));
+  vibrate(40); toast('✅ Journée ouverte — bon travail !'); go('jour');
 }
 
 async function resetJour(){
@@ -929,6 +1018,8 @@ async function savePointage(){
   vibrate(manq>0? [60,40,60] : 40);
   toast(manq>0 ? '⚠️ Manquant du jour : '+fmt(manq) : '✅ Pointage OK — rien ne manque !');
   if(S.config.autoSend) sendCp(cpSel, true);
+  syncDay();
+  syncEvent('pointage', 'Pointage '+c.label+(existing?' (corrigé)':'')+' — réel '+fmt(cp.reelTotal)+', écart du jour '+fmt(manq));
   render();
 }
 
@@ -978,7 +1069,7 @@ function addMv(){
   if(!motif){ toast('⚠️ Indique le motif — c\'est ça qui structure !'); return; }
   const list = mvType==='sortie' ? day.sorties : day.entrees;
   list.push({time: nowHM(), montant, motif});
-  save(); vibrate(35); toast('✅ Enregistré'); render();
+  save(); syncDay(); vibrate(35); toast('✅ Enregistré'); render();
 }
 
 async function delMv(type,i){
@@ -989,7 +1080,7 @@ async function delMv(type,i){
   if(!await askConfirm('Supprimer ce mouvement ?', esc(lbl)+'<br>L\'admin sera notifié de la suppression.',{icon:'🗑',danger:true,ok:'Supprimer'})) return;
   audit('🗑 Suppression : '+lbl);
   alertTg('🗑 <b>Mouvement supprimé</b> : '+esc(lbl)+' (saisi à '+m.time+')'+(S.config.agent?'\n👤 '+esc(S.config.agent):''));
-  day[type].splice(i,1); save(); render();
+  day[type].splice(i,1); save(); syncDay(); render();
 }
 
 /* ══════════ VUE : HISTORIQUE ══════════ */
@@ -1077,6 +1168,19 @@ function vReglages(){
     <button class="btn blue" onclick="testTg()">🧪 Tester l'envoi Telegram</button>
   </div>`;
 
+  h += `<div class="card"><h2><span class="hic">🖥️</span>Page admin (synchronisation)</h2>
+    <div class="hint">Chaque pointage, sortie et alerte est aussi envoyé vers un <b>Google Sheet</b> que l'admin consulte sur une <b>page dédiée avec graphiques</b>. La création du lien (5 min) est expliquée sur la page admin.</div>
+    <label class="fl">URL du script Google (…/exec)</label>
+    <input id="cfg-syncurl" value="${esc(c.syncUrl)}" placeholder="https://script.google.com/macros/s/…/exec">
+    <label class="fl">Code secret de synchronisation</label>
+    <input type="password" id="cfg-syncsecret" value="${esc(c.syncSecret)}" placeholder="le même que dans le script">
+    <div class="btn-row">
+      <button class="btn blue" onclick="testSync()">🧪 Tester</button>
+      <button class="btn ghost" onclick="window.open('admin/','_blank')">🖥️ Page admin</button>
+    </div>
+    ${syncOn()? `<div class="small">✅ Synchronisation active${S.dayDirty||S.evQueue.length? ' · ⏳ '+(S.evQueue.length+(S.dayDirty?1:0))+' envoi(s) en attente (hors-ligne)':''}</div>`:''}
+  </div>`;
+
   h += `<div class="card"><h2><span class="hic">🛡️</span>Anti-triche</h2>
     <div class="hint">Le <b>code admin</b> protège : correction de pointage, suppression de mouvement, réinitialisation, réglages, effacement. Toute tentative avec un mauvais code est <b>signalée à l'admin sur Telegram</b>.</div>
     <label class="fl">🔐 Code admin (PIN, 4-6 chiffres)</label>
@@ -1124,6 +1228,8 @@ async function saveCfg(showToast){
   c.agent = $('cfg-agent').value.trim();
   c.tgToken = $('cfg-tgtoken').value.trim();
   c.tgChat = $('cfg-tgchat').value.trim();
+  c.syncUrl = $('cfg-syncurl').value.trim();
+  c.syncSecret = $('cfg-syncsecret').value.trim();
   c.notif = $('cfg-notif').checked;
   c.checkpoints.forEach((cp,i)=>{ cp.t = $('cfg-cp-'+i).value || cp.t; });
   relabelCps();
@@ -1278,6 +1384,8 @@ async function cloturer(){
   day.cloture = true;
   audit('🔒 Journée clôturée');
   save();
+  syncDay();
+  syncEvent('cloture', 'Journée clôturée — manquant total '+(cp? fmt((cp.theorique-cp.reelTotal)+(+day.ouverture.manquantInitial||0)) : '—'));
   if(cp){
     toast('⏳ Envoi du rapport de clôture…');
     let t = '🔒 <b>RAPPORT DE CLÔTURE</b>\n\n' + reportCp(day, cp);
@@ -1324,6 +1432,7 @@ function checkReminders(){
   });
   const clock = $('clock');
   if(clock) clock.textContent = nowHM();
+  flushSync();
 }
 setInterval(checkReminders, 30000);
 
