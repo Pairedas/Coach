@@ -144,11 +144,11 @@ let lastFetch = null;
 const $ = id => document.getElementById(id);
 function fmt(n){
   if(n==='' || n==null || isNaN(+n)) return '—';
-  return Math.round(+n).toLocaleString('fr-FR').replace(/[  ]/g,' ') + ' F';
+  return Math.round(+n).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ') + ' F';
 }
 function fmtK(n){
   n = Math.round(+n||0);
-  if(Math.abs(n) >= 1000000) return (n/1000000).toLocaleString('fr-FR',{maximumFractionDigits:1}).replace(/[  ]/g,' ')+'M';
+  if(Math.abs(n) >= 1000000) return (n/1000000).toLocaleString('fr-FR',{maximumFractionDigits:1}).replace(/[\u202f\u00a0]/g,' ')+'M';
   if(Math.abs(n) >= 10000) return Math.round(n/1000)+'k';
   return String(n);
 }
@@ -165,6 +165,37 @@ function toast(msg){
   clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2800);
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── accès au script Google ──
+   1) fetch classique ; 2) si le navigateur bloque (Safari/iPhone : « Load failed »),
+   repli JSONP via une balise <script>, jamais soumise au CORS. */
+function jsonpGet(url, params, timeoutMs){
+  return new Promise((resolve, reject)=>{
+    const cb = '__agcb' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    const qs = Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+    let done = false;
+    const to = setTimeout(()=>{ finish(null, new Error('délai dépassé')); }, timeoutMs||20000);
+    function finish(val, err){
+      if(done) return; done = true;
+      clearTimeout(to); try{ delete window[cb]; }catch(e){ window[cb]=undefined; } s.remove();
+      err ? reject(err) : resolve(val);
+    }
+    window[cb] = j => finish(j);
+    s.onerror = () => finish(null, new Error('script injoignable'));
+    s.src = url + (url.includes('?')?'&':'?') + qs + '&callback=' + cb;
+    document.body.appendChild(s);
+  });
+}
+async function apiGet(url, params){
+  try{
+    const qs = Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+    const r = await fetch(url + (url.includes('?')?'&':'?') + qs);
+    return await r.json();
+  }catch(e){
+    return await jsonpGet(url, params);
+  }
+}
 
 /* ══════════ CONNEXION ══════════ */
 function vLogin(){
@@ -189,6 +220,7 @@ function vLogin(){
       <div class="step"><div class="n">3</div><div>Dans le code, remplace <b>CHANGE-MOI-ABSOLUMENT</b> par ton propre code secret (long).</div></div>
       <div class="step"><div class="n">4</div><div><b>Déployer → Nouveau déploiement → Application Web</b> : exécuter en tant que <b>Moi</b>, accès <b>Tout le monde</b>. Autorise quand Google le demande.</div></div>
       <div class="step"><div class="n">5</div><div>Copie l'<b>URL /exec</b> : colle-la ici et dans l'app de l'agent (⚙️ Réglages → Synchronisation) avec le même code secret.</div></div>
+      <div class="step"><div class="n">↺</div><div><b>Déjà installé ?</b> Pour mettre à jour le code : recolle-le dans Apps Script, 💾 Enregistrer, puis <b>Déployer → Gérer les déploiements → ✏️ → Version : Nouvelle version → Déployer</b>. L'URL ne change pas.</div></div>
       <label class="fl">Le code à coller</label>
       <textarea id="gs-code" readonly>Chargement…</textarea>
       <button class="btn ghost" onclick="copyCode()">📋 Copier le code</button>
@@ -217,8 +249,7 @@ async function login(){
   if(!secret){ toast('⚠️ Saisis le code secret'); return; }
   const btn = $('btn-login'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Connexion…';
   try{
-    const r = await fetch(url+'?action=ping&secret='+encodeURIComponent(secret));
-    const j = await r.json();
+    const j = await apiGet(url, {action:'ping', secret});
     if(!j.ok) throw new Error(j.error||'réponse invalide');
     A = {url, secret}; saveA();
     toast('✅ Connecté !');
@@ -237,8 +268,7 @@ async function refresh(){
   if(!A.url || loading) return;
   loading = true; render();
   try{
-    const r = await fetch(A.url+'?action=data&secret='+encodeURIComponent(A.secret));
-    const j = await r.json();
+    const j = await apiGet(A.url, {action:'data', secret:A.secret});
     if(!j.ok) throw new Error(j.error||'réponse invalide');
     DATA = j; lastFetch = new Date();
   }catch(e){
