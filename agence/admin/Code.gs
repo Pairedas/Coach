@@ -44,9 +44,28 @@ function doPost(e){
 
 function doGet(e){
   const p = e.parameter || {};
-  if(p.secret !== CODE_SECRET) return json({ok:false, error:'code secret invalide'});
-  if(p.action === 'ping') return json({ok:true, version:1});
-  return json({ok:true, days:getDays(90), events:getEvents(150)});
+  /* callback = mode JSONP : contourne les blocages CORS de Safari/iPhone */
+  const cb = (p.callback && /^[\w$.]+$/.test(p.callback)) ? p.callback : null;
+  if(p.secret !== CODE_SECRET) return out({ok:false, error:'code secret invalide'}, cb);
+  if(p.action === 'ping') return out({ok:true, version:2}, cb);
+  if(p.action === 'push'){
+    /* écriture via GET (repli quand le POST est bloqué par le navigateur) */
+    try{
+      const data = JSON.parse(p.data || '{}');
+      if(data.action === 'day') upsertDay(data.day);
+      else if(data.action === 'event') addEvent(data.event);
+      else return out({ok:false, error:'action inconnue'}, cb);
+      return out({ok:true}, cb);
+    }catch(err){ return out({ok:false, error:String(err)}, cb); }
+  }
+  return out({ok:true, days:getDays(90), events:getEvents(150)}, cb);
+}
+
+function out(o, cb){
+  const s = JSON.stringify(o);
+  if(cb) return ContentService.createTextOutput(cb+'('+s+')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return ContentService.createTextOutput(s).setMimeType(ContentService.MimeType.JSON);
 }
 
 /* ── feuilles ── */
