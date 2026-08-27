@@ -128,6 +128,7 @@ details .step b{color:var(--txt)}
 <div id="toast"></div>
 
 <script>
+const AVERSION = '1.2';
 const AKEY = 'agenceProAdmin_v1';
 let A = loadA();
 function loadA(){
@@ -212,6 +213,8 @@ function vLogin(){
       <label class="fl">Code secret</label>
       <input type="password" id="lg-secret" value="${esc(A.secret)}" placeholder="celui choisi dans le script">
       <button class="btn blue" id="btn-login" onclick="login()">Se connecter</button>
+      <button class="btn ghost" id="btn-diag" onclick="runDiag()">🩺 Diagnostic — teste tout et dis-moi ce qui bloque</button>
+      <div id="diag-out"></div>
     </div>
     <details>
       <summary>🛠️ Première fois ? Créer le lien (5 min)</summary>
@@ -226,8 +229,72 @@ function vLogin(){
       <button class="btn ghost" onclick="copyCode()">📋 Copier le code</button>
       <div class="small">« Tout le monde » ne rend pas tes données publiques : chaque requête doit contenir ton code secret, sinon elle est rejetée.</div>
     </details>
-    <div class="foot">Agence Pro Admin v1.0</div>
+    <button class="btn ghost" onclick="forceUpdate()">🔄 Forcer la mise à jour de cette page</button>
+    <div class="foot">Agence Pro Admin v${AVERSION}</div>
   </div>`;
+}
+
+/* vide les caches et modules hérités, puis recharge la page toute fraîche */
+async function forceUpdate(){
+  toast('🔄 Nettoyage et rechargement…');
+  try{
+    if(navigator.serviceWorker){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+    }
+  }catch(e){}
+  try{
+    const keys = await caches.keys();
+    for(const k of keys) await caches.delete(k);
+  }catch(e){}
+  setTimeout(()=> location.reload(), 400);
+}
+
+/* ── diagnostic : teste chaque canal et explique en clair ── */
+async function runDiag(){
+  const url = $('lg-url').value.trim();
+  const secret = $('lg-secret').value.trim();
+  const box = $('diag-out');
+  const rows = [];
+  const row = (ic, txt) => rows.push(`<div class="ev"><div class="eic">${ic}</div><div>${txt}</div></div>`);
+  box.innerHTML = `<div class="hint" style="margin-top:12px"><span class="spin"></span> Diagnostic en cours…</div>`;
+
+  row('ℹ️', 'Version de la page : <b>v'+AVERSION+'</b> ✓ (tu as bien la dernière)');
+  row(navigator.onLine ? '✅' : '❌', 'Internet : ' + (navigator.onLine ? 'connecté' : '<b>hors-ligne !</b> Vérifie ta connexion.'));
+  if(navigator.serviceWorker && navigator.serviceWorker.controller){
+    row('⚠️', 'Un module de cache contrôle cette page. Si un test échoue ci-dessous, appuie sur <b>« 🔄 Forcer la mise à jour »</b> puis relance le diagnostic.');
+  }
+  let anyOk = false, secretBad = false;
+  if(!url){
+    row('❌', 'Le champ URL est <b>vide</b> — colle l\'URL du script qui finit par /exec.');
+  }else{
+    if(!/^https:\/\/script\.google/.test(url)) row('⚠️', 'L\'URL ne commence pas par <b>https://script.google…</b> — es-tu sûr d\'avoir copié l\'URL de l\'application Web ?');
+    if(!url.endsWith('/exec')) row('⚠️', 'L\'URL ne finit pas par <b>/exec</b> — copie l\'URL de l\'application Web, pas une autre.');
+    if(/\s/.test(url)) row('⚠️', 'L\'URL contient un <b>espace</b> — supprime-le.');
+    if(!secret) row('⚠️', 'Le code secret est vide.');
+    /* canal 1 : connexion directe */
+    try{
+      const r = await fetch(url+'?action=ping&secret='+encodeURIComponent(secret));
+      const j = await r.json();
+      if(j.ok){ anyOk = true; row('✅', 'Connexion directe : <b>OK</b> (script version '+(j.version||'?')+')'); }
+      else{ if(String(j.error||'').includes('secret')) secretBad = true; row('❌', 'Connexion directe : le script répond mais dit « '+esc(j.error||'réponse invalide')+' »'); }
+    }catch(e){
+      row('❌', 'Connexion directe : bloquée par le navigateur ('+esc(e.message||String(e))+')');
+    }
+    /* canal 2 : connexion de secours */
+    try{
+      const j = await jsonpGet(url, {action:'ping', secret}, 12000);
+      if(j && j.ok){ anyOk = true; row('✅', 'Connexion de secours : <b>OK</b> (script version '+(j.version||'?')+')'); }
+      else{ if(String(j && j.error||'').includes('secret')) secretBad = true; row('❌', 'Connexion de secours : le script répond mais dit « '+esc((j&&j.error)||'réponse invalide')+' »'); }
+    }catch(e){
+      row('❌', 'Connexion de secours : '+esc(e.message||String(e)));
+    }
+  }
+  let verdict;
+  if(anyOk) verdict = `<div class="hint" style="border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.07);color:#a8f0c4">✅ <b>Au moins un canal fonctionne : tu peux te connecter !</b> Appuie sur « Se connecter ». Si ça échoue quand même, envoie une capture de ce diagnostic.</div>`;
+  else if(secretBad) verdict = `<div class="hint danger" style="border-color:rgba(255,95,95,.4)">🔑 <b>Le lien marche mais le code secret ne correspond pas.</b> Vérifie qu'il est identique à celui écrit dans le script (majuscules, tirets, sans espace).</div>`;
+  else verdict = `<div class="hint danger" style="border-color:rgba(255,95,95,.4)">🚫 <b>Impossible de joindre le script depuis cette page.</b> 1) Appuie sur « 🔄 Forcer la mise à jour » en bas, rouvre la page et relance le diagnostic. 2) Si ça persiste, essaie en Wi-Fi ou avec les données mobiles (l'autre des deux) : certains réseaux bloquent script.google.com. 3) Envoie-moi une capture de cet écran.</div>`;
+  box.innerHTML = `<div style="margin-top:12px">${rows.join('')}</div>${verdict}`;
 }
 async function loadGsCode(){
   try{
@@ -430,7 +497,7 @@ function vDash(){
       <div>${esc(e.texte)}<div class="ets">${esc(e.date)} · ${esc(e.ts)}</div></div>
     </div>`).join('') : `<div class="empty"><span class="ei">📜</span>Aucun événement</div>`) + `</div>`;
 
-  h += `<div class="foot">Agence Pro Admin v1.0 · actualisation auto chaque minute</div></div>`;
+  h += `<div class="foot">Agence Pro Admin v${AVERSION} · actualisation auto chaque minute</div></div>`;
   return h;
 }
 

@@ -253,7 +253,7 @@ h3.sec{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;color:va
 
 <script>
 /* ══════════ CONSTANTES ══════════ */
-const VERSION = '2.2';
+const VERSION = '2.3';
 /* c = couleur d'accent UI (valeurs, pastilles) · cc = couleur validée pour les graphiques (contraste + daltonisme) */
 const SERVICES = [
   {k:'orange', n:'UV Orange', e:'🟠', c:'#ff7900', cc:'#d96a10'},
@@ -1232,7 +1232,8 @@ function vReglages(){
     </div>
     <input type="file" id="imp-file" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
     <button class="btn ghost" onclick="exportCSV()">📊 Exporter l'historique (CSV pour Excel)</button>
-    <div class="small">La sauvegarde contient tout : historique, réglages, journal. Garde-en une copie régulièrement (WhatsApp, Drive…).</div>
+    <button class="btn ghost" onclick="forceUpdate()">🔄 Forcer la mise à jour de l'app</button>
+    <div class="small">La sauvegarde contient tout : historique, réglages, journal. Garde-en une copie régulièrement (WhatsApp, Drive…). « Forcer la mise à jour » recharge la dernière version de l'app sans toucher à tes données.</div>
   </div>`;
 
   h += `<div class="card"><h2><span class="hic">📜</span>Journal des actions <span class="tag">${S.audit.length} entrées</span></h2>`+
@@ -1281,6 +1282,22 @@ async function wipeAll(){
   if(!await askConfirm('Tout effacer ?','Historique, réglages et journal seront <b>définitivement perdus</b>. Fais une sauvegarde avant !',{icon:'🗑',danger:true,ok:'Tout effacer'})) return;
   alertTg('🗑 <b>TOUTES les données de l\'app ont été effacées</b> (historique + réglages).');
   localStorage.removeItem(KEY); S = load(); migrate(); wizStep = 0; go('jour');
+}
+
+/* recharge la dernière version de l'app (les données localStorage sont conservées) */
+async function forceUpdate(){
+  toast('🔄 Mise à jour en cours…');
+  try{
+    if(navigator.serviceWorker){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+    }
+  }catch(e){}
+  try{
+    const keys = await caches.keys();
+    for(const k of keys) await caches.delete(k);
+  }catch(e){}
+  setTimeout(()=> location.reload(), 400);
 }
 
 /* ══════════ SAUVEGARDE / EXPORT ══════════ */
