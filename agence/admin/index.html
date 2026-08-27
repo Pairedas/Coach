@@ -128,7 +128,7 @@ details .step b{color:var(--txt)}
 <div id="toast"></div>
 
 <script>
-const AVERSION = '1.2';
+const AVERSION = '1.3';
 const AKEY = 'agenceProAdmin_v1';
 let A = loadA();
 function loadA(){
@@ -213,6 +213,7 @@ function vLogin(){
       <label class="fl">Code secret</label>
       <input type="password" id="lg-secret" value="${esc(A.secret)}" placeholder="celui choisi dans le script">
       <button class="btn blue" id="btn-login" onclick="login()">Se connecter</button>
+      <button class="btn ghost" onclick="openEmbedded()">✨ Ou ouvre le tableau de bord intégré (recommandé, aucun blocage)</button>
       <button class="btn ghost" id="btn-diag" onclick="runDiag()">🩺 Diagnostic — teste tout et dis-moi ce qui bloque</button>
       <div id="diag-out"></div>
     </div>
@@ -293,8 +294,16 @@ async function runDiag(){
   let verdict;
   if(anyOk) verdict = `<div class="hint" style="border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.07);color:#a8f0c4">✅ <b>Au moins un canal fonctionne : tu peux te connecter !</b> Appuie sur « Se connecter ». Si ça échoue quand même, envoie une capture de ce diagnostic.</div>`;
   else if(secretBad) verdict = `<div class="hint danger" style="border-color:rgba(255,95,95,.4)">🔑 <b>Le lien marche mais le code secret ne correspond pas.</b> Vérifie qu'il est identique à celui écrit dans le script (majuscules, tirets, sans espace).</div>`;
-  else verdict = `<div class="hint danger" style="border-color:rgba(255,95,95,.4)">🚫 <b>Impossible de joindre le script depuis cette page.</b> 1) Appuie sur « 🔄 Forcer la mise à jour » en bas, rouvre la page et relance le diagnostic. 2) Si ça persiste, essaie en Wi-Fi ou avec les données mobiles (l'autre des deux) : certains réseaux bloquent script.google.com. 3) Envoie-moi une capture de cet écran.</div>`;
+  else verdict = `<div class="hint danger" style="border-color:rgba(255,95,95,.4)">🚫 <b>Ton navigateur bloque les requêtes de cette page vers Google.</b> Pas grave : le tableau de bord existe aussi <b>directement dans ton lien Google</b> — là, rien ne peut le bloquer.</div>
+  <button class="btn blue" onclick="openEmbedded()">✨ Ouvrir le tableau de bord intégré</button>
+  <div class="small">Astuce : une fois ouvert, ajoute-le à ton écran d'accueil — c'est ton accès admin direct.</div>`;
   box.innerHTML = `<div style="margin-top:12px">${rows.join('')}</div>${verdict}`;
+}
+
+function openEmbedded(){
+  const url = $('lg-url') ? $('lg-url').value.trim() : (A.url||'');
+  if(!url){ toast('⚠️ Colle d\'abord l\'URL de ton script (…/exec)'); return; }
+  window.open(url, '_blank');
 }
 async function loadGsCode(){
   try{
