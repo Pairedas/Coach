@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════
- *  AGENCE PRO — BACKEND + TABLEAU DE BORD ADMIN (version 3)
+ *  AGENCE PRO — BACKEND + TABLEAU DE BORD ADMIN (version 4)
  * ═══════════════════════════════════════════════════════════
  *
  *  ✨ NOUVEAU : ouvre simplement ton URL /exec dans le navigateur
@@ -36,18 +36,52 @@ function doGet(e){
       .addMetaTag('viewport','width=device-width, initial-scale=1');
   }
   const cb = (p.callback && /^[\w$.]+$/.test(p.callback)) ? p.callback : null;
+  /* envoi par navigation (onglet ouvert par l'app) : réponse lisible par l'humain */
+  if(p.action === 'push' && !cb){
+    if(p.secret !== CODE_SECRET) return htmlResult(false, 'Code secret invalide — vérifie que le code dans l\'app (Réglages → Synchronisation) est exactement celui écrit dans ce script.');
+    try{
+      applyPush(JSON.parse(p.data || '{}'));
+      return htmlResult(true, '');
+    }catch(err){ return htmlResult(false, String(err)); }
+  }
   if(p.secret !== CODE_SECRET) return out({ok:false, error:'code secret invalide'}, cb);
-  if(p.action === 'ping') return out({ok:true, version:3}, cb);
+  if(p.action === 'ping') return out({ok:true, version:4}, cb);
   if(p.action === 'push'){
     try{
-      const data = JSON.parse(p.data || '{}');
-      if(data.action === 'day') upsertDay(data.day);
-      else if(data.action === 'event') addEvent(data.event);
-      else return out({ok:false, error:'action inconnue'}, cb);
+      applyPush(JSON.parse(p.data || '{}'));
       return out({ok:true}, cb);
     }catch(err){ return out({ok:false, error:String(err)}, cb); }
   }
   return out({ok:true, days:getDays(90), events:getEvents(150)}, cb);
+}
+
+function applyPush(data){
+  if(data.action === 'day'){ upsertDay(data.day); return; }
+  if(data.action === 'event'){ addEvent(data.event); return; }
+  if(data.action === 'batch'){
+    (data.items || []).forEach(function(it){
+      if(it.action === 'day') upsertDay(it.day);
+      else if(it.action === 'event') addEvent(it.event);
+    });
+    return;
+  }
+  throw new Error('action inconnue');
+}
+
+/* petite page de confirmation affichée quand l'envoi passe par un onglet */
+function htmlResult(ok, msg){
+  const html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'+
+    '<meta name="viewport" content="width=device-width, initial-scale=1"><style>'+
+    'body{background:#070b12;color:#e2ecf7;font-family:-apple-system,Roboto,Arial,sans-serif;'+
+    'display:flex;align-items:center;justify-content:center;min-height:92vh;text-align:center;padding:20px}'+
+    '.c{max-width:340px}.ic{font-size:60px}.t{font-size:20px;font-weight:800;margin-top:12px}'+
+    '.s{font-size:13.5px;color:#8aa2bd;margin-top:10px;line-height:1.6}'+
+    '</style></head><body><div class="c">'+
+    (ok ? '<div class="ic">✅</div><div class="t">Données envoyées à l\'admin !</div>'+
+          '<div class="s">La synchronisation a réussi.<br><b>Tu peux fermer cet onglet</b> et retourner dans l\'app.</div>'
+        : '<div class="ic">⛔</div><div class="t">Envoi refusé</div><div class="s">'+msg+'</div>')+
+    '</div></body></html>';
+  return HtmlService.createHtmlOutput(html).setTitle(ok ? 'Envoyé ✅' : 'Refusé ⛔');
 }
 
 function doPost(e){
@@ -56,9 +90,8 @@ function doPost(e){
     try{ data = JSON.parse(e.postData.contents); }
     catch(err){ data = JSON.parse((e.parameter && e.parameter.data) || '{}'); }
     if(data.secret !== CODE_SECRET) return out({ok:false, error:'code secret invalide'}, null);
-    if(data.action === 'day'){ upsertDay(data.day); return out({ok:true}, null); }
-    if(data.action === 'event'){ addEvent(data.event); return out({ok:true}, null); }
-    return out({ok:false, error:'action inconnue'}, null);
+    applyPush(data);
+    return out({ok:true}, null);
   }catch(err){
     return out({ok:false, error:String(err)}, null);
   }
@@ -69,7 +102,7 @@ function api(payload){
   try{
     const p = JSON.parse(payload || '{}');
     if(p.secret !== CODE_SECRET) return JSON.stringify({ok:false, error:'code secret invalide'});
-    return JSON.stringify({ok:true, version:3, days:getDays(90), events:getEvents(150)});
+    return JSON.stringify({ok:true, version:4, days:getDays(90), events:getEvents(150)});
   }catch(err){
     return JSON.stringify({ok:false, error:String(err)});
   }
@@ -265,7 +298,7 @@ function vLogin(msg){
     '<input type="password" id="sec" placeholder="ton code secret de synchronisation">'+
     (msg? '<div class="err">'+esc(msg)+'</div>' : '')+
     '<button class="btn" id="go">Ouvrir le tableau de bord</button></div>'+
-    '<div class="foot">Agence Pro · tableau de bord intégré v3.1</div>';
+    '<div class="foot">Agence Pro · tableau de bord intégré v4</div>';
   $('go').onclick = function(){ var v = $('sec').value.trim(); if(!v) return; setSecret(v); loadData(); };
   $('sec').addEventListener('keydown', function(ev){ if(ev.key==='Enter') $('go').onclick(); });
 }
@@ -396,7 +429,7 @@ function render(){
   }else h += '<div class="empty">Aucun événement</div>';
   h += '</div>';
 
-  h += '<div class="foot">Agence Pro · tableau de bord intégré v3.1 · actualisation auto chaque minute</div>';
+  h += '<div class="foot">Agence Pro · tableau de bord intégré v4 · actualisation auto chaque minute</div>';
   $('app').innerHTML = h;
   renderBar();
   $('rf').onclick = function(){ loadData(); };
