@@ -253,7 +253,7 @@ h3.sec{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;color:va
 
 <script>
 /* ══════════ CONSTANTES ══════════ */
-const VERSION = '2.4';
+const VERSION = '2.5';
 /* c = couleur d'accent UI (valeurs, pastilles) · cc = couleur validée pour les graphiques (contraste + daltonisme) */
 const SERVICES = [
   {k:'orange', n:'UV Orange', e:'🟠', c:'#ff7900', cc:'#d96a10'},
@@ -364,7 +364,9 @@ function lastCp(day){
 }
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), 2800);
+  clearTimeout(t._h);
+  /* les messages longs restent affichés plus longtemps */
+  t._h = setTimeout(()=> t.classList.remove('show'), Math.min(9000, Math.max(2800, msg.length * 55)));
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function vibrate(ms){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
@@ -454,13 +456,13 @@ function jsonpGet(url, params, timeoutMs){
     document.body.appendChild(s);
   });
 }
-async function apiGet(url, params){
+async function apiGet(url, params, timeoutMs){
   try{
     const qs = Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
     const r = await fetch(url + (url.includes('?')?'&':'?') + qs);
     return await r.json();
   }catch(e){
-    return await jsonpGet(url, params);
+    return await jsonpGet(url, params, timeoutMs);
   }
 }
 /* Envoi, 3 niveaux : 1) POST text/plain (pas de préflight) ;
@@ -561,12 +563,23 @@ async function testSync(){
   if(!syncOn()){ toast('⚠️ Renseigne l\'URL du script et le code secret'); return; }
   toast('⏳ Test de connexion…');
   try{
-    const j = await apiGet(S.config.syncUrl, {action:'ping', secret:S.config.syncSecret});
+    const j = await apiGet(S.config.syncUrl, {action:'ping', secret:S.config.syncSecret}, 8000);
     if(!j.ok) throw new Error(j.error||'réponse invalide');
     toast('✅ Synchronisation connectée !');
     syncDay();
   }catch(e){
-    toast('❌ Connexion impossible : '+e.message);
+    /* lecture bloquée sur ce téléphone → on prouve la liaison par la voie
+       de secours : un événement test que l'admin verra sur son tableau de bord */
+    const sent = formPost({action:'event', event:{
+      ts: nowHM(), date: todayKey(), type:'info',
+      texte:'🧪 Test de liaison depuis l\'app agent'+(S.config.agent? ' ('+S.config.agent+')':'')+' — si tu vois ce message, la synchronisation fonctionne !'
+    }});
+    if(sent){
+      audit('🧪 Test de liaison envoyé par la voie de secours');
+      toast('📨 La lecture est bloquée sur ce téléphone, mais un TEST est parti par la voie de secours. Demande à l\'admin de regarder son tableau de bord (fil d\'activité) : si « Test de liaison » y apparaît, tout fonctionne ✅');
+    }else{
+      toast('❌ Connexion impossible : '+e.message);
+    }
   }
 }
 
