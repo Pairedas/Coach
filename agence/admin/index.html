@@ -128,7 +128,7 @@ details .step b{color:var(--txt)}
 <div id="toast"></div>
 
 <script>
-const AVERSION = '1.3';
+const AVERSION = '1.4';
 const AKEY = 'agenceProAdmin_v1';
 let A = loadA();
 function loadA(){
@@ -430,9 +430,9 @@ function vDash(){
   </div>`;
 
   if(!days.length){
-    h += `<div class="card"><div class="empty"><span class="ei">📭</span>Aucune donnée reçue pour l'instant.<br>Vérifie que l'app de l'agent a bien l'URL et le code secret<br>dans ⚙️ Réglages → Synchronisation.</div></div></div>`;
-    return h;
+    h += `<div class="card"><div class="empty"><span class="ei">📭</span>Aucune journée reçue pour l'instant.<br>Fais faire une ouverture ou un pointage à l'agent, puis ↻.<br>Les tests et alertes déjà reçus s'affichent dans le fil d'activité ci-dessous.</div></div>`;
   }
+  if(days.length){
 
   /* KPI */
   const mt = latest ? +latest.manquant_total : null;
@@ -498,8 +498,9 @@ function vDash(){
       </div>`:''}
     </div>`;
   });
+  } /* fin if(days.length) */
 
-  /* fil d'activité */
+  /* fil d'activité : toujours affiché, même sans journée (tests de liaison, alertes) */
   h += `<div class="card" style="margin-top:14px"><h2><span class="hic">📜</span>Fil d'activité <span class="tag">${events.length} événements</span></h2>`+
     (events.length ? events.slice(0, 40).map(e=>`<div class="ev ${e.type==='alerte'?'alert':''}">
       <div class="eic">${EV_ICONS[e.type]||'ℹ️'}</div>

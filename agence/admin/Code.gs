@@ -265,7 +265,7 @@ function vLogin(msg){
     '<input type="password" id="sec" placeholder="ton code secret de synchronisation">'+
     (msg? '<div class="err">'+esc(msg)+'</div>' : '')+
     '<button class="btn" id="go">Ouvrir le tableau de bord</button></div>'+
-    '<div class="foot">Agence Pro · tableau de bord intégré v3</div>';
+    '<div class="foot">Agence Pro · tableau de bord intégré v3.1</div>';
   $('go').onclick = function(){ var v = $('sec').value.trim(); if(!v) return; setSecret(v); loadData(); };
   $('sec').addEventListener('keydown', function(ev){ if(ev.key==='Enter') $('go').onclick(); });
 }
@@ -324,7 +324,7 @@ function render(){
     '<div class="sp"><button class="icb" id="rf">↻</button><button class="icb" id="lo">⏻</button></div></div>';
 
   if(!days.length){
-    h += '<div class="card"><div class="empty">📭 Aucune donnée reçue pour l\\'instant.<br>Fais faire une action à l\\'agent (ouverture, pointage)<br>et appuie sur ↻.</div></div>';
+    h += '<div class="card"><div class="empty">📭 Aucune journée reçue pour l\\'instant.<br>Fais faire une ouverture ou un pointage à l\\'agent<br>puis appuie sur ↻. Les tests et alertes déjà reçus<br>s\\'affichent dans le fil d\\'activité ci-dessous.</div></div>';
   }else{
     var mt = (latest.manquant_total===''||latest.manquant_total==null)? null : +latest.manquant_total;
     h += '<div class="kpis">'+
@@ -383,16 +383,20 @@ function render(){
       h += '</div>';
     }
 
-    h += '<div class="card"><h2>📜 Fil d\\'activité</h2>';
-    if(events.length){
-      var evs = events.slice(0,40);
-      for(i=0;i<evs.length;i++){
-        h += '<div class="ev'+(evs[i].type==='alerte'?' al':'')+'"><span class="i">'+(EVI[evs[i].type]||'ℹ️')+'</span><div>'+esc(evs[i].texte)+'<div class="t">'+esc(evs[i].date)+' · '+esc(evs[i].ts)+'</div></div></div>';
-      }
-    }else h += '<div class="empty">Aucun événement</div>';
-    h += '</div>';
   }
-  h += '<div class="foot">Agence Pro · tableau de bord intégré v3 · actualisation auto chaque minute</div>';
+
+  /* le fil d'activité s'affiche toujours, même sans journée : c'est là
+     qu'apparaissent les tests de liaison et les alertes */
+  h += '<div class="card"><h2>📜 Fil d\\'activité</h2>';
+  if(events.length){
+    var evs = events.slice(0,40);
+    for(i=0;i<evs.length;i++){
+      h += '<div class="ev'+(evs[i].type==='alerte'?' al':'')+'"><span class="i">'+(EVI[evs[i].type]||'ℹ️')+'</span><div>'+esc(evs[i].texte)+'<div class="t">'+esc(evs[i].date)+' · '+esc(evs[i].ts)+'</div></div></div>';
+    }
+  }else h += '<div class="empty">Aucun événement</div>';
+  h += '</div>';
+
+  h += '<div class="foot">Agence Pro · tableau de bord intégré v3.1 · actualisation auto chaque minute</div>';
   $('app').innerHTML = h;
   renderBar();
   $('rf').onclick = function(){ loadData(); };
