@@ -546,7 +546,7 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       </div>
       <div style="display:flex;gap:16px">
         <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--lime)" id="jts-ben">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Bénéfices</div></div>
-        <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--red)" id="jts-dep">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Dépenses</div></div>
+        <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--red)" id="jts-dep">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Sorties</div></div>
         <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--blue)" id="jts-net">0 F</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Net</div></div>
         <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--txt2)" id="jts-count">0</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Entrées</div></div>
       </div>
@@ -831,6 +831,13 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
       <button class="btn btn-red btn-sm" onclick="resetData()">🗑️ Réinitialiser</button>
     </div>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="doImport(event)">
+    <div id="export-rappel" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <div class="card-t cyan">🗄️ Sauvegardes automatiques</div>
+    <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:10px">FinCoach garde les <strong>5 dernières</strong> copies de tes données dans ce navigateur. Elles te protègent d'une fausse manip — <strong>pas</strong> d'un téléphone perdu ni d'un navigateur vidé : pour ça, l'export JSON reste indispensable.</p>
+    <div id="bak-list"></div>
+    <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="renderBackups()">🔄 Rafraîchir la liste</button></div>
   </div>
 </section>
 
@@ -880,7 +887,7 @@ let S={
   journal:[],bilans:[],wallets:[],investissements:[],dettes:[],creances:[],objectifs:[],
   chargesFixes:[],defis:[],fondsSecurite:{cible:0,actuel:0},
   config:{apiKey:'',pct:{sal:35,epa:20,wav:25,urg:10,inv:10}},
-  chatHist:[]
+  chatHist:[],lastExport:null
 };
 let CH={},_mt=null,_eid=null,_quickType=null,_jFilter='all',_sFilter='all';
 
@@ -913,16 +920,102 @@ const POCHES={
   mtn:{icon:'🟡',label:'MTN MoMo'},
 };
 
+// ══════ FUSION PROFONDE (répare : un S ancien sans config.pct faisait planter updSl) ══════
+function isPlainObj(o){return !!o&&typeof o==='object'&&!Array.isArray(o);}
+function deepMerge(base,over){
+  if(!isPlainObj(over))return base;
+  const out=Object.assign({},base);
+  Object.keys(over).forEach(k=>{
+    const b=out[k],v=over[k];
+    out[k]=(isPlainObj(b)&&isPlainObj(v))?deepMerge(b,v):v;
+  });
+  return out;
+}
+const PCT_DEF={sal:35,epa:20,wav:25,urg:10,inv:10};
+// Garde-fou : quoi qu'il y ait dans le localStorage, S a toujours la bonne forme.
+function ensureShape(){
+  ['journal','bilans','wallets','investissements','dettes','creances','objectifs','chargesFixes','defis','chatHist']
+    .forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
+  if(!isPlainObj(S.fondsSecurite))S.fondsSecurite={cible:0,actuel:0};
+  ['cible','actuel'].forEach(k=>{const v=Number(S.fondsSecurite[k]);S.fondsSecurite[k]=isNaN(v)?0:v;});
+  if(!isPlainObj(S.config))S.config={};
+  if(typeof S.config.apiKey!=='string')S.config.apiKey='';
+  if(!isPlainObj(S.config.pct))S.config.pct=Object.assign({},PCT_DEF);
+  Object.keys(PCT_DEF).forEach(k=>{const v=Number(S.config.pct[k]);S.config.pct[k]=isNaN(v)?PCT_DEF[k]:v;});
+}
+
+// ══════ SAUVEGARDES AUTOMATIQUES (rotation dans le localStorage) ══════
+// Quota localStorage : ~5 Mo par origine. Un instantané complet de FinCoach avec
+// un an de saisie (~1100 lignes de journal + 12 bilans) pèse ~150 Ko.
+// 5 copies ≈ 750 Ko, soit ~15 % du quota : assez d'historique pour rattraper une
+// bêtise, assez peu pour ne jamais gêner la clé principale fcv4.
+const BAK_PREFIX='fcv4_bak_';
+const BAK_MAX=5;
+// Sans espacement, 5 clics d'affilée écraseraient les 5 copies en 30 secondes et
+// l'historique ne servirait à rien. Une copie au plus toutes les 10 min → au moins
+// ~50 min de recul, et en pratique plusieurs jours d'usage normal.
+const BAK_MIN_MS=10*60*1000;
+function listBackups(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf(BAK_PREFIX)===0)out.push(k);}
+  return out.sort(); // clé = préfixe + ISO → tri lexicographique == tri chronologique
+}
+function countEntries(o){
+  o=o||{};
+  const n=k=>Array.isArray(o[k])?o[k].length:0;
+  return{journal:n('journal'),bilans:n('bilans'),dettes:n('dettes'),creances:n('creances'),
+    objectifs:n('objectifs'),wallets:n('wallets'),investissements:n('investissements'),chargesFixes:n('chargesFixes')};
+}
+function bakMeta(k){
+  const iso=k.slice(BAK_PREFIX.length);
+  try{const o=JSON.parse(localStorage.getItem(k));return{key:k,iso,data:o,counts:countEntries(o)};}
+  catch(e){return{key:k,iso,data:null,counts:null};}
+}
+function bakLabel(iso){const d=new Date(iso);return isNaN(d.getTime())?iso:d.toLocaleString('fr-FR');}
+function writeBackup(){
+  // Deux sauvegardes dans la même milliseconde partageraient la même clé et
+  // s'écraseraient : on avance l'horodatage jusqu'à trouver une clé libre.
+  let ts=Date.now();
+  while(localStorage.getItem(BAK_PREFIX+new Date(ts).toISOString())!==null)ts++;
+  const key=BAK_PREFIX+new Date(ts).toISOString();
+  const payload=JSON.stringify(S);
+  for(let essai=0;essai<4;essai++){
+    try{localStorage.setItem(key,payload);break;}
+    catch(err){
+      const ks=listBackups();
+      if(!ks.length||(ks.length===1&&ks[0]===key))break; // plus rien à purger : on renonce à la copie
+      localStorage.removeItem(ks[0]===key?ks[1]:ks[0]);  // purge la plus ancienne et on réessaie
+    }
+  }
+  const ks=listBackups();
+  while(ks.length>BAK_MAX)localStorage.removeItem(ks.shift());
+  return key;
+}
+function rotateBackups(){
+  const ks=listBackups();
+  if(ks.length){
+    const t=Date.parse(ks[ks.length-1].slice(BAK_PREFIX.length));
+    if(!isNaN(t)&&Date.now()-t<BAK_MIN_MS)return null;
+  }
+  return writeBackup();
+}
+
 // ══════ INIT ══════
 function init(){
-  try{const d=localStorage.getItem('fcv4');if(d)S={...S,...JSON.parse(d)};}catch(e){}
-  loadCfg();setTodayInputs();refreshAll();
+  try{const d=localStorage.getItem('fcv4');if(d)S=deepMerge(S,JSON.parse(d));}catch(e){}
+  ensureShape();migrateBilans();
+  loadCfg();setTodayInputs();refreshAll();renderBackups();
 }
-function save(){localStorage.setItem('fcv4',JSON.stringify(S));}
+function save(){
+  localStorage.setItem('fcv4',JSON.stringify(S)); // la clé principale d'abord, toujours
+  try{rotateBackups();}catch(e){}                 // la rotation ne doit jamais casser une saisie
+}
 function loadCfg(){
-  if(S.config.apiKey)document.getElementById('cfg-api').value=S.config.apiKey;
+  ensureShape();
+  const api=document.getElementById('cfg-api');
+  if(api&&S.config.apiKey)api.value=S.config.apiKey;
   const p=S.config.pct;
-  ['sal','epa','wav','urg','inv'].forEach(k=>document.getElementById('sl-'+k).value=p[k]);
+  ['sal','epa','wav','urg','inv'].forEach(k=>{const el=document.getElementById('sl-'+k);if(el)el.value=p[k];});
   updSl(false);
 }
 function saveConfig(){
@@ -1015,6 +1108,16 @@ function updateScore(){
 }
 
 // ══════ ALERTES ══════
+// Le localStorage peut être vidé par le navigateur sans prévenir : au-delà d'un mois
+// sans export JSON, on le dit clairement.
+function alerteExport(){
+  if(!S.journal.length&&!S.bilans.length)return null;
+  const le=Number(S.lastExport);
+  if(!le||isNaN(le))return{t:'al-a',i:'💾',m:'Aucun export JSON enregistré. Si ce navigateur est vidé, tout disparaît — Config → 📤 Exporter JSON (10 secondes).'};
+  const j=Math.floor((Date.now()-le)/86400000);
+  if(j>31)return{t:'al-a',i:'💾',m:`Dernier export JSON il y a ${j} jours. Refais-en un : Config → 📤 Exporter JSON.`};
+  return null;
+}
 function checkAlerts(){
   const al=[];
   if(!S.config.apiKey)al.push({t:'al-b',i:'🔑',m:'Configure ta clé API Gemini dans Config pour discuter avec ton Ami Comptable IA.'});
@@ -1036,6 +1139,10 @@ function checkAlerts(){
   if(calcCreances()>0)al.push({t:'al-b',i:'🤝',m:`${fmt(calcCreances())} à récupérer chez tes débiteurs. Pense à relancer !`});
   const ts=new Date().toISOString().split('T')[0];
   if(!S.journal.some(e=>e.date===ts))al.push({t:'al-l',i:'📅',m:'Rappel : saisis tes revenus et dépenses du jour !'});
+  // Rappel d'export JSON — en tête de liste, c'est le seul risque de perte totale.
+  const exAlerte=alerteExport();
+  if(exAlerte){al.unshift(exAlerte);const r=document.getElementById('export-rappel');if(r)r.innerHTML=`<div class="alert ${exAlerte.t}"><div class="al-ico">${exAlerte.i}</div><div>${exAlerte.m}</div></div>`;}
+  else{const r=document.getElementById('export-rappel');if(r)r.innerHTML='';}
   const html=al.slice(0,3).map(a=>`<div class="alert ${a.t}"><div class="al-ico">${a.i}</div><div>${a.m}</div></div>`).join('');
   ['dash-alerts','ana-alerts'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=html;});
   document.getElementById('dot-dash').className='ndot'+(al.some(a=>a.t==='al-r')?' on':'');
@@ -1063,6 +1170,61 @@ function updatePrev(){
 function isInc(t){return t==='benef_wave'||t==='benef_crypto'||t==='revenu_autre'||t==='side_hustle'||t==='remb_recu';}
 // Bénéfice réel : entrées d'argent hors remboursements de prêts reçus (ce n'est pas un revenu)
 function isBen(t){return isInc(t)&&t!=='remb_recu';}
+// SORTIE DE TRÉSORERIE : tout ce qui quitte la poche — consommation, remboursement
+// de dette ET versement d'épargne. Sert à tout ce qui parle d'argent réellement sorti :
+// totaux du jour, net disponible, historique du journal, recherche, courbe 30 jours.
+function isSortie(t){return typeof t==='string'&&(t.indexOf('depense')===0||t==='remb_dette'||t==='epargne');}
+// DÉPENSE DE CONSOMMATION : train de vie seul. Ni dette (on rembourse un passé),
+// ni épargne (l'argent reste à soi). Sert aux indicateurs de train de vie et au
+// dossier IA, qui doivent distinguer « il dépense trop » de « il assainit ».
+function isDepConso(t){return typeof t==='string'&&t.indexOf('depense')===0;}
+
+// ══════ BILANS : clé de tri ym ('2026-09') ══════
+const MOIS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+function _sansAccent(s){return s.normalize?s.normalize('NFD').replace(/[̀-ͯ]/g,''):s;}
+function ymFromMoisKey(mk){
+  if(typeof mk!=='string')return null;
+  const p=mk.trim().split(/\s+/);
+  if(p.length<2)return null;
+  const an=parseInt(p[p.length-1],10);
+  if(!an||an<1970||an>3000)return null;
+  const nom=_sansAccent(p.slice(0,-1).join(' ').toLowerCase());
+  const i=MOIS_FR.findIndex(m=>_sansAccent(m.toLowerCase())===nom);
+  if(i<0)return null;
+  return an+'-'+String(i+1).padStart(2,'0');
+}
+// Idempotente : ne retouche pas un ym déjà valide, ne casse rien si moisKey est inattendu.
+function migrateBilans(){
+  if(!Array.isArray(S.bilans))return 0;
+  let n=0;
+  S.bilans.forEach(b=>{
+    if(!b||typeof b!=='object')return;
+    if(typeof b.ym==='string'&&/^\d{4}-\d{2}$/.test(b.ym))return;
+    const ym=ymFromMoisKey(b.moisKey);
+    if(ym){b.ym=ym;n++;}
+  });
+  sortBilans();
+  return n;
+}
+// Étiquette courte pour les graphiques — tolère un moisKey absent ou non textuel.
+function moisCourt(b){
+  if(!b)return'—';
+  if(typeof b.moisKey==='string')return b.moisKey.substring(0,3);
+  if(typeof b.ym==='string')return b.ym;
+  return'—';
+}
+// Du plus récent au plus ancien. Un bilan sans ym exploitable est rejeté en fin de
+// liste (il ne peut plus se faire passer pour « ce mois »), sans être perdu.
+function sortBilans(){
+  if(!Array.isArray(S.bilans))return;
+  S.bilans=S.bilans.map((b,i)=>({b,i})).sort((x,y)=>{
+    const a=x.b&&x.b.ym,c=y.b&&y.b.ym;
+    if(a&&c)return a===c?x.i-y.i:c.localeCompare(a);
+    if(a)return -1;
+    if(c)return 1;
+    return x.i-y.i;
+  }).map(o=>o.b);
+}
 // Indicateur d'Oxygène : part des revenus du mois qui part dans le remboursement de dettes
 function calcOxygene(){
   const now=new Date();
@@ -1093,12 +1255,12 @@ function refreshDash(){
   const ts=new Date().toISOString().split('T')[0];
   const te=S.journal.filter(e=>e.date===ts);
   const tBen=te.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-  const tDep=te.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const tDep=te.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
   const dt=document.getElementById('dash-today');
   if(te.length){
     dt.innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap">
       <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--lime)">${fmt(tBen)}</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Bénéfices</div></div>
-      <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--red)">${fmt(tDep)}</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Dépenses</div></div>
+      <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--red)">${fmt(tDep)}</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Sorties</div></div>
       <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--blue)">${fmt(tBen-tDep)}</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Net</div></div>
       <div style="text-align:center"><div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--txt2)">${te.length}</div><div style="font-size:9px;color:var(--txt3);font-family:'Fira Code',monospace">Entrées</div></div>
     </div>`;
@@ -1113,7 +1275,7 @@ function refreshDash(){
   if(S.bilans.length>=2){
     document.getElementById('dash-chart-wrap').style.display='block';
     const bils=S.bilans.slice(0,6).reverse();
-    mkChart('chart-mini','line',bils.map(b=>b.moisKey.substring(0,3)),[
+    mkChart('chart-mini','line',bils.map(b=>moisCourt(b)),[
       {label:'Bénéfices',data:bils.map(b=>b.calc.totalBen),borderColor:'#b8ff57',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#b8ff57'},
     ],false,true);
   }
@@ -1127,7 +1289,7 @@ function getMoisActuel(){
   const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const ents=S.journal.filter(e=>e.date.startsWith(prefix));
   const ben=ents.filter(e=>isBen(e.type)).reduce((s,e)=>s+e.montant,0);
-  const dep=ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const dep=ents.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
   return{ben,dep,net:ben-dep};
 }
 function oxygeneHTML(){
@@ -1203,7 +1365,7 @@ function refreshJournal(){
   const ts=new Date().toISOString().split('T')[0];
   const te=S.journal.filter(e=>e.date===ts).sort((a,b)=>b.ts-a.ts);
   const tBen=te.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-  const tDep=te.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const tDep=te.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
   document.getElementById('jts-ben').textContent=fmt(tBen);
   document.getElementById('jts-dep').textContent=fmt(tDep);
   document.getElementById('jts-net').textContent=fmt(tBen-tDep);
@@ -1223,7 +1385,7 @@ function renderJournalHist(){
   hist.slice(0,100).forEach(e=>{if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
   hl.innerHTML=Object.entries(byDate).slice(0,10).map(([dt,ents])=>{
     const b=ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-    const d=ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+    const d=ents.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
     const dl=new Date(dt+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
     return`<div style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -1269,9 +1431,10 @@ async function analyseJourIA(){
   const ents=S.journal.filter(e=>e.date===ts);
   if(!ents.length){toast('⚠️ Aucune saisie aujourd\'hui','err');return;}
   const ben=ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-  const dep=ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const dep=ents.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
+  const conso=ents.filter(e=>isDepConso(e.type)).reduce((s,e)=>s+e.montant,0);
   const sc=calcScore();
-  const prompt=`Aujourd'hui j'ai fait: bénéfices ${fmt(ben)}, dépenses ${fmt(dep)}, net ${fmt(ben-dep)}. Score actuel ${sc?.total||'—'}/100. Donne-moi un conseil rapide (max 60 mots) et bienveillant.`;
+  const prompt=`Aujourd'hui j'ai fait: bénéfices ${fmt(ben)}, sorties totales ${fmt(dep)} (dont ${fmt(conso)} de consommation, le reste = remboursement de dette et épargne), net ${fmt(ben-dep)}. Score actuel ${sc?.total||'—'}/100. Donne-moi un conseil rapide (max 60 mots) et bienveillant.`;
   go('coach',null);await chatWith(prompt,'Analyse mon journal du jour');
 }
 
@@ -1283,7 +1446,7 @@ function doSearch(){
   if(q)results=results.filter(e=>e.desc?.toLowerCase().includes(q)||fmt(e.montant).includes(q)||typeCfg(e.type).label.toLowerCase().includes(q));
   results=results.sort((a,b)=>b.date.localeCompare(a.date));
   const totBen=results.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-  const totDep=results.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const totDep=results.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
   document.getElementById('srch-stats').innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap;font-family:'Fira Code',monospace;font-size:11px">
     <span style="color:var(--txt3)">${results.length} résultat(s)</span>
     <span style="color:var(--lime)">+${fmt(totBen)}</span>
@@ -1386,8 +1549,9 @@ function saveBilan(){
   const calc={totalBen:tBen,totalDep:tDep,netDispo:net,salaire:Math.max(0,Math.round(net*p.sal/100)),epargne:Math.round(net*p.epa/100),wave:Math.round(net*p.wav/100),urgence:Math.round(net*p.urg/100),invest:Math.round(net*p.inv/100),txDepenses:tBen>0?Math.round(tDep/tBen*100):0};
   const mk=`${mois} ${annee}`;
   const idx=S.bilans.findIndex(b=>b.moisKey===mk);
-  const entry={moisKey:mk,wave,crypto,fixes,vars,autres,capital,calc,detteSnapshot:calcDettes(),date:new Date().toLocaleDateString('fr-FR')};
+  const entry={moisKey:mk,ym:ymFromMoisKey(mk),wave,crypto,fixes,vars,autres,capital,calc,detteSnapshot:calcDettes(),date:new Date().toLocaleDateString('fr-FR')};
   if(idx>=0)S.bilans[idx]=entry;else S.bilans.unshift(entry);
+  sortBilans(); // l'ordre de saisie ne décide plus de quel bilan est « ce mois »
   entry.scoreSnapshot=calcScore()?.total??null;
   save();refreshBilansHist();refreshDash();updateScore();refreshObjectifs();renderRetro();
   toast(`✓ Bilan ${mk} enregistré !`);
@@ -1417,7 +1581,9 @@ async function bilanIA(){
 }
 
 // ══════ PATRIMOINE ══════
-function calcActifs(){return S.wallets.reduce((s,w)=>s+w.solde,0)+S.investissements.reduce((s,i)=>s+i.montant,0);}
+// Le fonds de sécurité est de l'argent qui appartient à Hervé : il compte dans les actifs.
+function calcFondsSecurite(){const fs=S.fondsSecurite;return fs&&!isNaN(Number(fs.actuel))?Number(fs.actuel):0;}
+function calcActifs(){return S.wallets.reduce((s,w)=>s+w.solde,0)+S.investissements.reduce((s,i)=>s+i.montant,0)+calcFondsSecurite();}
 function calcDettes(){return S.dettes.reduce((s,d)=>s+d.soldeRestant,0);}
 function calcCreances(){return (S.creances||[]).reduce((s,c)=>s+c.soldeRestant,0);}
 function calcPatrimoine(){return calcActifs()+calcCreances()-calcDettes();}
@@ -1610,7 +1776,7 @@ function selectDetteModal(detteId){const data=JSON.parse(_eid);closeModal();enre
 function buildCharts(){
   if(!S.bilans.length)return;
   const bils=S.bilans.slice(0,6).reverse();
-  const lbls=bils.map(b=>b.moisKey.substring(0,3));
+  const lbls=bils.map(b=>moisCourt(b));
   const bens=bils.map(b=>b.calc.totalBen);
   const deps=bils.map(b=>b.calc.totalDep);
   const nets=bils.map(b=>b.calc.netDispo);
@@ -1635,8 +1801,8 @@ function buildCharts(){
     {label:'Épargne cumulée',data:epaCum,borderColor:'#b8ff57',backgroundColor:'rgba(184,255,87,.06)',fill:true,tension:.3,pointBackgroundColor:'#b8ff57',pointRadius:3},
   ]);
   const now=new Date();const jl=[],jb=[],jd=[];
-  for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const str=d.toISOString().split('T')[0];jl.push(d.getDate());const ents=S.journal.filter(e=>e.date===str);jb.push(ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0));jd.push(ents.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0));}
-  mkChart('ch-jnl','bar',jl,[{label:'Bénéfices',data:jb,backgroundColor:'rgba(56,240,208,.4)',borderRadius:3},{label:'Dépenses',data:jd,backgroundColor:'rgba(255,95,95,.35)',borderRadius:3}]);
+  for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const str=d.toISOString().split('T')[0];jl.push(d.getDate());const ents=S.journal.filter(e=>e.date===str);jb.push(ents.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0));jd.push(ents.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0));}
+  mkChart('ch-jnl','bar',jl,[{label:'Bénéfices',data:jb,backgroundColor:'rgba(56,240,208,.4)',borderRadius:3},{label:'Sorties',data:jd,backgroundColor:'rgba(255,95,95,.35)',borderRadius:3}]);
   mkChart('ch-txdep','line',lbls,[{label:'Tx dépenses %',data:txDeps,borderColor:'#ffb830',backgroundColor:'rgba(255,184,48,.08)',fill:true,tension:.4,pointBackgroundColor:'#ffb830',pointRadius:4}],false,false,60);
   const mx=Math.max(...S.bilans.map(b=>b.calc.totalBen));
   const moy=Math.round(S.bilans.reduce((s,b)=>s+b.calc.totalBen,0)/S.bilans.length);
@@ -1676,6 +1842,37 @@ function addObj(){
   toast('✓ Objectif ajouté !');
 }
 function delObj(id){S.objectifs=S.objectifs.filter(o=>o.id!==id);save();refreshObjectifs();toast('✓ Supprimé');}
+function _lireMontant(raw){
+  if(raw===null||raw===undefined)return null;
+  const m=Math.abs(parseFloat(String(raw).replace(/\s/g,'').replace(',','.')));
+  return(!m||isNaN(m))?0:m;
+}
+// Même logique que verserFS : on alimente l'objectif ET on écrit la ligne de journal.
+function verserObj(id){
+  const o=S.objectifs.find(x=>x.id===id);if(!o)return;
+  const m=_lireMontant(prompt(`Verser sur « ${o.nom} »\nActuel : ${fmt(o.actuel)} / ${fmt(o.cible)}\n\nMontant à verser (FCFA) :`,''));
+  if(m===null)return;
+  if(!m){toast('⚠️ Montant invalide','err');return;}
+  o.actuel=(Number(o.actuel)||0)+m;
+  S.journal.push({id:uid(),date:new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:'Objectif : '+o.nom,objId:o.id,ts:Date.now()});
+  save();refreshObjectifs();refreshJournal();refreshDash();
+  toast(`🎯 ${fmt(m)} versés sur « ${o.nom} »`);
+}
+// Correction d'erreur : on retire le montant ET la ligne de journal correspondante.
+function corrigerObj(id){
+  const o=S.objectifs.find(x=>x.id===id);if(!o)return;
+  const m=_lireMontant(prompt(`Corriger « ${o.nom} »\nActuel : ${fmt(o.actuel)}\n\nMontant à retirer (FCFA) :`,''));
+  if(m===null)return;
+  if(!m){toast('⚠️ Montant invalide','err');return;}
+  const avant=Number(o.actuel)||0;
+  if(!confirm(`Retirer ${fmt(m)} de « ${o.nom} » ?\n${fmt(avant)} → ${fmt(Math.max(0,avant-m))}`))return;
+  o.actuel=Math.max(0,avant-m);
+  let idx=-1;
+  for(let i=S.journal.length-1;i>=0;i--){const e=S.journal[i];if(e.objId===o.id&&e.montant===m){idx=i;break;}}
+  if(idx>=0)S.journal.splice(idx,1);
+  save();refreshObjectifs();refreshJournal();refreshDash();
+  toast(idx>=0?`✓ Versement de ${fmt(m)} annulé`:`✓ Montant corrigé (aucune ligne de journal à annuler)`);
+}
 function refreshObjectifs(){
   const c=document.getElementById('objectifs-list');
   if(!S.objectifs.length){c.innerHTML='<div class="card"><div class="empty"><div class="ei">🎯</div><p>Aucun objectif.<br>Ajoute ton premier ci-dessous.</p></div></div>';return;}
@@ -1699,6 +1896,10 @@ function refreshObjectifs(){
         <div class="obj-name">${o.nom}</div>
         <div class="obj-meta">Cible: ${dt}${moisR?` • ~${moisR} mois à ce rythme`:''}</div>
         <div class="obj-nums">${fmt(o.actuel)} / ${fmt(o.cible)}</div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-lime btn-sm" onclick="verserObj('${o.id}')">➕ Verser</button>
+          <button class="btn btn-ghost btn-sm" onclick="corrigerObj('${o.id}')">↩️ Corriger</button>
+        </div>
       </div>
       <button class="je-del" onclick="delObj('${o.id}')">🗑</button>
     </div>`;
@@ -1960,7 +2161,8 @@ async function chatWith(autoP,dispMsg){
   const ts=new Date().toISOString().split('T')[0];
   const te=S.journal.filter(e=>e.date===ts);
   const benT=te.filter(e=>isInc(e.type)).reduce((s,e)=>s+e.montant,0);
-  const depT=te.filter(e=>e.type.startsWith('depense')).reduce((s,e)=>s+e.montant,0);
+  const depT=te.filter(e=>isSortie(e.type)).reduce((s,e)=>s+e.montant,0);
+  const consoT=te.filter(e=>isDepConso(e.type)).reduce((s,e)=>s+e.montant,0);
   const now=new Date();
   const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const moisEnts=S.journal.filter(e=>e.date.startsWith(prefix));
@@ -2021,7 +2223,7 @@ ${lb?`• Revenus : ${fmt(lb.calc.totalBen)} | Charges : ${fmt(lb.calc.totalDep)
 
 ▌ CE MOIS EN COURS
 • Revenus enregistrés : ${fmt(benMois)} (${jSaisis} jours saisis sur ${joursTotal})
-• Aujourd'hui : revenus ${fmt(benT)} | dépenses ${fmt(depT)}
+• Aujourd'hui : revenus ${fmt(benT)} | sorties ${fmt(depT)} (dont consommation ${fmt(consoT)} ; le reste part en remboursement de dette et en épargne — ce n'est pas du train de vie)
 • Prévision fin de mois : ${prevision>0?fmt(prevision)+' FCFA':'Données insuffisantes'}
 
 ▌ OBJECTIFS
@@ -2270,9 +2472,81 @@ function showBilanCFDetail(){
 }
 
 // ══════ DONNÉES ══════
-function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fincoach_v4_'+new Date().toISOString().split('T')[0]+'.json';a.click();toast('✓ Export réussi');}
+function exportData(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='fincoach_v4_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  S.lastExport=Date.now();save();checkAlerts();
+  toast('✓ Export réussi');
+}
 function importData(){document.getElementById('import-file').click();}
-function doImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{S={...S,...JSON.parse(ev.target.result)};save();refreshAll();loadCfg();setTimeout(buildCharts,300);toast('✓ Données importées !');}catch(err){toast('❌ Fichier invalide','err');}};r.readAsText(f);}
+function doImport(e){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    let inc=null;
+    try{inc=JSON.parse(ev.target.result);}catch(err){}
+    if(!isPlainObj(inc)){toast('❌ Fichier invalide','err');e.target.value='';return;}
+    applyImport(inc);
+    e.target.value='';
+  };
+  r.readAsText(f);
+}
+const IMPORT_LIGNES=[['Journal','journal'],['Bilans','bilans'],['Dettes','dettes'],['Créances','creances'],
+  ['Objectifs','objectifs'],['Comptes','wallets'],['Investissements','investissements'],['Charges fixes','chargesFixes']];
+// Un import remplace les tableaux entiers. On montre donc ce qu'on perd AVANT d'appliquer,
+// et on prend une sauvegarde automatique juste avant.
+function applyImport(inc){
+  const after=deepMerge(S,inc);
+  const A=countEntries(S),B=countEntries(after);
+  const lignes=IMPORT_LIGNES.map(([lbl,k])=>{
+    const d=B[k]-A[k];
+    return `• ${lbl} : ${A[k]} → ${B[k]}${d===0?'  (inchangé)':d>0?'  (+'+d+')':'  ('+d+' ⚠️ PERDUES)'}`;
+  }).join('\n');
+  const perte=IMPORT_LIGNES.some(([,k])=>B[k]<A[k]);
+  const msg=`IMPORT — comparaison avant → après\n\n${lignes}\n\n`
+    +(perte?'⚠️ Cet import SUPPRIME des entrées existantes : les tableaux sont remplacés, pas fusionnés.\n\n':'')
+    +'Une sauvegarde automatique est prise juste avant (Config → Sauvegardes).\n\nAppliquer cet import ?';
+  if(!confirm(msg)){toast('Import annulé');return false;}
+  writeBackup();
+  S=after;ensureShape();migrateBilans();
+  localStorage.setItem('fcv4',JSON.stringify(S));
+  refreshAll();loadCfg();renderBackups();setTimeout(buildCharts,300);
+  toast('✓ Données importées');
+  return true;
+}
+// ══════ SAUVEGARDES — LISTE & RESTAURATION ══════
+function renderBackups(){
+  const el=document.getElementById('bak-list');if(!el)return;
+  const keys=listBackups().reverse();
+  if(!keys.length){el.innerHTML='<div class="empty"><div class="ei">🗄️</div><p>Aucune sauvegarde automatique pour l\'instant.<br>Elle se crée toute seule à la prochaine saisie.</p></div>';return;}
+  el.innerHTML=keys.map(k=>{
+    const m=bakMeta(k),c=m.counts||{};
+    const det=m.data?`${c.journal} journal · ${c.bilans} bilans · ${c.dettes} dettes · ${c.objectifs} objectifs`:'illisible';
+    return`<div class="je" style="flex-wrap:wrap">
+      <div class="je-ico" style="background:rgba(56,240,208,.12)">🗄️</div>
+      <div style="flex:1;min-width:120px"><div class="je-cat">${bakLabel(m.iso)}</div><div class="je-desc" style="font-size:12px;overflow-wrap:anywhere">${det}</div></div>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="restoreBackup('${k}')">↩️ Restaurer</button>
+    </div>`;
+  }).join('');
+}
+function restoreBackup(key){
+  const m=bakMeta(key);
+  if(!m.data){toast('❌ Sauvegarde illisible','err');return;}
+  const c=m.counts,now=countEntries(S);
+  const msg=`RESTAURER la sauvegarde du ${bakLabel(m.iso)} ?\n\n`
+    +`Contenu de cette sauvegarde :\n`
+    +IMPORT_LIGNES.map(([lbl,k])=>`• ${lbl} : ${c[k]}`).join('\n')
+    +`\n\nÉtat actuel :\n`
+    +IMPORT_LIGNES.map(([lbl,k])=>`• ${lbl} : ${now[k]}`).join('\n')
+    +`\n\nTes données actuelles seront remplacées. Une copie de l'état actuel est prise juste avant.`;
+  if(!confirm(msg))return;
+  writeBackup();
+  S=deepMerge(S,m.data);ensureShape();migrateBilans();
+  localStorage.setItem('fcv4',JSON.stringify(S));
+  refreshAll();loadCfg();renderBackups();setTimeout(buildCharts,300);
+  toast('✓ Sauvegarde du '+bakLabel(m.iso)+' restaurée');
+}
 function resetData(){if(!confirm('Effacer TOUTES les données FinCoach v4 ?'))return;localStorage.removeItem('fcv4');location.reload();}
 
 // ══════ UTILS ══════
