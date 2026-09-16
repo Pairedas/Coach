@@ -1,5 +1,5 @@
 // FinCoach — Service Worker : cache local pour usage hors-ligne
-const CACHE = 'fincoach-v3';
+const CACHE = 'fincoach-v4';
 const ASSETS = [
   './',
   './index.html',

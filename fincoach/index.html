@@ -178,6 +178,41 @@ margin-bottom:13px;position:relative;overflow:hidden;
 .al-b{background:rgba(77,158,255,.06);border:1px solid rgba(77,158,255,.15);color:var(--blue)}
 .al-ico{font-size:16px;flex-shrink:0;margin-top:1px}
 
+/* ══ POCHES / RITUEL / POINTAGE ══ */
+.miroir-note{background:rgba(77,158,255,.06);border:1px solid rgba(77,158,255,.16);border-radius:11px;padding:13px 14px;margin-bottom:13px;font-size:13px;line-height:1.55;color:var(--txt2)}
+.miroir-note strong{color:var(--blue)}
+.poche-card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:11px}
+.poche-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.poche-ico{width:38px;height:38px;border-radius:10px;background:var(--ink3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.poche-nom{font-size:14px;font-weight:700;line-height:1.25}
+.poche-cpt{font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-top:2px;word-break:break-word}
+.poche-sol{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;margin-left:auto;text-align:right;white-space:nowrap}
+.poche-trk{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:11px}
+.poche-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.poche-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-top:5px;line-height:1.5}
+.poche-sub{margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.poche-sub-t{font-size:9px;font-family:'Fira Code',monospace;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.poche-li{display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;font-size:11px;font-family:'Fira Code',monospace;color:var(--txt2);padding:4px 0;border-bottom:1px solid rgba(29,47,69,.5)}
+.poche-li:last-child{border-bottom:none}
+.rit-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;background:var(--ink3);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.rit-ligne{display:flex;align-items:flex-start;gap:11px;background:var(--ink3);border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:9px}
+.rit-ligne.fait{border-color:rgba(184,255,87,.35);background:rgba(184,255,87,.05)}
+.rit-ligne.nf{opacity:.55;border-style:dashed}
+.rit-chk{width:32px;height:32px;min-width:32px;border-radius:9px;border:2px solid var(--line2);background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#000;cursor:pointer;flex-shrink:0;touch-action:manipulation;transition:all .15s}
+.rit-chk.on{background:var(--lime);border-color:var(--lime)}
+.rit-ordre{font-size:14px;font-weight:700;line-height:1.4}
+.rit-sub{font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);margin-top:4px;line-height:1.5;word-break:break-word}
+.pt-row{background:var(--ink3);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
+.pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;align-items:end}
+.pt-ec{font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;white-space:nowrap}
+.pt-mini{font-size:10px;font-family:'Fira Code',monospace;color:var(--txt3);line-height:1.5}
+.pt-hist{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+@media(max-width:430px){
+.poche-sol{margin-left:0;width:100%;text-align:left}
+.pt-grid{grid-template-columns:1fr}
+.rit-ordre{font-size:13px}
+}
+
 /* ══ PRÉVISION ══ */
 .prev-card{background:linear-gradient(135deg,rgba(77,158,255,.06),rgba(56,240,208,.04));border:1px solid rgba(77,158,255,.15);border-radius:14px;padding:18px;margin-bottom:13px}
 .prev-val{font-family:'Nunito',sans-serif;font-size:36px;font-weight:800;color:var(--blue);letter-spacing:-1px}
@@ -383,6 +418,10 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
     <button class="ni on" onclick="go('dash',this)"><span class="ico">🏠</span>Dashboard<span class="ndot" id="dot-dash"></span></button>
     <button class="ni" onclick="go('analytics',this)"><span class="ico">📊</span>Rétroviseur<span class="ndot" id="dot-ana"></span></button>
     <button class="ni" onclick="go('journal',this)"><span class="ico">📅</span>Journal</button>
+    <div class="sb-sec">Le guide</div>
+    <button class="ni" onclick="go('poches',this)"><span class="ico">🧺</span>Les 4 poches<span class="ndot" id="dot-poches"></span></button>
+    <button class="ni" onclick="go('rituel',this)"><span class="ico">🗓</span>Rituel mensuel</button>
+    <button class="ni" onclick="go('pointage',this)"><span class="ico">🧭</span>Pointage hebdo<span class="ndot" id="dot-pointage"></span></button>
     <div class="sb-sec">Finances</div>
     <button class="ni" onclick="go('bilan',this)"><span class="ico">📋</span>Bilan Mensuel</button>
     <button class="ni" onclick="go('charges',this)"><span class="ico">🔒</span>Charges Fixes</button>
@@ -564,6 +603,72 @@ box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;
       <div class="tag" onclick="filterJournal('side_hustle',this)">💼 Side-hustle</div>
     </div>
     <div id="j-hist-list"><div class="empty"><div class="ei">📅</div><p>Aucune entrée.</p></div></div>
+  </div>
+</section>
+
+<section id="sec-poches" class="sec">
+  <div class="ph">
+    <div><h2>Les 4 <span>poches</span></h2><p>Miroir de tes vrais sous-comptes Wave & Orange Money</p></div>
+    <div class="ph-actions"><button class="btn btn-lime btn-sm" onclick="go('pointage',document.querySelectorAll('.ni')[5])">🧭 Pointer</button></div>
+  </div>
+  <div class="miroir-note">
+    <strong>Le vrai compte a toujours raison.</strong> Ces chiffres sont ce que FinCoach <em>attend</em>. La vérité est dans Wave et Orange Money. Quand les deux divergent, c'est ici qu'on corrige — jamais l'inverse.
+  </div>
+  <div id="poches-alertes"></div>
+  <div class="mbox ml" style="margin-bottom:13px">
+    <div class="mlbl">Total des 4 poches (théorique)</div>
+    <div class="mval" id="poches-total">—</div>
+    <div class="msub">Somme des soldes attendus — à confronter au réel chaque semaine</div>
+  </div>
+  <div id="poches-list"></div>
+</section>
+
+<section id="sec-rituel" class="sec">
+  <div class="ph">
+    <div><h2>Rituel <span>mensuel</span></h2><p>Une fois par mois — tu constates, FinCoach ordonne, tu vires</p></div>
+  </div>
+  <div class="miroir-note">
+    FinCoach ne déplace pas un franc. Il te dit quoi virer, dans quel ordre. <strong>Les virements, c'est toi qui les fais</strong>, dans Wave et Orange Money. Tu coches quand c'est fait.
+  </div>
+  <div class="card">
+    <div class="card-t lime">1️⃣ Constate ton revenu réel du mois</div>
+    <div class="g2">
+      <div class="fg"><label>Mois</label><input type="month" id="rit-ym" onchange="refreshRituel()"></div>
+      <div class="fg"><label>Revenu réel encaissé (FCFA)</label><input type="number" id="rit-revenu" inputmode="numeric" placeholder="ex: 1590000"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-lime" onclick="lancerRituel()">📋 Établir la cascade</button></div>
+  </div>
+  <div class="card">
+    <div class="card-t cyan">2️⃣ Exécute les ordres, dans l'ordre</div>
+    <div id="rituel-body"></div>
+  </div>
+  <div class="card">
+    <div class="card-t">🗂 Autres mois</div>
+    <div id="rituel-hist"></div>
+  </div>
+</section>
+
+<section id="sec-pointage" class="sec">
+  <div class="ph">
+    <div><h2>Pointage <span>hebdomadaire</span></h2><p>Deux minutes : ouvre Wave et Orange Money, lis, saisis</p></div>
+  </div>
+  <div class="miroir-note">
+    <strong>Le vrai compte a toujours raison.</strong> Si le solde réel diffère de ce que FinCoach attendait, c'est FinCoach qui s'aligne. Un écart doit être expliqué : sinon il s'accumule et devient du bruit qu'on finit par ignorer.
+  </div>
+  <div id="pointage-age"></div>
+  <div class="card">
+    <div class="card-t cyan">🧭 Soldes réels de la semaine</div>
+    <div id="pointage-body"></div>
+    <div class="rit-hero" style="margin-top:12px">
+      <div><div class="pt-mini">Écart total</div><div class="pt-ec" id="pt-total" style="font-size:24px">—</div></div>
+      <div style="text-align:right"><div class="pt-mini" id="pt-nb">—</div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-lime" onclick="soumettrePointage()">✅ Valider le pointage</button></div>
+  </div>
+  <div class="card">
+    <div class="card-t amber">📜 Historique des écarts</div>
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:10px;line-height:1.5">Relis cette liste de temps en temps : c'est elle qui révèle les fuites récurrentes.</div>
+    <div id="pointage-hist"></div>
   </div>
 </section>
 
@@ -774,6 +879,10 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
           <option value="annuel">📅 Annuelle (÷12)</option>
         </select>
       </div>
+      <div class="fg">
+        <label>Poche qui la porte</label>
+        <select id="cf-poche"><option value="">— non rattachée —</option></select>
+      </div>
       <div class="fg full"><label>Note (optionnel)</label><input type="text" id="cf-note" placeholder="ex: Loyer appartement, Forfait Expresso…"></div>
     </div>
     <div class="btn-row">
@@ -886,6 +995,7 @@ Comment tu te sens, et sur quoi on se concentre aujourd'hui ?</div>
 let S={
   journal:[],bilans:[],wallets:[],investissements:[],dettes:[],creances:[],objectifs:[],
   chargesFixes:[],defis:[],fondsSecurite:{cible:0,actuel:0},
+  poches:[],repartitions:[],pointages:[],
   config:{apiKey:'',pct:{sal:35,epa:20,wav:25,urg:10,inv:10}},
   chatHist:[],lastExport:null
 };
@@ -934,7 +1044,8 @@ function deepMerge(base,over){
 const PCT_DEF={sal:35,epa:20,wav:25,urg:10,inv:10};
 // Garde-fou : quoi qu'il y ait dans le localStorage, S a toujours la bonne forme.
 function ensureShape(){
-  ['journal','bilans','wallets','investissements','dettes','creances','objectifs','chargesFixes','defis','chatHist']
+  ['journal','bilans','wallets','investissements','dettes','creances','objectifs','chargesFixes','defis','chatHist',
+   'poches','repartitions','pointages']
     .forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
   if(!isPlainObj(S.fondsSecurite))S.fondsSecurite={cible:0,actuel:0};
   ['cible','actuel'].forEach(k=>{const v=Number(S.fondsSecurite[k]);S.fondsSecurite[k]=isNaN(v)?0:v;});
@@ -942,6 +1053,7 @@ function ensureShape(){
   if(typeof S.config.apiKey!=='string')S.config.apiKey='';
   if(!isPlainObj(S.config.pct))S.config.pct=Object.assign({},PCT_DEF);
   Object.keys(PCT_DEF).forEach(k=>{const v=Number(S.config.pct[k]);S.config.pct[k]=isNaN(v)?PCT_DEF[k]:v;});
+  ensurePoches();
 }
 
 // ══════ SAUVEGARDES AUTOMATIQUES (rotation dans le localStorage) ══════
@@ -1028,6 +1140,8 @@ function setTodayInputs(){
   document.getElementById('q-date').value=iso;
   document.getElementById('b-mois').selectedIndex=t.getMonth();
   document.getElementById('b-annee').value=t.getFullYear();
+  const ry=document.getElementById('rit-ym');
+  if(ry&&!ry.value)ry.value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');
   const lbl=t.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('dash-date').textContent=lbl;
   document.getElementById('j-date-lbl').textContent=lbl;
@@ -1049,6 +1163,9 @@ function go(id,btn){
   if(id==='objectifs'){refreshObjectifs();refreshReservoir();}
   if(id==='dash')refreshDash();
   if(id==='search')doSearch();
+  if(id==='poches')refreshPoches();
+  if(id==='rituel')refreshRituel();
+  if(id==='pointage')refreshPointage();
   closeSB();window.scrollTo(0,0);
 }
 function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('vis');}
@@ -1059,6 +1176,7 @@ function refreshAll(){
   refreshDash();refreshJournal();refreshPatrimoine();
   refreshObjectifs();refreshBilansHist();updateScore();updatePrev();checkAlerts();
   refreshChargesFixes();refreshReservoir();renderRetro();
+  refreshPoches();refreshRituel();refreshPointage();
 }
 
 // ══════ SCORE ══════
@@ -1139,6 +1257,12 @@ function checkAlerts(){
   if(calcCreances()>0)al.push({t:'al-b',i:'🤝',m:`${fmt(calcCreances())} à récupérer chez tes débiteurs. Pense à relancer !`});
   const ts=new Date().toISOString().split('T')[0];
   if(!S.journal.some(e=>e.date===ts))al.push({t:'al-l',i:'📅',m:'Rappel : saisis tes revenus et dépenses du jour !'});
+  // Pointage hebdo : au-delà de 10 jours, l'écart devient trop gros pour être expliqué.
+  const jp=joursDepuisPointage();
+  if(jp===null)al.push({t:'al-b',i:'🧭',m:'Aucun pointage hebdomadaire encore fait. Lis les soldes réels de tes sous-comptes Wave et Orange Money et saisis-les — deux minutes.'});
+  else if(jp>10)al.push({t:'al-r',i:'🧭',m:`Dernier pointage il y a ${jp} jours. Au-delà de 10 jours, tu ne sauras plus expliquer les écarts.`});
+  // Échéances de dettes — en tête, une date fixe ne se négocie pas.
+  alertesEcheance().forEach(a=>al.unshift({t:a.t,i:a.i,m:a.m}));
   // Rappel d'export JSON — en tête de liste, c'est le seul risque de perte totale.
   const exAlerte=alerteExport();
   if(exAlerte){al.unshift(exAlerte);const r=document.getElementById('export-rappel');if(r)r.innerHTML=`<div class="alert ${exAlerte.t}"><div class="al-ico">${exAlerte.i}</div><div>${exAlerte.m}</div></div>`;}
@@ -1613,7 +1737,10 @@ function refreshPatrimoine(){
         <div style="flex:1;min-width:0">
           <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace">${d.type}${d.mensualite?` • mensualité ${fmt(d.mensualite)}`:''}</div>
           <div style="font-size:14px;font-weight:700">${d.nom}</div>
-          <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px">Depuis ${d.dateDebut||'—'} • ${d.paiements?.length||0} paiement(s)</div>
+          <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px">Depuis ${d.dateDebut||'—'} • ${d.paiements?.length||0} paiement(s) • 🧺 ${pocheNom(d.poche)}</div>
+          ${(()=>{if(!d.echeance||!(d.soldeRestant>0))return'';const j=joursAvant(d.echeance);if(j===null)return'';
+            const col=j<0||j<=7?'var(--red)':j<=30?'var(--amber)':'var(--txt3)';
+            return`<div style="font-size:10px;font-family:'Fira Code',monospace;margin-top:2px;color:${col}">⏰ Échéance ${dateFR(d.echeance)} — ${j<0?'DÉPASSÉE de '+(-j)+' jour(s)':'J−'+j}</div>`;})()}
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:${soldé?'var(--lime)':'var(--red)'}">${soldé?'SOLDÉ':fmt(d.soldeRestant)}</div>
@@ -1744,16 +1871,36 @@ function payerMensualite(id){
   const d=S.dettes.find(x=>x.id===id);if(!d||!d.mensualite)return;
   enregistrerPaiementDette(id,d.mensualite,new Date().toISOString().split('T')[0],'Mensualité');
 }
-function enregistrerPaiementDette(id,montant,date,note='',skipJournal=false){
-  const d=S.dettes.find(x=>x.id===id);if(!d)return;
+// Renvoie { detteId, montant, soldeAvant, soldeApres, jid } — le rituel mensuel a besoin
+// de ces références pour pouvoir annuler exactement l'écriture si Hervé décoche la ligne.
+function enregistrerPaiementDette(id,montant,date,note='',skipJournal=false,silencieux=false){
+  const d=S.dettes.find(x=>x.id===id);if(!d)return null;
   const avant=d.soldeRestant;
   d.soldeRestant=Math.max(0,d.soldeRestant-montant);
   if(!d.paiements)d.paiements=[];
   d.paiements.push({date:new Date(date+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}),montant,note,soldeAvant:avant,soldeApres:d.soldeRestant});
-  if(!skipJournal)S.journal.push({id:uid(),date,type:'remb_dette',montant,desc:`Remb. ${d.nom}${note?' ('+note+')':''}`,ts:Date.now()});
+  let jid=null;
+  if(!skipJournal){jid=uid();S.journal.push({id:jid,date,type:'remb_dette',montant,desc:`Remb. ${d.nom}${note?' ('+note+')':''}`,ts:Date.now()});}
   save();refreshPatrimoine();refreshDash();refreshJournal();updateScore();updatePrev();
-  if(d.soldeRestant<=0)toast(`🎉 Dette "${d.nom}" entièrement remboursée !`);
-  else toast(`✓ Paiement de ${fmt(montant)} enregistré — Reste : ${fmt(d.soldeRestant)}`);
+  if(!silencieux){
+    if(d.soldeRestant<=0)toast(`🎉 Dette "${d.nom}" entièrement remboursée !`);
+    else toast(`✓ Paiement de ${fmt(montant)} enregistré — Reste : ${fmt(d.soldeRestant)}`);
+  }
+  return{detteId:d.id,montant,soldeAvant:avant,soldeApres:d.soldeRestant,jid};
+}
+// Annule exactement un paiement rendu par enregistrerPaiementDette.
+function annulerPaiementDette(ref){
+  if(!ref)return false;
+  const d=S.dettes.find(x=>x.id===ref.detteId);if(!d)return false;
+  d.soldeRestant=ref.soldeAvant;
+  if(Array.isArray(d.paiements)){
+    for(let i=d.paiements.length-1;i>=0;i--){
+      const p=d.paiements[i];
+      if(p.montant===ref.montant&&p.soldeAvant===ref.soldeAvant){d.paiements.splice(i,1);break;}
+    }
+  }
+  if(ref.jid)S.journal=S.journal.filter(e=>e.id!==ref.jid);
+  return true;
 }
 function ouvrirSelectionDette(montant,date){
   const da=S.dettes.filter(x=>x.soldeRestant>0);
@@ -1848,15 +1995,29 @@ function _lireMontant(raw){
   return(!m||isNaN(m))?0:m;
 }
 // Même logique que verserFS : on alimente l'objectif ET on écrit la ligne de journal.
-function verserObj(id){
-  const o=S.objectifs.find(x=>x.id===id);if(!o)return;
-  const m=_lireMontant(prompt(`Verser sur « ${o.nom} »\nActuel : ${fmt(o.actuel)} / ${fmt(o.cible)}\n\nMontant à verser (FCFA) :`,''));
-  if(m===null)return;
-  if(!m){toast('⚠️ Montant invalide','err');return;}
+// montantArg / dateArg : appel programmatique (rituel mensuel). Sans argument, comportement
+// d'origine inchangé — prompt(). Renvoie { objId, montant, jid } pour l'annulation.
+function verserObj(id,montantArg,dateArg){
+  const o=S.objectifs.find(x=>x.id===id);if(!o)return null;
+  const auto=(montantArg!==undefined&&montantArg!==null);
+  const m=auto?Math.abs(Number(montantArg)||0)
+              :_lireMontant(prompt(`Verser sur « ${o.nom} »\nActuel : ${fmt(o.actuel)} / ${fmt(o.cible)}\n\nMontant à verser (FCFA) :`,''));
+  if(m===null)return null;
+  if(!m){if(!auto)toast('⚠️ Montant invalide','err');return null;}
   o.actuel=(Number(o.actuel)||0)+m;
-  S.journal.push({id:uid(),date:new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:'Objectif : '+o.nom,objId:o.id,ts:Date.now()});
+  const jid=uid();
+  S.journal.push({id:jid,date:dateArg||new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:'Objectif : '+o.nom,objId:o.id,ts:Date.now()});
   save();refreshObjectifs();refreshJournal();refreshDash();
-  toast(`🎯 ${fmt(m)} versés sur « ${o.nom} »`);
+  if(!auto)toast(`🎯 ${fmt(m)} versés sur « ${o.nom} »`);
+  return{objId:o.id,montant:m,jid};
+}
+// Annule exactement un versement rendu par verserObj.
+function annulerVersementObj(ref){
+  if(!ref)return false;
+  const o=S.objectifs.find(x=>x.id===ref.objId);if(!o)return false;
+  o.actuel=Math.max(0,(Number(o.actuel)||0)-ref.montant);
+  if(ref.jid)S.journal=S.journal.filter(e=>e.id!==ref.jid);
+  return true;
 }
 // Correction d'erreur : on retire le montant ET la ligne de journal correspondante.
 function corrigerObj(id){
@@ -1957,15 +2118,28 @@ function setFsCible(){
   S.fondsSecurite.cible=Math.abs(parseFloat(document.getElementById('fs-cible').value)||0);
   save();refreshReservoir();
 }
-function verserFS(){
-  const m=Math.abs(parseFloat(document.getElementById('fs-verse').value)||0);
-  if(!m){toast('⚠️ Saisis un montant','err');return;}
+// montantArg / dateArg : appel programmatique (rituel mensuel). Sans argument, comportement
+// d'origine inchangé — lecture du champ #fs-verse. Renvoie { montant, jid } pour l'annulation.
+function verserFS(montantArg,dateArg,desc){
+  const auto=(montantArg!==undefined&&montantArg!==null);
+  const m=auto?Math.abs(Number(montantArg)||0):Math.abs(parseFloat(document.getElementById('fs-verse').value)||0);
+  if(!m){if(!auto)toast('⚠️ Saisis un montant','err');return null;}
   if(!S.fondsSecurite)S.fondsSecurite={cible:0,actuel:0};
-  S.fondsSecurite.actuel+=m;
-  S.journal.push({id:uid(),date:new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:'Fonds de sécurité',ts:Date.now()});
-  document.getElementById('fs-verse').value='';
-  save();refreshReservoir();refreshJournal();
-  toast(`🛡️ ${fmt(m)} versés au fonds de sécurité !`);
+  S.fondsSecurite.actuel=(Number(S.fondsSecurite.actuel)||0)+m;
+  const jid=uid();
+  S.journal.push({id:jid,date:dateArg||new Date().toISOString().split('T')[0],type:'epargne',montant:m,desc:desc||'Fonds de sécurité',ts:Date.now()});
+  if(!auto)document.getElementById('fs-verse').value='';
+  save();refreshReservoir();refreshJournal();refreshDash();
+  if(!auto)toast(`🛡️ ${fmt(m)} versés au fonds de sécurité !`);
+  return{montant:m,jid};
+}
+// Annule exactement un versement rendu par verserFS.
+function annulerVersementFS(ref){
+  if(!ref)return false;
+  if(!S.fondsSecurite)S.fondsSecurite={cible:0,actuel:0};
+  S.fondsSecurite.actuel=Math.max(0,(Number(S.fondsSecurite.actuel)||0)-ref.montant);
+  if(ref.jid)S.journal=S.journal.filter(e=>e.id!==ref.jid);
+  return true;
 }
 function retirerFS(){
   const m=Math.abs(parseFloat(document.getElementById('fs-verse').value)||0);
@@ -2083,7 +2257,12 @@ function openModal(type,id=null){
       <div class="fg"><label>Montant initial (FCFA)</label><input type="number" id="m-initial" placeholder="ex: 200000" inputmode="numeric"></div>
       <div class="fg"><label>Solde restant (FCFA)</label><input type="number" id="m-restant" placeholder="ex: 150000" inputmode="numeric"></div>
       <div class="fg"><label>Mensualité (FCFA)</label><input type="number" id="m-mens" placeholder="ex: 25000" inputmode="numeric"></div>
-      <div class="fg"><label>Date de début</label><input type="date" id="m-date" value="${new Date().toISOString().split('T')[0]}"></div>`;
+      <div class="fg"><label>Date de début</label><input type="date" id="m-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label>Échéance ferme (optionnel)</label><input type="date" id="m-echeance"></div>
+      <div class="fg"><label>Poche</label><select id="m-poche">${S.poches.map(p=>`<option value="${p.id}"${p.id==='p_obligations'?' selected':''}>${p.icon} ${p.nom}</option>`).join('')}</select></div>
+      <div style="font-size:11px;font-family:'Fira Code',monospace;color:var(--txt3);background:var(--ink3);border-radius:8px;padding:10px;margin-top:4px">
+        ⏰ Avec une échéance ferme, FinCoach alerte à J−30 puis à J−7.
+      </div>`;
   }else if(type==='creance'){
     document.getElementById('modal-body').innerHTML=`
       <div class="fg"><label>Nom / Débiteur</label><input type="text" id="m-nom" placeholder="ex: Cousin Ibrahim, Client Awa…"></div>
@@ -2120,8 +2299,11 @@ function modalOK(){
     const soldeRestant=parseFloat(document.getElementById('m-restant').value)||0;
     const mensualite=parseFloat(document.getElementById('m-mens').value)||0;
     const dateDebut=document.getElementById('m-date').value;
+    const echEl=document.getElementById('m-echeance'),pocEl=document.getElementById('m-poche');
+    const echeance=echEl?echEl.value:'';
+    const pocheId=pocEl?pocEl.value:'p_obligations';
     if(!nom||!montantInitial){toast('⚠️ Nom et montant initial requis','err');return;}
-    S.dettes.push({id:uid(),nom,type,montantInitial,soldeRestant,mensualite,dateDebut,paiements:[]});
+    S.dettes.push({id:uid(),nom,type,montantInitial,soldeRestant,mensualite,dateDebut,echeance,poche:pocheId,paiements:[]});
     toast('✓ Dette ajoutée');
   }else if(_mt==='creance'){
     const nom=document.getElementById('m-nom').value.trim();
@@ -2399,7 +2581,8 @@ function addCharge(){
   const note=document.getElementById('cf-note').value.trim();
   if(!nom){toast('⚠️ Nom requis','err');return;}
   if(!montant||montant<=0){toast('⚠️ Montant invalide','err');return;}
-  S.chargesFixes.push({id:uid(),nom,cat,montant,freq,note,actif:true});
+  const pEl=document.getElementById('cf-poche');
+  S.chargesFixes.push({id:uid(),nom,cat,montant,freq,note,poche:pEl?pEl.value:'',actif:true});
   save();refreshChargesFixes();cfReset();
   toast('✓ Charge fixe ajoutée — appliquée automatiquement aux bilans');
 }
@@ -2407,6 +2590,13 @@ function cfReset(){document.getElementById('cf-nom').value='';document.getElemen
 function toggleCharge(id){const cf=S.chargesFixes.find(c=>c.id===id);if(cf){cf.actif=!cf.actif;save();refreshChargesFixes();}}
 function delCharge(id){if(!confirm('Supprimer cette charge fixe ?'))return;S.chargesFixes=S.chargesFixes.filter(c=>c.id!==id);save();refreshChargesFixes();toast('✓ Charge supprimée');}
 function refreshChargesFixes(){
+  // Le sélecteur de poche est peuplé depuis S.poches — une seule source de vérité.
+  const ps=document.getElementById('cf-poche');
+  if(ps){
+    const garde=ps.value;
+    ps.innerHTML='<option value="">— non rattachée —</option>'+S.poches.map(p=>`<option value="${p.id}">${p.icon} ${p.nom}</option>`).join('');
+    if(garde)ps.value=garde;
+  }
   const total=getTotalChargesFixes();
   const actives=S.chargesFixes.filter(c=>c.actif);
   document.getElementById('cf-total').textContent=fmt(total);
@@ -2438,7 +2628,7 @@ function refreshChargesFixes(){
           <div style="width:36px;height:36px;border-radius:9px;background:${cf.actif?'rgba(255,95,95,.1)':'rgba(255,255,255,.04)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${catInfo.icon}</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:700">${cf.nom}</div>
-            <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px">${freqInfo.label}${cf.freq!=='mensuel'?' · '+fmt(cf.montant)+' total':''} ${cf.note?'· '+cf.note:''}</div>
+            <div style="font-size:10px;color:var(--txt3);font-family:'Fira Code',monospace;margin-top:2px">${freqInfo.label}${cf.freq!=='mensuel'?' · '+fmt(cf.montant)+' total':''} ${cf.poche?'· 🧺 '+pocheNom(cf.poche):''} ${cf.note?'· '+cf.note:''}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:${cf.actif?'var(--red)':'var(--txt3)'}">−${fmt(mensuel)}</div>
@@ -2558,6 +2748,597 @@ function toast(msg,type='ok'){
   el.style.borderColor=type==='err'?'rgba(255,95,95,.4)':'var(--line2)';
   el.style.color=type==='err'?'var(--red)':'var(--txt)';
   el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES 4 POCHES · RITUEL MENSUEL · POINTAGE HEBDOMADAIRE
+   ───────────────────────────────────────────────────────────────────────────
+   PRINCIPE DIRECTEUR — LE VRAI COMPTE A TOUJOURS RAISON.
+   Les poches d'ici sont le miroir de vrais sous-comptes Wave et Orange Money,
+   où l'argent est réellement séparé. Quand le solde réel saisi diffère du
+   solde théorique, c'est FinCoach qui s'aligne sur la banque, jamais l'inverse.
+   Aucun écran ne doit laisser croire le contraire.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const POCHES_DEF=[
+  {id:'p_roulement',nom:'Fonds de roulement PRADEX',icon:'🎰',
+   compteReel:'Wave — sous-compte PRADEX',
+   solde:1500000,plancher:1500000,cible:2500000,dateCible:'2026-12-31',lien:null,
+   note:"Capital de l'activité d'agent de paris. Sous le plancher, on commence à refuser des dépôts. On n'y touche jamais pour autre chose."},
+  {id:'p_obligations',nom:'Obligations',icon:'💳',
+   compteReel:'Wave — sous-compte Obligations',
+   solde:0,plancher:0,cible:0,dateCible:'',lien:'dettes',
+   note:"Porte les dettes. Ce qui entre ici repart vers les créanciers."},
+  {id:'p_reserve',nom:"Réserve d'urgence",icon:'🛡️',
+   compteReel:"Orange Money — sous-compte Réserve",
+   solde:0,plancher:0,cible:450000,dateCible:'',lien:'fs',
+   note:"Miroir du fonds de sécurité — c'est la même somme, pas un doublon."},
+  {id:'p_projets',nom:'Projets',icon:'🎯',
+   compteReel:'Orange Money — sous-compte Projets',
+   solde:0,plancher:0,cible:1500000,dateCible:'2026-12-31',lien:'objectifs',
+   note:"Salon de beauté."}
+];
+// Cascade du rituel : MONTANTS FIXES, par ordre de priorité. montant:null = « tout le reste ».
+// Volontairement sans pourcentages : le mécanisme de pourcentages de la Config
+// répartit un revenu théorique, ce n'est pas ce qu'on fait ici.
+const CASCADE_DEF=[
+  {poche:'p_obligations',libelle:'Obligations',montant:225000},
+  {poche:'p_roulement',libelle:'Fonds de roulement PRADEX',montant:286000},
+  {poche:'p_reserve',libelle:"Réserve d'urgence",montant:150000},
+  {poche:'p_projets',libelle:'Projets — salon de beauté',montant:null}
+];
+
+function ensurePoches(){
+  if(!Array.isArray(S.poches))S.poches=[];
+  POCHES_DEF.forEach(def=>{
+    let p=S.poches.find(x=>x&&x.id===def.id);
+    if(!p){p=Object.assign({},def);S.poches.push(p);}
+    Object.keys(def).forEach(k=>{if(p[k]===undefined||(p[k]===null&&def[k]!==null))p[k]=def[k];});
+    ['solde','plancher','cible'].forEach(k=>{const v=Number(p[k]);p[k]=isNaN(v)?0:v;});
+    if(typeof p.compteReel!=='string')p.compteReel=def.compteReel;
+    if(typeof p.dateCible!=='string')p.dateCible=def.dateCible||'';
+  });
+  // La réserve EST le fonds de sécurité : la cible vit dans S.fondsSecurite, pas en double.
+  if(!isPlainObj(S.fondsSecurite))S.fondsSecurite={cible:0,actuel:0};
+  if(!(Number(S.fondsSecurite.cible)>0))S.fondsSecurite.cible=450000;
+  // Rattachement des entités existantes — idempotent, n'écrase aucun choix déjà fait.
+  S.dettes.forEach(d=>{if(!d)return;if(!d.poche)d.poche='p_obligations';if(typeof d.echeance!=='string')d.echeance='';});
+  S.objectifs.forEach(o=>{if(o&&!o.poche)o.poche='p_projets';});
+  S.chargesFixes.forEach(c=>{if(c&&typeof c.poche!=='string')c.poche='';});
+  if(!Array.isArray(S.config.cascade)||!S.config.cascade.length)
+    S.config.cascade=CASCADE_DEF.map(r=>Object.assign({},r));
+}
+
+// ── Accès & agrégation (aucun stockage propre : tout est dérivé des entités existantes) ──
+function poche(id){return S.poches.find(p=>p&&p.id===id)||null;}
+function pocheNom(id){const p=poche(id);return p?p.nom:'—';}
+function dettesDePoche(id){return S.dettes.filter(d=>d&&d.poche===id&&Number(d.soldeRestant)>0);}
+function objectifsDePoche(id){return S.objectifs.filter(o=>o&&o.poche===id);}
+function chargesDePoche(id){return S.chargesFixes.filter(c=>c&&c.poche===id);}
+function pocheSolde(p){
+  if(!p)return 0;
+  if(p.lien==='fs')return Number(S.fondsSecurite&&S.fondsSecurite.actuel)||0;
+  if(p.lien==='objectifs'){
+    const os=objectifsDePoche(p.id);
+    if(os.length)return os.reduce((s,o)=>s+(Number(o.actuel)||0),0);
+  }
+  return Number(p.solde)||0;
+}
+function pocheCible(p){
+  if(!p)return 0;
+  if(p.lien==='fs')return Number(S.fondsSecurite&&S.fondsSecurite.cible)||0;
+  if(p.lien==='objectifs'){
+    const os=objectifsDePoche(p.id);
+    if(os.length)return os.reduce((s,o)=>s+(Number(o.cible)||0),0);
+  }
+  return Number(p.cible)||0;
+}
+function pocheDateCible(p){
+  if(!p)return'';
+  if(p.dateCible)return p.dateCible;
+  const ds=objectifsDePoche(p.id).map(o=>o.date).filter(Boolean).sort();
+  return ds.length?ds[ds.length-1]:'';
+}
+// LE VRAI COMPTE A TOUJOURS RAISON : cette fonction n'existe que pour aligner le
+// théorique sur le réel. Elle n'est jamais appelée dans l'autre sens.
+function setPocheSolde(p,val){
+  if(!p)return;
+  const v=Math.max(0,Number(val)||0);
+  if(p.lien==='fs'){
+    if(!isPlainObj(S.fondsSecurite))S.fondsSecurite={cible:0,actuel:0};
+    S.fondsSecurite.actuel=v;return;
+  }
+  if(p.lien==='objectifs'){
+    const os=objectifsDePoche(p.id);
+    if(os.length){
+      // On garde ce qui est déjà acquis sur les premiers objectifs ; le dernier absorbe
+      // le solde restant, de sorte que le total de la poche vaille exactement le réel.
+      let reste=v;
+      os.forEach((o,i)=>{
+        if(i===os.length-1){o.actuel=Math.max(0,reste);reste=0;}
+        else{const part=Math.min(Number(o.actuel)||0,reste);o.actuel=part;reste-=part;}
+      });
+      return;
+    }
+  }
+  p.solde=v;
+}
+
+// ── Échéances ──
+function joursAvant(dateISO){
+  if(!dateISO||typeof dateISO!=='string')return null;
+  const t=Date.parse(dateISO+'T00:00:00');
+  if(isNaN(t))return null;
+  const n=new Date();
+  return Math.round((t-new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime())/86400000);
+}
+function dateFR(iso){
+  const t=iso?Date.parse(iso+'T00:00:00'):NaN;
+  return isNaN(t)?(iso||'—'):new Date(t).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+}
+// Alerte à 30 jours (ambre) puis à 7 jours (rouge), et au-delà si l'échéance est dépassée.
+function alertesEcheance(){
+  const out=[];
+  S.dettes.forEach(d=>{
+    if(!d||!(Number(d.soldeRestant)>0)||!d.echeance)return;
+    const j=joursAvant(d.echeance);
+    if(j===null)return;
+    if(j<0)out.push({t:'al-r',i:'⏰',jours:j,dette:d.id,
+      m:`ÉCHÉANCE DÉPASSÉE de ${-j} jour(s) — ${d.nom} : ${fmt(d.soldeRestant)} étaient dus le ${dateFR(d.echeance)}.`});
+    else if(j<=7)out.push({t:'al-r',i:'⏰',jours:j,dette:d.id,
+      m:`J−${j} — ${d.nom} : ${fmt(d.soldeRestant)} à payer le ${dateFR(d.echeance)}.`});
+    else if(j<=30)out.push({t:'al-a',i:'📆',jours:j,dette:d.id,
+      m:`J−${j} — ${d.nom} : ${fmt(d.soldeRestant)} à payer le ${dateFR(d.echeance)}. Prépare la poche Obligations.`});
+  });
+  return out.sort((a,b)=>a.jours-b.jours);
+}
+
+// ══════ PARTIE 1 — ÉCRAN « LES 4 POCHES » (vue agrégée, sans stockage propre) ══════
+function refreshPoches(){
+  const dp=document.getElementById('dot-poches');
+  if(dp)dp.className='ndot'+(alertesEcheance().some(a=>a.t==='al-r')?' on':'');
+  const c=document.getElementById('poches-list');if(!c)return;
+  const tot=S.poches.reduce((s,p)=>s+pocheSolde(p),0);
+  const tt=document.getElementById('poches-total');if(tt)tt.textContent=fmt(tot);
+  const al=document.getElementById('poches-alertes');
+  if(al){
+    const ae=alertesEcheance();
+    al.innerHTML=ae.length?ae.map(a=>`<div class="alert ${a.t}"><div class="al-ico">${a.i}</div><div>${a.m}</div></div>`).join('')
+      :`<div class="alert al-l"><div class="al-ico">✅</div><div>Aucune échéance dans les 30 jours.</div></div>`;
+  }
+  c.innerHTML=S.poches.map(p=>{
+    const solde=pocheSolde(p),cible=pocheCible(p),plancher=Number(p.plancher)||0;
+    const pct=cible>0?Math.min(100,Math.round(solde/cible*100)):0;
+    const sousPlancher=plancher>0&&solde<plancher;
+    const col=sousPlancher?'var(--red)':pct>=100?'var(--lime)':pct>=50?'var(--cyan)':'var(--amber)';
+    const dt=pocheDateCible(p);
+    const ds=dettesDePoche(p.id);
+    const detteTot=ds.reduce((s,d)=>s+(Number(d.soldeRestant)||0),0);
+    const os=objectifsDePoche(p.id);
+    return`<div class="poche-card">
+      <div class="poche-hd">
+        <div class="poche-ico">${p.icon}</div>
+        <div style="flex:1;min-width:120px">
+          <div class="poche-nom">${p.nom}</div>
+          <div class="poche-cpt">🏦 ${p.compteReel||'compte réel non renseigné'}</div>
+        </div>
+        <div class="poche-sol" style="color:${col}">${fmt(solde)}</div>
+      </div>
+      ${cible>0?`<div class="poche-trk"><div class="poche-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="poche-meta">
+        <span>${pct}% de ${fmt(cible)}${dt?' · visé '+dateFR(dt):''}</span>
+        <span>${solde<cible?'reste '+fmt(cible-solde):'✓ cible atteinte'}</span>
+      </div>`:''}
+      ${plancher>0?`<div class="poche-meta"><span style="color:${sousPlancher?'var(--red)':'var(--txt3)'}">
+        ${sousPlancher?'🔴 SOUS LE PLANCHER de '+fmt(plancher-solde)+' — tu vas devoir refuser des dépôts':'🛑 Plancher '+fmt(plancher)+' — respecté'}</span></div>`:''}
+      ${detteTot>0?`<div class="poche-sub">
+        <div class="poche-sub-t">Dettes portées — ${fmt(detteTot)}</div>
+        ${ds.map(d=>{const j=joursAvant(d.echeance);
+          const badge=j===null?'':`<span style="color:${j<0?'var(--red)':j<=7?'var(--red)':j<=30?'var(--amber)':'var(--txt3)'}">${j<0?'dépassée de '+(-j)+'j':'J−'+j}</span>`;
+          return`<div class="poche-li"><span>${d.nom}${d.mensualite?' · '+fmt(d.mensualite)+'/mois':''}${d.echeance?' · échéance '+dateFR(d.echeance):''}</span><span style="color:var(--red)">${fmt(d.soldeRestant)} ${badge}</span></div>`;}).join('')}
+      </div>`:''}
+      ${os.length?`<div class="poche-sub">
+        <div class="poche-sub-t">Objectifs rattachés</div>
+        ${os.map(o=>`<div class="poche-li"><span>${o.nom}</span><span style="color:var(--cyan)">${fmt(o.actuel)} / ${fmt(o.cible)}</span></div>`).join('')}
+      </div>`:''}
+      <div class="poche-meta" style="margin-top:9px"><span>${p.note||''}</span></div>
+      <div class="btn-row" style="margin-top:9px">
+        <button class="btn btn-ghost btn-sm" onclick="editPoche('${p.id}')">✏️ Compte réel / cible</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function editPoche(id){
+  const p=poche(id);if(!p)return;
+  const cpt=prompt(`Poche « ${p.nom} »\n\nQuel est le compte réel associé ?`,p.compteReel||'');
+  if(cpt===null)return;
+  p.compteReel=String(cpt).trim();
+  if(p.lien!=='objectifs'){
+    const cb=prompt(`Cible de « ${p.nom} » (FCFA, 0 = pas de cible) :`,String(pocheCible(p)));
+    if(cb!==null){
+      const v=Math.abs(parseFloat(String(cb).replace(/\s/g,'').replace(',','.'))||0);
+      if(p.lien==='fs')S.fondsSecurite.cible=v;else p.cible=v;
+    }
+  }
+  save();refreshPoches();refreshReservoir();toast('✓ Poche mise à jour');
+}
+
+// ══════ PARTIE 2 — LE RITUEL MENSUEL ══════
+function ymCourant(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function ymLisible(ym){
+  if(typeof ym!=='string'||!/^\d{4}-\d{2}$/.test(ym))return ym||'—';
+  return MOIS_FR[parseInt(ym.slice(5,7),10)-1]+' '+ym.slice(0,4);
+}
+function dateRituel(ym){
+  const auj=new Date().toISOString().split('T')[0];
+  if(typeof ym==='string'&&auj.indexOf(ym)===0)return auj;
+  const an=parseInt(String(ym).slice(0,4),10),mo=parseInt(String(ym).slice(5,7),10);
+  if(!an||!mo)return auj;
+  return ym+'-'+String(new Date(an,mo,0).getDate()).padStart(2,'0');
+}
+function cascadeRegles(){
+  if(!Array.isArray(S.config.cascade)||!S.config.cascade.length)
+    S.config.cascade=CASCADE_DEF.map(r=>Object.assign({},r));
+  return S.config.cascade;
+}
+// Cascade à montants fixes. Aucune ligne ne peut être négative : chaque montant est
+// borné par ce qui reste réellement disponible.
+function calculerCascade(revenu){
+  let dispo=Math.max(0,Number(revenu)||0);
+  const lignes=cascadeRegles().map((r,i)=>{
+    const p=poche(r.poche);
+    const demande=(r.montant===null||r.montant===undefined)?null:Math.max(0,Number(r.montant)||0);
+    const montant=(demande===null)?dispo:Math.min(demande,dispo);
+    dispo=Math.max(0,dispo-montant);
+    const statut=montant<=0?'non_finance':(demande!==null&&montant<demande)?'partiel':'ok';
+    return{id:'L'+i+'_'+uid(),poche:r.poche,libelle:r.libelle||(p?p.nom:r.poche),
+      montant,demande,statut,fait:false,ref:null};
+  });
+  return{lignes,reste:dispo};
+}
+function repartitionDuMois(ym){return S.repartitions.find(r=>r&&r.ym===ym)||null;}
+function creerRepartition(ym,revenuReel){
+  if(repartitionDuMois(ym))return null;
+  const c=calculerCascade(revenuReel);
+  const r={ym,revenuReel:Math.max(0,Number(revenuReel)||0),surplusSorti:0,
+    lignes:c.lignes,reste:c.reste,cloture:false,dateCloture:null,cree:new Date().toISOString()};
+  S.repartitions.push(r);
+  S.repartitions.sort((a,b)=>String(b.ym).localeCompare(String(a.ym)));
+  save();
+  return repartitionDuMois(ym);
+}
+function recalculerRepartition(ym,revenuReel){
+  const r=repartitionDuMois(ym);if(!r)return{ok:false,msg:'Mois introuvable'};
+  if(r.cloture)return{ok:false,msg:'Mois clôturé — rouvre-le d\'abord.'};
+  if(r.lignes.some(l=>l.fait))return{ok:false,msg:'Des virements sont déjà cochés. Décoche-les avant de corriger le revenu.'};
+  const c=calculerCascade(revenuReel);
+  r.revenuReel=Math.max(0,Number(revenuReel)||0);r.lignes=c.lignes;r.reste=c.reste;
+  save();return{ok:true,repartition:r};
+}
+function majClotureRepartition(r){
+  const actives=r.lignes.filter(l=>Number(l.montant)>0);
+  const complet=actives.length>0&&actives.every(l=>l.fait);
+  if(complet&&!r.cloture){r.cloture=true;r.dateCloture=new Date().toISOString();}
+  return r.cloture;
+}
+// Cocher = l'ordre a été exécuté dans la vraie application. On écrit l'effet dans les
+// entités existantes (dettes, fonds de sécurité, objectifs, solde de poche) et on garde
+// les références exactes pour pouvoir tout annuler si Hervé décoche.
+function cocherLigne(ym,ligneId){
+  const r=repartitionDuMois(ym);if(!r)return{ok:false,msg:'Mois introuvable'};
+  if(r.cloture)return{ok:false,msg:'Mois clôturé — rouvre-le d\'abord.'};
+  const l=r.lignes.find(x=>x.id===ligneId);if(!l)return{ok:false,msg:'Ligne introuvable'};
+  if(l.fait)return{ok:false,msg:'Déjà fait'};
+  if(!(Number(l.montant)>0))return{ok:false,msg:'Ligne non financée ce mois — il n\'y a rien à virer.'};
+  const p=poche(l.poche);if(!p)return{ok:false,msg:'Poche introuvable'};
+  const date=dateRituel(ym);
+  const ref={paiements:[],fs:null,objs:[],pocheDelta:0,jid:null};
+  if(p.lien==='dettes'){
+    let reste=Number(l.montant);
+    const ds=dettesDePoche(p.id);
+    const plan=[];
+    // 1) Les mensualités du mois d'abord : un engagement mensuel se paie ce mois-ci.
+    ds.forEach(d=>{
+      const m=Math.min(Number(d.mensualite)||0,Number(d.soldeRestant)||0,reste);
+      if(m>0){plan.push({d,m});reste-=m;}
+    });
+    // 2) Le solde va à l'échéance la plus proche ; une dette datée passe avant une dette sans date.
+    ds.slice().sort((a,b)=>{
+      const ja=joursAvant(a.echeance),jb=joursAvant(b.echeance);
+      if(ja===null&&jb===null)return 0;
+      if(ja===null)return 1;
+      if(jb===null)return -1;
+      return ja-jb;
+    }).forEach(d=>{
+      if(reste<=0)return;
+      const deja=plan.filter(x=>x.d===d).reduce((s,x)=>s+x.m,0);
+      const m=Math.min(reste,(Number(d.soldeRestant)||0)-deja);
+      if(m>0){plan.push({d,m});reste-=m;}
+    });
+    plan.forEach(x=>{
+      const pr=enregistrerPaiementDette(x.d.id,x.m,date,'Rituel '+ym,false,true);
+      if(pr)ref.paiements.push(pr);
+    });
+    if(reste>0){ // plus rien à rembourser : le surplus reste dans la poche
+      p.solde=(Number(p.solde)||0)+reste;ref.pocheDelta=reste;
+      ref.jid=uid();
+      S.journal.push({id:ref.jid,date,type:'epargne',montant:reste,desc:'Rituel '+ym+' — '+p.nom,ts:Date.now()});
+    }
+  }else if(p.lien==='fs'){
+    ref.fs=verserFS(l.montant,date,'Rituel '+ym+" — Réserve d'urgence");
+  }else if(p.lien==='objectifs'){
+    const os=objectifsDePoche(p.id);
+    const cibleObj=os.find(o=>(Number(o.actuel)||0)<(Number(o.cible)||0))||os[0]||null;
+    if(cibleObj){const vr=verserObj(cibleObj.id,l.montant,date);if(vr)ref.objs.push(vr);}
+    else{
+      p.solde=(Number(p.solde)||0)+Number(l.montant);ref.pocheDelta=Number(l.montant);
+      ref.jid=uid();
+      S.journal.push({id:ref.jid,date,type:'epargne',montant:Number(l.montant),desc:'Rituel '+ym+' — '+p.nom,ts:Date.now()});
+    }
+  }else{
+    p.solde=(Number(p.solde)||0)+Number(l.montant);ref.pocheDelta=Number(l.montant);
+    ref.jid=uid();
+    S.journal.push({id:ref.jid,date,type:'epargne',montant:Number(l.montant),desc:'Rituel '+ym+' — '+p.nom,ts:Date.now()});
+  }
+  l.fait=true;l.ref=ref;l.dateFait=new Date().toISOString();
+  majClotureRepartition(r);
+  save();refreshAll();
+  return{ok:true,ref};
+}
+function decocherLigne(ym,ligneId){
+  const r=repartitionDuMois(ym);if(!r)return{ok:false,msg:'Mois introuvable'};
+  if(r.cloture)return{ok:false,msg:'Mois clôturé — rouvre-le d\'abord.'};
+  const l=r.lignes.find(x=>x.id===ligneId);if(!l)return{ok:false,msg:'Ligne introuvable'};
+  if(!l.fait)return{ok:false,msg:'Rien à annuler'};
+  const ref=l.ref||{};
+  (ref.paiements||[]).slice().reverse().forEach(pr=>annulerPaiementDette(pr));
+  if(ref.fs)annulerVersementFS(ref.fs);
+  (ref.objs||[]).forEach(vr=>annulerVersementObj(vr));
+  if(ref.pocheDelta){const p=poche(l.poche);if(p)p.solde=Math.max(0,(Number(p.solde)||0)-ref.pocheDelta);}
+  if(ref.jid)S.journal=S.journal.filter(e=>e.id!==ref.jid);
+  l.fait=false;l.ref=null;delete l.dateFait;
+  r.cloture=false;r.dateCloture=null;
+  save();refreshAll();
+  return{ok:true};
+}
+function rouvrirMois(ym){
+  const r=repartitionDuMois(ym);if(!r||!r.cloture)return false;
+  r.cloture=false;r.dateCloture=null;save();refreshRituel();
+  return true;
+}
+// ── UI du rituel ──
+function rituelYm(){
+  const el=document.getElementById('rit-ym');
+  const v=el&&el.value?el.value:ymCourant();
+  return /^\d{4}-\d{2}$/.test(v)?v:ymCourant();
+}
+function lancerRituel(){
+  const ym=rituelYm();
+  const brut=document.getElementById('rit-revenu').value;
+  const rev=Math.abs(parseFloat(String(brut).replace(/\s/g,'').replace(',','.'))||0);
+  if(!rev){toast('⚠️ Saisis ton revenu réel du mois','err');return;}
+  const ex=repartitionDuMois(ym);
+  if(ex){
+    const rr=recalculerRepartition(ym,rev);
+    if(!rr.ok){toast('⚠️ '+rr.msg,'err');return;}
+    toast('✓ Cascade recalculée sur '+fmt(rev));
+  }else{
+    creerRepartition(ym,rev);
+    toast('✓ Rituel de '+ymLisible(ym)+' ouvert');
+  }
+  refreshRituel();
+}
+function toggleLigneRituel(ym,ligneId){
+  const r=repartitionDuMois(ym);if(!r)return;
+  const l=r.lignes.find(x=>x.id===ligneId);if(!l)return;
+  const res=l.fait?decocherLigne(ym,ligneId):cocherLigne(ym,ligneId);
+  if(!res.ok){toast('⚠️ '+res.msg,'err');return;}
+  toast(l.fait?'↩️ Virement annulé — écriture effacée':'✓ Virement enregistré');
+  refreshRituel();
+}
+function demanderReouverture(ym){
+  if(!confirm('Rouvrir '+ymLisible(ym)+' ?\n\nUn mois clôturé est un mois classé. Tu ne le rouvres que si un virement s\'est passé autrement que prévu.'))return;
+  if(rouvrirMois(ym))toast('🔓 '+ymLisible(ym)+' rouvert');
+}
+function refreshRituel(){
+  const c=document.getElementById('rituel-body');if(!c)return;
+  const ym=rituelYm();
+  const r=repartitionDuMois(ym);
+  const hist=document.getElementById('rituel-hist');
+  if(hist){
+    const autres=S.repartitions.filter(x=>x&&x.ym!==ym);
+    hist.innerHTML=autres.length?autres.map(x=>{
+      const f=x.lignes.filter(l=>l.fait).length,n=x.lignes.filter(l=>Number(l.montant)>0).length;
+      return`<div class="poche-li" style="cursor:pointer" onclick="document.getElementById('rit-ym').value='${x.ym}';refreshRituel()">
+        <span>${ymLisible(x.ym)} · ${fmt(x.revenuReel)}</span>
+        <span style="color:${x.cloture?'var(--lime)':'var(--amber)'}">${x.cloture?'✓ clôturé':f+'/'+n+' fait'}</span></div>`;
+    }).join(''):'<div class="empty"><div class="ei">🗓</div><p>Aucun autre mois enregistré.</p></div>';
+  }
+  if(!r){
+    c.innerHTML=`<div class="empty"><div class="ei">🗓</div>
+      <p>Aucune répartition pour ${ymLisible(ym)}.<br>Constate ton revenu réel du mois ci-dessus, puis ouvre le rituel.</p></div>`;
+    return;
+  }
+  const totalVire=r.lignes.filter(l=>l.fait).reduce((s,l)=>s+Number(l.montant),0);
+  const nbFait=r.lignes.filter(l=>l.fait).length;
+  const nbActives=r.lignes.filter(l=>Number(l.montant)>0).length;
+  const insuffisant=r.lignes.some(l=>l.statut!=='ok');
+  c.innerHTML=`
+    <div class="rit-hero">
+      <div>
+        <div class="pt-mini">Revenu réel constaté · ${ymLisible(ym)}</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:30px;font-weight:800;color:var(--lime)">${fmt(r.revenuReel)}</div>
+        <div class="pt-mini">${nbFait}/${nbActives} virement(s) exécuté(s) · ${fmt(totalVire)} viré</div>
+      </div>
+      <div style="text-align:right">
+        <div class="pt-mini">Statut</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;color:${r.cloture?'var(--lime)':'var(--amber)'}">${r.cloture?'✓ CLÔTURÉ':'EN COURS'}</div>
+        ${r.cloture?`<div class="pt-mini">${r.dateCloture?new Date(r.dateCloture).toLocaleDateString('fr-FR'):''}</div>`:''}
+      </div>
+    </div>
+    ${insuffisant?`<div class="alert al-a"><div class="al-ico">⚠️</div><div>Ce revenu ne couvre pas toute la cascade. Les lignes ci-dessous s'arrêtent là où l'argent s'arrête — rien n'est inventé, aucun montant négatif.</div></div>`:''}
+    ${r.cloture?`<div class="alert al-l"><div class="al-ico">🔒</div><div>Mois clôturé le ${r.dateCloture?new Date(r.dateCloture).toLocaleDateString('fr-FR'):'—'}. Plus modifiable.
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="demanderReouverture('${ym}')">🔓 Rouvrir ce mois</button></div></div>`:''}
+    ${r.lignes.map((l,i)=>{
+      const p=poche(l.poche);
+      const cpt=p?(p.compteReel||p.nom):l.poche;
+      const nf=!(Number(l.montant)>0);
+      return`<div class="rit-ligne ${l.fait?'fait':''} ${nf?'nf':''}">
+        <div class="rit-chk ${l.fait?'on':''}" onclick="${nf||r.cloture?'':`toggleLigneRituel('${ym}','${l.id}')`}">${l.fait?'✓':''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="rit-ordre">${nf?`Rien à virer vers ${l.libelle} ce mois.`:`Vire ${fmt(l.montant)} du compte principal vers ${l.libelle}.`}</div>
+          <div class="rit-sub">${i+1}. ${cpt}${l.demande!==null&&l.montant<l.demande?` · prévu ${fmt(l.demande)}, financé ${fmt(l.montant)}`:''}${l.demande===null&&!nf?' · tout le reste':''}</div>
+          ${l.statut==='non_finance'?`<div class="rit-sub" style="color:var(--red)">NON FINANCÉ — le revenu du mois s'est arrêté avant.</div>`:''}
+          ${l.statut==='partiel'?`<div class="rit-sub" style="color:var(--amber)">PARTIEL — il manque ${fmt(l.demande-l.montant)}.</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    ${r.reste>0?`<div class="poche-meta"><span>Reste non affecté : ${fmt(r.reste)}</span></div>`:''}
+  `;
+}
+
+// ══════ PARTIE 3 — LE POINTAGE HEBDOMADAIRE ══════
+function dernierPointage(){return S.pointages.length?S.pointages[0]:null;}
+function joursDepuisPointage(){
+  const p=dernierPointage();if(!p)return null;
+  const j=joursAvant(p.date);
+  return j===null?null:-j;
+}
+// saisies = { idPoche: soldeRéel }, motifs = { idPoche: texte }
+// Un écart non expliqué ne passe pas : sinon il s'accumule et devient du bruit qu'on ignore.
+// Une fois expliqué, la ligne de journal est créée ET le théorique est aligné sur le réel.
+function validerPointage(saisies,motifs){
+  saisies=saisies||{};motifs=motifs||{};
+  const lignes=[],manquants=[];
+  S.poches.forEach(p=>{
+    const attendu=pocheSolde(p);
+    const brut=saisies[p.id];
+    const num=(brut===''||brut===null||brut===undefined)?NaN:Number(String(brut).replace(/\s/g,'').replace(',','.'));
+    if(isNaN(num)){manquants.push({poche:p.id,raison:'solde'});return;}
+    const reel=Math.max(0,num);
+    const ecart=Math.round(reel-attendu);
+    const motif=String(motifs[p.id]||'').trim();
+    if(ecart!==0&&!motif)manquants.push({poche:p.id,raison:'motif'});
+    lignes.push({poche:p.id,attendu,reel,ecart,motif});
+  });
+  if(manquants.length)return{ok:false,manquants,
+    msg:manquants.some(m=>m.raison==='motif')
+      ?'Un écart sans motif devient du bruit qu\'on finit par ignorer. Explique chaque écart avant de valider.'
+      :'Saisis le solde réel de chaque poche.'};
+  const date=new Date().toISOString().split('T')[0];
+  lignes.forEach(li=>{
+    if(li.ecart===0)return;
+    const p=poche(li.poche);if(!p)return;
+    const jid=uid();
+    S.journal.push({id:jid,date,
+      type:li.ecart<0?'depense_var':'revenu_autre',
+      montant:Math.abs(li.ecart),
+      desc:'Pointage '+p.nom+' — '+li.motif,
+      pointage:true,ts:Date.now()});
+    li.jid=jid;
+    setPocheSolde(p,li.reel); // LE VRAI COMPTE A TOUJOURS RAISON
+  });
+  const pt={id:uid(),date,lignes,ecartTotal:lignes.reduce((s,l)=>s+l.ecart,0),resolu:true};
+  S.pointages.unshift(pt);
+  save();refreshAll();
+  return{ok:true,pointage:pt};
+}
+// ── UI du pointage ──
+function refreshPointage(){
+  const j=joursDepuisPointage();
+  const dp=document.getElementById('dot-pointage');
+  if(dp)dp.className='ndot'+((j===null||j>10)?' on':'');
+  const c=document.getElementById('pointage-body');if(!c)return;
+  const hd=document.getElementById('pointage-age');
+  if(hd){
+    if(j===null)hd.innerHTML=`<div class="alert al-b"><div class="al-ico">🧭</div><div>Aucun pointage encore fait. Ouvre Wave et Orange Money, lis les soldes de tes sous-comptes, saisis-les ici. Deux minutes.</div></div>`;
+    else if(j>10)hd.innerHTML=`<div class="alert al-r"><div class="al-ico">⏳</div><div>Dernier pointage il y a ${j} jours. Au-delà de 10 jours, l'écart devient trop gros pour être expliqué de mémoire.</div></div>`;
+    else hd.innerHTML=`<div class="alert al-l"><div class="al-ico">✅</div><div>Dernier pointage il y a ${j} jour${j>1?'s':''}${j===0?" (aujourd'hui)":''}.</div></div>`;
+  }
+  c.innerHTML=S.poches.map(p=>{
+    const attendu=pocheSolde(p);
+    return`<div class="pt-row" id="pt-row-${p.id}">
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+        <div class="poche-ico" style="width:32px;height:32px;font-size:15px">${p.icon}</div>
+        <div style="flex:1;min-width:110px">
+          <div style="font-size:13px;font-weight:700">${p.nom}</div>
+          <div class="pt-mini">🏦 ${p.compteReel||'—'}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="pt-mini">Attendu par FinCoach</div>
+          <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--txt2)">${fmt(attendu)}</div>
+        </div>
+      </div>
+      <div class="pt-grid">
+        <div class="fg" style="margin:0"><label>Solde réel lu dans l'app</label>
+          <input type="number" inputmode="numeric" id="pt-r-${p.id}" placeholder="ex: ${Math.round(attendu)}" oninput="majEcartPointage()"></div>
+        <div class="fg" style="margin:0"><label>Écart</label>
+          <div class="pt-ec" id="pt-e-${p.id}" style="padding:12px 0;color:var(--txt3)">—</div></div>
+      </div>
+      <div class="fg" id="pt-mw-${p.id}" style="margin:8px 0 0;display:none">
+        <label style="color:var(--amber)">Motif obligatoire — d'où vient cet écart ?</label>
+        <input type="text" id="pt-m-${p.id}" placeholder="ex: retrait taxi oublié, dépôt d'un client non noté…">
+      </div>
+    </div>`;
+  }).join('');
+  majEcartPointage();
+  renderPointagesHist();
+}
+function majEcartPointage(){
+  let total=0,nb=0;
+  S.poches.forEach(p=>{
+    const inp=document.getElementById('pt-r-'+p.id);
+    const out=document.getElementById('pt-e-'+p.id);
+    const mw=document.getElementById('pt-mw-'+p.id);
+    if(!inp||!out)return;
+    const v=inp.value;
+    if(v===''||isNaN(Number(v))){out.textContent='—';out.style.color='var(--txt3)';if(mw)mw.style.display='none';return;}
+    const ec=Math.round(Math.max(0,Number(v))-pocheSolde(p));
+    total+=ec;if(ec!==0)nb++;
+    out.textContent=(ec>0?'+':'')+fmt(ec).replace('-','−');
+    out.style.color=ec===0?'var(--lime)':ec<0?'var(--red)':'var(--cyan)';
+    if(mw)mw.style.display=ec===0?'none':'flex';
+  });
+  const t=document.getElementById('pt-total');
+  if(t){t.textContent=(total>0?'+':'')+fmt(total).replace('-','−');t.style.color=total===0?'var(--lime)':total<0?'var(--red)':'var(--cyan)';}
+  const n=document.getElementById('pt-nb');
+  if(n)n.textContent=nb===0?'Aucun écart — tout colle.':nb+' poche(s) en écart · motif obligatoire';
+}
+function soumettrePointage(){
+  const saisies={},motifs={};
+  S.poches.forEach(p=>{
+    const i=document.getElementById('pt-r-'+p.id);
+    const m=document.getElementById('pt-m-'+p.id);
+    saisies[p.id]=i?i.value:'';
+    motifs[p.id]=m?m.value:'';
+  });
+  const res=validerPointage(saisies,motifs);
+  if(!res.ok){
+    toast('⚠️ '+res.msg,'err');
+    res.manquants.forEach(mq=>{
+      const el=document.getElementById(mq.raison==='motif'?'pt-m-'+mq.poche:'pt-r-'+mq.poche);
+      if(el)el.style.borderColor='var(--red)';
+    });
+    return;
+  }
+  const e=res.pointage.ecartTotal;
+  toast(e===0?'✅ Pointage validé — tout colle.':'✓ Pointage validé — écart de '+fmt(e)+' expliqué et aligné');
+  refreshPointage();
+}
+function renderPointagesHist(){
+  const h=document.getElementById('pointage-hist');if(!h)return;
+  if(!S.pointages.length){h.innerHTML='<div class="empty"><div class="ei">🧭</div><p>Aucun pointage enregistré.<br>L\'historique des écarts est ce qui révèle les fuites récurrentes.</p></div>';return;}
+  h.innerHTML=S.pointages.slice(0,20).map(pt=>{
+    const ecarts=pt.lignes.filter(l=>l.ecart!==0);
+    return`<div class="pt-hist">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:700">📅 ${dateFR(pt.date)}</span>
+        <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:${pt.ecartTotal===0?'var(--lime)':pt.ecartTotal<0?'var(--red)':'var(--cyan)'}">${pt.ecartTotal===0?'✓ 0 F':(pt.ecartTotal>0?'+':'')+fmt(pt.ecartTotal).replace('-','−')}</span>
+      </div>
+      ${ecarts.length?ecarts.map(l=>`<div class="poche-li"><span>${pocheNom(l.poche)} — ${l.motif}</span><span style="color:${l.ecart<0?'var(--red)':'var(--cyan)'}">${(l.ecart>0?'+':'')+fmt(l.ecart).replace('-','−')}</span></div>`).join('')
+        :'<div class="pt-mini" style="margin-top:5px">Aucun écart ce jour-là.</div>'}
+    </div>`;
+  }).join('');
 }
 
 // ══════ PWA — INSTALLATION & HORS-LIGNE ══════
